@@ -54,8 +54,10 @@ class TestPathSecurity:
         home = os.path.expanduser("~")
 
         for path in malicious_paths:
-            full_path = os.path.abspath(os.path.expanduser(path))
-            # Path should be outside home
+            # Normalize backslashes to forward slashes (cross-platform)
+            normalized = path.replace("\\", "/")
+            full_path = os.path.abspath(os.path.expanduser(normalized))
+            # Path should be outside the prowlrbot working directory
             assert not full_path.startswith(home + "/prowlrbot")
 
     def test_safe_path_within_home(self):
