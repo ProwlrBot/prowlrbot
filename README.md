@@ -38,6 +38,41 @@ Open **http://localhost:8088** — your agent is live.
 
 > **No API key?** Run locally with Ollama: `prowlr init --defaults && prowlr app` — ProwlrBot auto-detects local models.
 
+<details>
+<summary><strong>Development Install (from source)</strong></summary>
+
+```bash
+git clone https://github.com/ProwlrBot/prowlrbot.git
+cd prowlrbot
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+prowlr init --defaults
+prowlr app
+```
+
+</details>
+
+<details>
+<summary><strong>WSL Install Notes</strong></summary>
+
+- **Use the Linux filesystem** — clone to `/home/user/prowlrbot`, NOT `/mnt/c/...`
+- **Create venv inside the project** — `python3 -m venv .venv` in the repo root
+- **Install in steps** if you hit I/O errors: `pip install -e .` first, then `pip install -e ".[dev]"`
+- See [Troubleshooting Guide](docs/troubleshooting.md) for WSL-specific issues
+
+</details>
+
+<details>
+<summary><strong>Docker</strong></summary>
+
+```bash
+docker pull ghcr.io/prowlrbot/prowlrbot:latest
+docker run -p 8088:8088 -v ~/.prowlrbot:/root/.prowlrbot ghcr.io/prowlrbot/prowlrbot:latest
+```
+
+</details>
+
 ---
 
 ## What Makes ProwlrBot Different

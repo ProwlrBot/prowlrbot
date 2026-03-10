@@ -25,6 +25,10 @@ Are you...
 │   └── Developer guide ─► CONTRIBUTING.md + CLAUDE.md
 │                           Architecture, conventions, PR process
 │
+├── Having issues?
+│   └── Troubleshooting ──► docs/troubleshooting.md
+│                            WSL, pip, ports, MCP, console fixes
+│
 └── Curious about the vision?
     └── Roadmap ─────────► Blog: What's Coming Next
                             Protocols, marketplace, AgentVerse
