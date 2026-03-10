@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "prowlr-hub": {
+      "command": "python3",
+      "args": ["-m", "prowlrbot.hub"],
+      "env": {
+        "PYTHONPATH": "${PROWLR_PROJECT_ROOT}/src",
+        "PROWLR_AGENT_NAME": "${PROWLR_AGENT_NAME:-claude-agent}",
+        "PROWLR_CAPABILITIES": "${PROWLR_CAPABILITIES:-general}"
+      }
+    }
+  }
+}
