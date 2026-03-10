@@ -109,6 +109,8 @@ No bridge, no network config. They all see each other on the mission board insta
 
 SQLite can't be shared across Mac and WSL filesystems. ProwlrBot includes an HTTP bridge for this.
 
+> **Different networks?** If your machines are on different WiFi networks (e.g., guest vs main), you need a tunnel. See the [Cross-Network Setup Guide](docs/guides/cross-network-setup.md) for Tailscale, Cloudflare Tunnel, ngrok, and SSH tunnel instructions. Or just run `./scripts/setup-warroom.sh` — the wizard handles it.
+
 ### Step 1: Start the bridge (on the machine with the database)
 
 ```bash
