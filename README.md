@@ -21,6 +21,12 @@
 
 ## 30-Second Install
 
+# Setup Env
+```bash
+python -m venv venv-prowlr
+source venv-prowlr/bin/activate
+```
+
 ```bash
 pip install prowlrbot
 prowlr init --defaults
