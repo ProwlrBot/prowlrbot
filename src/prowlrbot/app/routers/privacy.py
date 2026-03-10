@@ -5,8 +5,10 @@ from __future__ import annotations
 import sqlite3
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from ...auth.middleware import get_current_user, require_role
+from ...auth.models import Role, User
 from ...auth.privacy import PrivacyManager, PrivacySettings
 from ...constant import WORKING_DIR
 
@@ -26,10 +28,11 @@ async def get_privacy_settings() -> PrivacySettings:
     return _manager.get_settings()
 
 
-# TODO: This endpoint modifies privacy settings and needs auth protection
-# (e.g. Depends(require_role(Role.admin))).
 @router.put("/settings", response_model=PrivacySettings)
-async def update_privacy_settings(settings: PrivacySettings) -> PrivacySettings:
+async def update_privacy_settings(
+    settings: PrivacySettings,
+    _user: User = Depends(require_role(Role.admin)),
+) -> PrivacySettings:
     """Update and persist privacy settings."""
     _manager.update_settings(settings)
     return _manager.get_settings()
@@ -40,12 +43,11 @@ async def update_privacy_settings(settings: PrivacySettings) -> PrivacySettings:
 # ------------------------------------------------------------------
 
 
-# TODO: This endpoint can delete data and needs auth protection
-# (e.g. Depends(require_role(Role.admin))).
 @router.post("/retention/apply")
 async def apply_retention(
     days: int = Query(default=90, ge=1, description="Retain data newer than N days"),
     dry_run: bool = Query(default=True, description="Preview without deleting"),
+    _user: User = Depends(require_role(Role.admin)),
 ) -> Dict[str, Any]:
     """Apply data retention policy across all databases.
 
@@ -129,10 +131,13 @@ async def anonymize_data(data: Dict[str, Any]) -> Dict[str, Any]:
 # ------------------------------------------------------------------
 
 
-# TODO: This endpoint exports all user data (GDPR) and needs auth protection
-# (e.g. Depends(get_current_user) with ownership check or admin role).
 @router.get("/export/{user_id}")
-async def export_user_data(user_id: str) -> Dict[str, Any]:
+async def export_user_data(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    if current_user.role != Role.admin and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Can only export your own data")
     """Export all data associated with a user (GDPR data portability)."""
     result = _manager.export_user_data(user_id, working_dir=WORKING_DIR)
     return result
@@ -143,10 +148,13 @@ async def export_user_data(user_id: str) -> Dict[str, Any]:
 # ------------------------------------------------------------------
 
 
-# TODO: This endpoint permanently deletes user data and needs auth protection
-# (e.g. Depends(get_current_user) with ownership check or admin role).
 @router.delete("/data/{user_id}")
-async def delete_user_data(user_id: str) -> Dict[str, Any]:
+async def delete_user_data(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    if current_user.role != Role.admin and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Can only delete your own data")
     """Delete all data associated with a user (right to be forgotten).
 
     Iterates over every ``.db`` file in the working directory and
