@@ -202,6 +202,16 @@ pre-commit install && pre-commit run --all-files
 # Build frontend
 cd console && npm ci && npm run build
 ```
+# Easy Setup War Room Example
+```
+Set up the war room using                                                   
+  https://github.com/mcpcentral/prowlrbot/blob/main/INSTALL.md
+                                                                              
+  My answers to your questions:                                             
+  1. Agent name: wsl-marketplace-dev                                          
+  2. Capabilities: marketplace,skills,themes,publishing         
+  3. Different machine — bridge URL: http://192.168.12.21:8099 
+```
 
 ## Ecosystem
 
