@@ -1,0 +1,147 @@
+.page {
+  padding: 24px;
+}
+
+/* ---- Sections ---- */
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.sectionDesc {
+  margin: 0 0 16px;
+  color: #999;
+  font-size: 14px;
+}
+
+/* ---- Card Section ---- */
+
+.cardSection {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: #d9d9d9;
+  }
+}
+
+.cardSectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ---- Loading / Error ---- */
+
+.centerState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+.stateText {
+  font-size: 14px;
+  color: #999;
+}
+
+.stateTextError {
+  font-size: 14px;
+  color: #ff4d4f;
+  margin-bottom: 4px;
+}
+
+/* ---- Toggle Row ---- */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.15s ease-in-out;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #fafbfc;
+    margin: 0 -12px;
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+}
+
+.toggleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggleLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.toggleDesc {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ---- Retention Section ---- */
+
+.retentionRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.retentionSlider {
+  flex: 1;
+  min-width: 200px;
+}
+
+.retentionValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: #615ced;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ---- Data Actions ---- */
+
+.dataActions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dangerZone {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #fff1f0;
+}

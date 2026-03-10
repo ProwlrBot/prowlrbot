@@ -16,6 +16,14 @@ import WorkspacePage from "../../pages/Agent/Workspace";
 import MCPPage from "../../pages/Agent/MCP";
 import ModelsPage from "../../pages/Settings/Models";
 import EnvironmentsPage from "../../pages/Settings/Environments";
+import MarketplacePage from "../../pages/Marketplace";
+import AgentVersePage from "../../pages/AgentVerse";
+import GamificationPage from "../../pages/Gamification";
+import LeaderboardPage from "../../pages/Leaderboard";
+import SecurityPage from "../../pages/Settings/Security";
+import PrivacyPage from "../../pages/Settings/Privacy";
+import TemplatesPage from "../../pages/Settings/Templates";
+import OnboardingPage from "../../pages/Settings/Onboarding";
 
 const { Content } = Layout;
 
@@ -33,6 +41,17 @@ const pathToKey: Record<string, string> = {
   "/models": "models",
   "/environments": "environments",
   "/agent-config": "agent-config",
+  "/marketplace": "marketplace",
+  "/agentverse": "agentverse",
+  "/gamification": "gamification",
+  "/leaderboard": "leaderboard",
+  "/security": "security",
+  "/privacy": "privacy",
+  "/templates": "templates",
+  "/research": "research",
+  "/replay": "replay",
+  "/external-agents": "external-agents",
+  "/onboarding": "onboarding",
 };
 
 export default function MainLayout() {
@@ -68,6 +87,14 @@ export default function MainLayout() {
               <Route path="/models" element={<ModelsPage />} />
               <Route path="/environments" element={<EnvironmentsPage />} />
               <Route path="/agent-config" element={<AgentConfigPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/agentverse" element={<AgentVersePage />} />
+              <Route path="/gamification" element={<GamificationPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/security" element={<SecurityPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/" element={<Dashboard />} />
             </Routes>
           </div>

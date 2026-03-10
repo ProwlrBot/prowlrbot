@@ -87,9 +87,34 @@ from .uninstall_cmd import uninstall_cmd  # noqa: E402
 _record(".uninstall_cmd", time.perf_counter() - _t)
 
 _t = time.perf_counter()
+from .monitor_cmd import monitor_group  # noqa: E402
+
+_record(".monitor_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
 from .swarm_cmd import swarm_group  # noqa: E402
 
 _record(".swarm_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
+from .backup_cmd import backup_group  # noqa: E402
+
+_record(".backup_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
+from .export_cmd import export_group  # noqa: E402
+
+_record(".export_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
+from .completion_cmd import completion_group  # noqa: E402
+
+_record(".completion_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
+from .migrate_cmd import migrate_group  # noqa: E402
+
+_record(".migrate_cmd", time.perf_counter() - _t)
 
 _total = time.perf_counter() - _t0_main
 _init_timings.append(("(total imports)", _total))
@@ -138,5 +163,10 @@ cli.add_command(env_group)
 cli.add_command(init_cmd)
 cli.add_command(models_group)
 cli.add_command(skills_group)
+cli.add_command(monitor_group)
 cli.add_command(swarm_group)
 cli.add_command(uninstall_cmd)
+cli.add_command(backup_group)
+cli.add_command(export_group)
+cli.add_command(completion_group)
+cli.add_command(migrate_group)

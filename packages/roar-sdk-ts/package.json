@@ -1,0 +1,24 @@
+{
+  "name": "@roar-protocol/sdk",
+  "version": "0.1.0",
+  "description": "ROAR Protocol TypeScript SDK — Unified agent communication",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "roar",
+    "protocol",
+    "agent",
+    "ai",
+    "mcp",
+    "a2a"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "typescript": "^5.4.0"
+  }
+}

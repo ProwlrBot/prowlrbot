@@ -20,6 +20,16 @@ import {
   Globe,
   Settings,
   Plug,
+  Store,
+  Gamepad2,
+  Trophy,
+  Shield,
+  Eye,
+  Rocket,
+  FileText,
+  Search,
+  Play,
+  Bot,
 } from "lucide-react";
 
 const { Sider } = Layout;
@@ -37,6 +47,17 @@ const keyToPath: Record<string, string> = {
   models: "/models",
   environments: "/environments",
   "agent-config": "/agent-config",
+  marketplace: "/marketplace",
+  agentverse: "/agentverse",
+  gamification: "/gamification",
+  leaderboard: "/leaderboard",
+  security: "/security",
+  privacy: "/privacy",
+  templates: "/templates",
+  research: "/research",
+  replay: "/replay",
+  "external-agents": "/external-agents",
+  onboarding: "/onboarding",
 };
 
 interface SidebarProps {
@@ -50,6 +71,8 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
     "chat-group",
     "control-group",
     "agent-group",
+    "explore-group",
+    "social-group",
     "settings-group",
   ]);
   const [version, setVersion] = useState<string>("");
@@ -134,6 +157,60 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       ],
     },
     {
+      key: "explore-group",
+      label: "Explore",
+      icon: <Rocket size={16} />,
+      children: [
+        {
+          key: "marketplace",
+          label: "Marketplace",
+          icon: <Store size={16} />,
+        },
+        {
+          key: "agentverse",
+          label: "AgentVerse",
+          icon: <Bot size={16} />,
+        },
+        {
+          key: "templates",
+          label: "Templates",
+          icon: <FileText size={16} />,
+        },
+        {
+          key: "research",
+          label: "Research",
+          icon: <Search size={16} />,
+        },
+        {
+          key: "external-agents",
+          label: "External Agents",
+          icon: <Plug size={16} />,
+        },
+      ],
+    },
+    {
+      key: "social-group",
+      label: "Social",
+      icon: <Trophy size={16} />,
+      children: [
+        {
+          key: "gamification",
+          label: "Achievements",
+          icon: <Gamepad2 size={16} />,
+        },
+        {
+          key: "leaderboard",
+          label: "Leaderboard",
+          icon: <Trophy size={16} />,
+        },
+        {
+          key: "replay",
+          label: "Replay",
+          icon: <Play size={16} />,
+        },
+      ],
+    },
+    {
       key: "settings-group",
       label: t("nav.settings"),
       icon: <Cpu size={16} />,
@@ -147,6 +224,21 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "environments",
           label: t("nav.environments"),
           icon: <Globe size={16} />,
+        },
+        {
+          key: "security",
+          label: "Security",
+          icon: <Shield size={16} />,
+        },
+        {
+          key: "privacy",
+          label: "Privacy",
+          icon: <Eye size={16} />,
+        },
+        {
+          key: "onboarding",
+          label: "Onboarding",
+          icon: <Rocket size={16} />,
         },
       ],
     },

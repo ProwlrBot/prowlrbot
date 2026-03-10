@@ -239,6 +239,11 @@ app.include_router(
     tags=["agent"],
 )
 
+# --- A2A Protocol (agent-to-agent discovery + tasks) ---
+from ..protocols.a2a_server import router as a2a_router
+
+app.include_router(a2a_router)  # Mounted at root for /.well-known/agent.json
+
 # Mount console: root static files (logo.png etc.) then assets, then SPA
 # fallback.
 if os.path.isdir(_CONSOLE_STATIC_DIR):

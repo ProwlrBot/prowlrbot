@@ -18,6 +18,19 @@ import { localModelApi } from "./modules/localModel";
 import { ollamaModelApi } from "./modules/ollamaModel";
 import { mcpApi } from "./modules/mcp";
 
+// New module re-exports
+export * from "./modules/marketplace";
+export * from "./modules/agentverse";
+export * from "./modules/gamification";
+export * from "./modules/autonomy";
+export * from "./modules/notifications";
+export * from "./modules/templates";
+export * from "./modules/research";
+export * from "./modules/replay";
+export * from "./modules/health";
+export * from "./modules/leaderboard";
+export * from "./modules/externalAgents";
+
 export const api = {
   // Root
   ...rootApi,
