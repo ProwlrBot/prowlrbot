@@ -1,6 +1,6 @@
 # AI Swarm Documentation
 
-Secure, multi-device AI agent swarm connecting CoPaw (WSL) to Accomplish (macOS) via Redis queue and Tailscale VPN.
+Secure, multi-device AI agent swarm connecting ProwlrBot (WSL) to ProwlrBot (macOS) via Redis queue and Tailscale VPN.
 
 ## Architecture
 
@@ -8,28 +8,52 @@ Secure, multi-device AI agent swarm connecting CoPaw (WSL) to Accomplish (macOS)
 ┌─────────────────────────────────────────────────────────────────┐
 │                        AI Swarm Architecture                   │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────┐        ┌──────────────┐       ┌─────────────┐ │
-│  │   CoPaw     │        │    Redis      │       │   Bridge    │ │
-│  │   (WSL)     │───────▶│   Queue      │◀──────│   (Mac)     │ │
-│  │             │        │              │       │             │ │
-│  │ ┌─────────┐ │        │ ┌──────────┐ │       │ ┌─────────┐ │ │
-│  │ │ Client  │ │        │ │ Pending  │ │       │ │ Worker  │ │ │
-│  │ │         │ │        │ │ Jobs     │ │       │ │         │ │ │
-│  │ │ Enqueue │ │        │ └──────────┘ │       │ │ Execute │ │ │ │
-│  │ │ Jobs    │ │        └──────────────┘       │ │ Jobs    │ │ │ │
-│  │ └─────────┘ │                             │ └─────────┘ │ │ │
-│  │      │       │                             │      │       │ │ │
-│  │ ┌─────────┐ │                             │ ┌─────────┐ │ │ │
-│  │ │  CLI    │ │                             │ │Audit Log│ │ │ │
-│  │ │Commands │ │                             │ └─────────┘ │ │ │
-│  │ └─────────┘ │                             └─────────────┘ │ │
-│  └─────────────┘                                             │ │
-│         │                                                    │ │
-│  Tailscale VPN ────────────────────────────────────────────│ │
-│  (Encrypted)                                               └─┘
+│                                                                │
+│  ┌─────────────┐        ┌──────────────┐       ┌─────────────┐│
+│  │ ProwlrBot   │        │    Redis      │       │   Bridge    ││
+│  │   (WSL)     │───────▶│   Queue      │◀──────│   (Mac)     ││
+│  │             │        │              │       │             ││
+│  │ ┌─────────┐ │        │ ┌──────────┐ │       │ ┌─────────┐ ││
+│  │ │ Client  │ │        │ │ Pending  │ │       │ │ Worker  │ ││
+│  │ │         │ │        │ │ Jobs     │ │       │ │         │ ││
+│  │ │ Enqueue │ │        │ └──────────┘ │       │ │ Execute │ ││
+│  │ │ Jobs    │ │        └──────────────┘       │ │ Jobs    │ ││
+│  │ └─────────┘ │                               │ └─────────┘ ││
+│  │      │       │                               │      │       ││
+│  │ ┌─────────┐ │                               │ ┌─────────┐ ││
+│  │ │  CLI    │ │                               │ │Audit Log│ ││
+│  │ │Commands │ │                               │ └─────────┘ ││
+│  │ └─────────┘ │                               └─────────────┘│
+│  └─────────────┘                                              │
+│         │                                                     │
+│  Tailscale VPN ──────────────────────────────────────────────│
+│  (Encrypted)                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## How Swarm Relates to ProwlrHub
+
+ProwlrBot has **two complementary multi-agent systems**:
+
+| System | Purpose | Transport | Think of it as... |
+|--------|---------|-----------|-------------------|
+| **Swarm** | Remote execution — run commands on another machine | Redis + Tailscale | Hands (do things remotely) |
+| **ProwlrHub** | Coordination — task management and conflict prevention | SQLite + HTTP Bridge | Whiteboard (see what everyone's doing) |
+
+```
+┌─────────────────────────────────────────────┐
+│           ProwlrHub (Coordination)          │
+│  Mission Board │ File Locks │ Shared Context │
+├─────────────────────────────────────────────┤
+│            Swarm (Execution)                │
+│  browser:open │ shell:exec │ file:read/write│
+├─────────────────────────────────────────────┤
+│         Network (Tailscale/Bridge)          │
+│     Mac (host)  ←→  WSL (worker)            │
+└─────────────────────────────────────────────┘
+```
+
+An agent uses **ProwlrHub** to claim a task and lock files, then uses the **Swarm** to execute commands on the Mac. They're different layers of the same stack.
 
 ## Components
 
@@ -51,7 +75,7 @@ Secure, multi-device AI agent swarm connecting CoPaw (WSL) to Accomplish (macOS)
 ### 4. Job Queue Client
 - Python library for enqueuing jobs
 - Synchronous and asynchronous modes
-- CLI integration via `copaw swarm`
+- CLI integration via `prowlr swarm`
 
 ## Security Features
 
@@ -73,7 +97,7 @@ Secure, multi-device AI agent swarm connecting CoPaw (WSL) to Accomplish (macOS)
 3. Docker and Docker Compose on WSL
 4. Python 3.11+ on both systems
 
-### 1. Setup WSL (CoPaw)
+### 1. Setup WSL (ProwlrBot)
 
 ```bash
 # 1. Copy environment template
@@ -95,10 +119,10 @@ POLL_INTERVAL=5
 docker compose -f docker-compose.swarm.yml up -d
 
 # 4. Verify
- docker ps
+docker ps
 ```
 
-### 2. Setup Mac (Accomplish)
+### 2. Setup Mac (ProwlrBot)
 
 ```bash
 # 1. Copy environment template
@@ -112,7 +136,7 @@ vim .env.bridge
 ```env
 # .env.bridge
 HMAC_SECRET=your-secret-min-32-chars-long
-ALLOWED_IPS=100.x.x.x,100.y.y.y  # CoPaw's Tailscale IP
+ALLOWED_IPS=100.x.x.x,100.y.y.y  # WSL's Tailscale IP
 ```
 
 ```bash
@@ -120,35 +144,35 @@ ALLOWED_IPS=100.x.x.x,100.y.y.y  # CoPaw's Tailscale IP
 docker compose -f docker-compose.bridge.yml up -d
 
 # 4. Verify
- curl http://localhost:8765/health
+curl http://localhost:8765/health
 ```
 
 ### 3. Test Connection
 
 ```bash
 # Using CLI
-copaw swarm status
-copaw swarm capabilities
+prowlr swarm status
+prowlr swarm capabilities
 
 # Enqueue a job
-copaw swarm enqueue browser:open -p url=https://example.com -w
+prowlr swarm enqueue browser:open -p url=https://example.com -w
 
 # Check result
-copaw swarm result <job-id>
+prowlr swarm result <job-id>
 ```
 
 ## CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `copaw swarm status` | Check swarm status |
-| `copaw swarm up` | Start infrastructure |
-| `copaw swarm down` | Stop infrastructure |
-| `copaw swarm logs` | View logs |
-| `copaw swarm enqueue <capability>` | Queue a job |
-| `copaw swarm result <job-id>` | Get job result |
-| `copaw swarm capabilities` | List capabilities |
-| `copaw swarm config` | Show configuration |
+| `prowlr swarm status` | Check swarm status |
+| `prowlr swarm up` | Start infrastructure |
+| `prowlr swarm down` | Stop infrastructure |
+| `prowlr swarm logs` | View logs |
+| `prowlr swarm enqueue <capability>` | Queue a job |
+| `prowlr swarm result <job-id>` | Get job result |
+| `prowlr swarm capabilities` | List capabilities |
+| `prowlr swarm config` | Show configuration |
 
 ## Capabilities
 
@@ -216,7 +240,7 @@ docker logs swarm_redis
 ### Bridge Not Responding
 
 - Check Mac is on Tailscale
-- Verify `ALLOWED_IPS` includes CoPaw's Tailscale IP
+- Verify `ALLOWED_IPS` includes WSL's Tailscale IP
 - Check Bridge logs: `docker logs swarm_bridge`
 
 ## File Structure
@@ -272,4 +296,4 @@ cd swarm/bridge && docker build -t swarm-bridge:latest .
 
 ## License
 
-Same as CoPaw project.
+Same as ProwlrBot project.

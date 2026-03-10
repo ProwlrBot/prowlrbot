@@ -1,12 +1,12 @@
 # AI Swarm - Distributed Agent Execution
 
-A secure, multi-device AI agent swarm connecting CoPaw (WSL) to remote agents (macOS) via Redis queue and Tailscale VPN.
+A secure, multi-device AI agent swarm connecting ProwlrBot (WSL) to remote agents (macOS) via Redis queue and Tailscale VPN.
 
 ## Architecture
 
 ```
 ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-│   CoPaw     │ ───────>│    Redis    │ <───────│   Worker    │
+│ ProwlrBot   │ ───────>│    Redis    │ <───────│   Worker    │
 │   (WSL)     │ enqueue │   Queue     │ dequeue │  (Docker)   │
 └─────────────┘         └─────────────┘         └──────┬──────┘
                                                        │
@@ -30,7 +30,7 @@ A secure, multi-device AI agent swarm connecting CoPaw (WSL) to remote agents (m
 - **Worker** (`swarm/worker/`): Polls Redis for jobs, routes to Bridge API with HMAC authentication
 - **Bridge** (`swarm/bridge/`): FastAPI server on macOS that executes capabilities
 - **Client** (`swarm/client/`): Python library for enqueuing jobs
-- **CLI** (`copaw swarm`): Command-line interface for swarm management
+- **CLI** (`prowlr swarm`): Command-line interface for swarm management
 
 ## Quick Start
 
@@ -43,7 +43,7 @@ A secure, multi-device AI agent swarm connecting CoPaw (WSL) to remote agents (m
 
 ### 1. Configure Environment
 
-On WSL (CoPaw):
+On WSL (ProwlrBot):
 ```bash
 cp .env.swarm.example .env.swarm
 # Edit .env.swarm and set:
@@ -51,7 +51,7 @@ cp .env.swarm.example .env.swarm
 # - HMAC_SECRET: Shared secret (min 32 chars)
 ```
 
-On Mac (Accomplish):
+On Mac (ProwlrBot):
 ```bash
 cd swarm/bridge
 cp .env.bridge.example .env.bridge
@@ -84,19 +84,19 @@ python main.py
 
 ```bash
 # Check swarm status
-copaw swarm status
+prowlr swarm status
 
 # List available capabilities
-copaw swarm capabilities
+prowlr swarm capabilities
 
 # Enqueue a job
-copaw swarm enqueue browser:open -p url=https://example.com
+prowlr swarm enqueue browser:open -p url=https://example.com
 
 # Execute and wait for result
-copaw swarm enqueue file:read -p path=~/Documents/file.txt --wait
+prowlr swarm enqueue file:read -p path=~/Documents/file.txt --wait
 
 # Get result of a job
-copaw swarm result <job-id>
+prowlr swarm result <job-id>
 ```
 
 ## Security
@@ -157,7 +157,7 @@ swarm/
 1. Add capability definition to `swarm/bridge/capabilities.py`
 2. Implement handler method `_handle_<capability_name>`
 3. Add tests in `tests/swarm/test_bridge_api.py`
-4. Update capability list in `src/copaw/cli/swarm_cmd.py`
+4. Update capability list in `src/prowlrbot/cli/swarm_cmd.py`
 
 ## Troubleshooting
 
@@ -175,4 +175,4 @@ swarm/
 
 ## License
 
-Same as CoPaw project.
+Same as ProwlrBot project.
