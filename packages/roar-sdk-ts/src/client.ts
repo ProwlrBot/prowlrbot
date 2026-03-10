@@ -1,6 +1,8 @@
 import {
   AgentCard,
   AgentIdentity,
+  ConnectionConfig,
+  DiscoveryEntry,
   MessageIntent,
   ROARMessage,
   TransportType,
@@ -13,89 +15,113 @@ export interface ROARClientOptions {
   /** URL of a remote agent directory (reserved for future use). */
   directoryUrl?: string;
   /** Shared secret key used to sign outgoing messages. */
-  secretKey?: string;
+  signingSecret?: string;
 }
 
 /**
  * High-level client for the ROAR protocol.
  *
  * Wraps identity management, message creation/signing, and agent discovery
- * into a single convenient interface.
+ * into a single convenient interface. Matches Python's ROARClient API.
  */
 export class ROARClient {
   readonly identity: AgentIdentity;
   private readonly directory: AgentDirectory;
-  private readonly secretKey?: string;
+  private readonly signingSecret?: string;
   private readonly directoryUrl?: string;
 
   constructor(identity: AgentIdentity, options: ROARClientOptions = {}) {
     this.identity = identity;
     this.directory = new AgentDirectory();
-    this.secretKey = options.secretKey;
+    this.signingSecret = options.signingSecret;
     this.directoryUrl = options.directoryUrl;
   }
 
   /**
-   * Send a message to another agent.
-   *
-   * The message is signed when a secretKey was provided at construction time.
-   * Currently performs a local round-trip (returns the constructed message).
-   * Future versions will dispatch over the configured transport.
-   *
-   * @param toAgentId - Recipient agent ID.
-   * @param intent - Semantic intent of the message.
-   * @param content - Message payload.
-   * @returns The constructed (and optionally signed) ROARMessage.
+   * Register an agent card with the local directory.
    */
-  async send(
-    toAgentId: string,
+  register(card: AgentCard): DiscoveryEntry {
+    return this.directory.register(card);
+  }
+
+  /**
+   * Find agents, optionally filtered by capability.
+   */
+  discover(capability?: string): DiscoveryEntry[] {
+    if (capability) {
+      return this.directory.search(capability);
+    }
+    return this.directory.listAll();
+  }
+
+  /**
+   * Create, sign, and return a ROAR message.
+   *
+   * In a full implementation this would transmit the message over the
+   * configured transport. Currently constructs and signs locally.
+   *
+   * @param toAgentDid - DID of the target agent.
+   * @param intent - What the sender wants the receiver to do.
+   * @param content - Payload dictionary.
+   * @param msgContext - Optional context metadata.
+   * @returns A signed ROARMessage ready for transmission.
+   */
+  send(
+    toAgentDid: string,
     intent: MessageIntent,
-    content: object,
-  ): Promise<ROARMessage> {
-    let message = createMessage(
-      this.identity.agent_id,
-      toAgentId,
+    content: Record<string, unknown>,
+    msgContext: Record<string, unknown> = {},
+  ): ROARMessage {
+    const entry = this.directory.lookup(toAgentDid);
+    const toIdentity: AgentIdentity = entry
+      ? entry.agent_card.identity
+      : {
+          did: toAgentDid,
+          display_name: "unknown",
+          agent_type: "agent",
+          capabilities: [],
+          version: "1.0",
+        };
+
+    let msg = createMessage(
+      this.identity,
+      toIdentity,
       intent,
       content,
+      msgContext,
     );
-    if (this.secretKey) {
-      message = signMessage(message, this.secretKey);
+
+    if (this.signingSecret) {
+      msg = signMessage(msg, this.signingSecret);
     }
-    // Future: dispatch over HTTP / WebSocket / gRPC based on target agent's
-    // transport configuration retrieved from the directory.
-    return message;
+
+    return msg;
   }
 
   /**
-   * Discover agents from the local directory, optionally filtering by capability.
-   */
-  discover(capability?: string): AgentCard[] {
-    return this.directory.discover(capability);
-  }
-
-  /**
-   * Register this client's identity in the local directory.
+   * Build a connection config for the given agent.
    *
-   * @param endpoint - The endpoint where this agent can be reached.
-   * @param transportTypes - Transports this agent supports (defaults to HTTP).
+   * Looks up the agent's registered endpoints and returns a
+   * ConnectionConfig with the appropriate URL and auth details.
    */
-  register(
-    endpoint: string = "local://self",
-    transportTypes: TransportType[] = [TransportType.HTTP],
-  ): void {
-    const card: AgentCard = {
-      identity: this.identity,
-      endpoint,
-      transport_types: transportTypes,
-    };
-    this.directory.register(card);
-  }
+  connect(
+    agentDid: string,
+    transport: TransportType = TransportType.HTTP,
+  ): ConnectionConfig {
+    const entry = this.directory.lookup(agentDid);
+    let url = "";
+    if (entry) {
+      const endpoints = entry.agent_card.endpoints;
+      url = endpoints[transport] ?? endpoints["http"] ?? "";
+    }
 
-  /**
-   * Register an external agent card in the local directory.
-   */
-  registerPeer(card: AgentCard): void {
-    this.directory.register(card);
+    return {
+      transport,
+      url,
+      auth_method: "hmac",
+      secret: this.signingSecret ?? "",
+      timeout_ms: 30000,
+    };
   }
 
   /**

@@ -1,10 +1,11 @@
 // ROAR Protocol TypeScript SDK
-// Unified agent communication
+// Unified agent communication — aligned with Python SDK
 
 export {
   AgentCapability,
   AgentIdentity,
   AgentCard,
+  DiscoveryEntry,
   TransportType,
   ConnectionConfig,
   MessageIntent,
@@ -13,7 +14,7 @@ export {
   StreamEvent,
 } from "./types";
 
-export { createIdentity, generateAgentId } from "./identity";
+export { createIdentity, generateDid } from "./identity";
 
 export { createMessage, signMessage, verifyMessage } from "./message";
 

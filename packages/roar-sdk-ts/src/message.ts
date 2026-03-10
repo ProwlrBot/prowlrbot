@@ -1,84 +1,119 @@
 import * as crypto from "crypto";
-import { MessageIntent, ROARMessage } from "./types";
+import { AgentIdentity, MessageIntent, ROARMessage } from "./types";
 
 /**
  * Create a new ROAR message.
  *
- * @param from - The sender's agent ID.
- * @param to - The recipient's agent ID.
+ * Matches Python's ROARMessage construction exactly.
+ *
+ * @param from - The sender's identity.
+ * @param to - The recipient's identity.
  * @param intent - The semantic intent of the message.
- * @param content - The message payload.
+ * @param payload - The message payload.
+ * @param context - Optional context metadata.
  * @returns A new ROARMessage with a unique ID and timestamp.
  */
 export function createMessage(
-  from: string,
-  to: string,
+  from: AgentIdentity,
+  to: AgentIdentity,
   intent: MessageIntent,
-  content: unknown,
+  payload: Record<string, unknown> = {},
+  context: Record<string, unknown> = {},
 ): ROARMessage {
   return {
-    id: crypto.randomUUID(),
-    from_agent: from,
-    to_agent: to,
+    roar: "1.0",
+    id: `msg_${crypto.randomBytes(5).toString("hex")}`,
+    from_identity: from,
+    to_identity: to,
     intent,
-    content,
-    timestamp: new Date().toISOString(),
+    payload,
+    context,
+    auth: {},
+    timestamp: Date.now() / 1000, // Unix epoch (seconds), matches Python's time.time()
   };
 }
 
 /**
- * Compute the canonical string representation of a message for signing.
- * Excludes the signature field itself.
+ * Compute the canonical string for signing.
+ *
+ * MUST match Python's signing canonical body exactly:
+ *   JSON.stringify({id, intent, payload}, sort_keys=True)
+ *
+ * Python uses json.dumps with sort_keys=True which sorts all keys
+ * recursively. We replicate this with a recursive key-sorting replacer.
  */
 function canonicalize(message: ROARMessage): string {
-  return JSON.stringify({
+  const obj = {
     id: message.id,
-    from_agent: message.from_agent,
-    to_agent: message.to_agent,
     intent: message.intent,
-    content: message.content,
-    timestamp: message.timestamp,
-  });
+    payload: message.payload,
+  };
+  return JSON.stringify(obj, sortKeysReplacer);
+}
+
+/**
+ * JSON replacer that sorts object keys to match Python's sort_keys=True.
+ */
+function sortKeysReplacer(_key: string, value: unknown): unknown {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const sorted: Record<string, unknown> = {};
+    for (const k of Object.keys(value as Record<string, unknown>).sort()) {
+      sorted[k] = (value as Record<string, unknown>)[k];
+    }
+    return sorted;
+  }
+  return value;
 }
 
 /**
  * Sign a ROAR message using HMAC-SHA256.
  *
+ * Signature format: "hmac-sha256:<hex>" — matches Python exactly.
+ *
  * @param message - The message to sign.
- * @param secretKey - The shared secret key.
- * @returns A new ROARMessage with the signature field populated.
+ * @param secret - The shared secret key.
+ * @returns A new ROARMessage with the auth field populated.
  */
 export function signMessage(
   message: ROARMessage,
-  secretKey: string,
+  secret: string,
 ): ROARMessage {
-  const payload = canonicalize(message);
-  const hmac = crypto.createHmac("sha256", secretKey);
-  hmac.update(payload);
-  const signature = hmac.digest("hex");
-  return { ...message, signature };
+  const body = canonicalize(message);
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(body);
+  const sig = hmac.digest("hex");
+  return {
+    ...message,
+    auth: {
+      signature: `hmac-sha256:${sig}`,
+      signer: message.from_identity.did,
+      timestamp: Date.now() / 1000,
+    },
+  };
 }
 
 /**
  * Verify the HMAC-SHA256 signature on a ROAR message.
  *
- * @param message - The message to verify (must include a signature).
- * @param secretKey - The shared secret key.
+ * @param message - The message to verify (must include auth.signature).
+ * @param secret - The shared secret key.
  * @returns true if the signature is valid, false otherwise.
  */
 export function verifyMessage(
   message: ROARMessage,
-  secretKey: string,
+  secret: string,
 ): boolean {
-  if (!message.signature) {
+  const sigValue = message.auth?.signature;
+  if (typeof sigValue !== "string" || !sigValue.startsWith("hmac-sha256:")) {
     return false;
   }
-  const payload = canonicalize(message);
-  const hmac = crypto.createHmac("sha256", secretKey);
-  hmac.update(payload);
-  const expected = hmac.digest("hex");
+  const expectedSig = sigValue.split(":")[1];
+  const body = canonicalize(message);
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(body);
+  const actualSig = hmac.digest("hex");
   return crypto.timingSafeEqual(
-    Buffer.from(message.signature, "hex"),
-    Buffer.from(expected, "hex"),
+    Buffer.from(expectedSig, "hex"),
+    Buffer.from(actualSig, "hex"),
   );
 }

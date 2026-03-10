@@ -31,6 +31,7 @@ class AgentIdentity(BaseModel):
     agent_type: str = "agent"  # agent, tool, human, ide
     capabilities: List[str] = Field(default_factory=list)
     version: str = "1.0"
+    public_key: Optional[str] = None  # Ed25519 public key (hex-encoded)
 
     def model_post_init(self, __context: Any) -> None:
         if not self.did:
