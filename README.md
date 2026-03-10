@@ -6,15 +6,15 @@
 <p align="center"><strong>Always watching. Always ready.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/mcpcentral/prowlrbot/actions"><img src="https://img.shields.io/github/actions/workflow/status/mcpcentral/prowlrbot/ci.yml?branch=main&style=flat-square" alt="CI" /></a>
+  <a href="https://github.com/prowlrbot/prowlrbot/actions"><img src="https://img.shields.io/github/actions/workflow/status/prowlrbot/prowlrbot/ci.yml?branch=main&style=flat-square" alt="CI" /></a>
   <a href="https://pypi.org/project/prowlrbot/"><img src="https://img.shields.io/pypi/v/prowlrbot?style=flat-square" alt="PyPI" /></a>
-  <a href="https://github.com/mcpcentral/prowlrbot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/mcpcentral/prowlrbot?style=flat-square" alt="License" /></a>
-  <a href="https://github.com/mcpcentral/prowlrbot/stargazers"><img src="https://img.shields.io/github/stars/mcpcentral/prowlrbot?style=flat-square" alt="Stars" /></a>
-  <a href="https://mcpcentral.github.io/prowlr-docs"><img src="https://img.shields.io/badge/docs-website-blue?style=flat-square" alt="Docs" /></a>
+  <a href="https://github.com/prowlrbot/prowlrbot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/prowlrbot/prowlrbot?style=flat-square" alt="License" /></a>
+  <a href="https://github.com/prowlrbot/prowlrbot/stargazers"><img src="https://img.shields.io/github/stars/prowlrbot/prowlrbot?style=flat-square" alt="Stars" /></a>
+  <a href="https://prowlrbot.github.io/docs"><img src="https://img.shields.io/badge/docs-website-blue?style=flat-square" alt="Docs" /></a>
 </p>
 
 <p align="center">
-  <a href="#-30-second-install">Install</a> · <a href="#-what-makes-prowlrbot-different">Why ProwlrBot</a> · <a href="docs/README.md">Full Docs</a> · <a href="docs/blog/">Blog</a> · <a href="https://github.com/mcpcentral/prowlrbot/issues">Issues</a>
+  <a href="#-30-second-install">Install</a> · <a href="#-what-makes-prowlrbot-different">Why ProwlrBot</a> · <a href="docs/README.md">Full Docs</a> · <a href="docs/blog/">Blog</a> · <a href="https://github.com/prowlrbot/prowlrbot/issues">Issues</a>
 </p>
 
 ---
@@ -183,10 +183,10 @@ Smart Router scores: `cost × w₁ + speed × w₂ + availability × w₃` → p
 
 ```bash
 # Install
-git clone https://github.com/mcpcentral/prowlrbot.git && cd prowlrbot && pip install -e .
+git clone https://github.com/prowlrbot/prowlrbot.git && cd prowlrbot && pip install -e .
 
 # Tell your Claude Code agent:
-# "Set up the war room using https://github.com/mcpcentral/prowlrbot/blob/main/INSTALL.md"
+# "Set up the war room using https://github.com/prowlrbot/prowlrbot/blob/main/INSTALL.md"
 # It handles everything.
 ```
 
@@ -410,7 +410,7 @@ prowlrbot/
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Security policy | [SECURITY.md](SECURITY.md) |
 | Blog & updates | [docs/blog/](docs/blog/) |
-| Full docs site | [mcpcentral.github.io/prowlr-docs](https://mcpcentral.github.io/prowlr-docs) |
+| Full docs site | [prowlrbot.github.io/docs](https://prowlrbot.github.io/docs) |
 
 ---
 
@@ -419,23 +419,23 @@ prowlrbot/
 <table>
 <tr>
 <td align="center" width="20%">
-<a href="https://github.com/mcpcentral/prowlrbot"><strong>ProwlrBot</strong></a><br/>
+<a href="https://github.com/prowlrbot/prowlrbot"><strong>ProwlrBot</strong></a><br/>
 <sub>Core agent platform</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/mcpcentral/roar-protocol"><strong>ROAR Protocol</strong></a><br/>
+<a href="https://github.com/prowlrbot/roar-protocol"><strong>ROAR Protocol</strong></a><br/>
 <sub>Agent communication</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/mcpcentral/prowlr-marketplace"><strong>Marketplace</strong></a><br/>
+<a href="https://github.com/prowlrbot/marketplace"><strong>Marketplace</strong></a><br/>
 <sub>Skills & agents</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://mcpcentral.github.io/prowlr-docs"><strong>Docs</strong></a><br/>
+<a href="https://prowlrbot.github.io/docs"><strong>Docs</strong></a><br/>
 <sub>Guides & reference</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/mcpcentral/agentverse"><strong>AgentVerse</strong></a><br/>
+<a href="https://github.com/prowlrbot/agentverse"><strong>AgentVerse</strong></a><br/>
 <sub>Virtual agent world</sub>
 </td>
 </tr>
@@ -446,7 +446,7 @@ prowlrbot/
 ## Development
 
 ```bash
-git clone https://github.com/mcpcentral/prowlrbot.git
+git clone https://github.com/prowlrbot/prowlrbot.git
 cd prowlrbot
 pip install -e ".[dev]"
 pytest                                          # run all tests
@@ -464,7 +464,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit conventions, skill structure, 
   <strong>ProwlrBot</strong> — Always watching. Always ready.<br/><br/>
   <a href="docs/README.md">Docs</a> ·
   <a href="docs/blog/">Blog</a> ·
-  <a href="https://github.com/mcpcentral/prowlrbot/issues">Issues</a> ·
-  <a href="https://github.com/mcpcentral/prowlr-marketplace">Marketplace</a> ·
+  <a href="https://github.com/prowlrbot/prowlrbot/issues">Issues</a> ·
+  <a href="https://github.com/prowlrbot/marketplace">Marketplace</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>

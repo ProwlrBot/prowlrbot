@@ -1,12 +1,12 @@
-# Issue template chooser. Templates are listed alphanumerically.
-# See: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
-
 blank_issues_enabled: true
 
 contact_links:
-  - name: GitHub Discussions
-    url: https://github.com/agentscope-ai/CoPaw/discussions
-    about: Ask questions, share ideas, or discuss CoPaw here.
-  - name: View docs
-    url: https://copaw.agentscope.io/
-    about: CoPaw docs and guides.
+  - name: Questions & Help
+    url: https://github.com/prowlrbot/prowlrbot/discussions/categories/help
+    about: Get help with setup, configuration, or usage in GitHub Discussions.
+  - name: Ideas & Feature Discussion
+    url: https://github.com/prowlrbot/prowlrbot/discussions/categories/ideas
+    about: Brainstorm and discuss ideas before filing a feature request.
+  - name: Security Policy
+    url: https://github.com/prowlrbot/prowlrbot/blob/main/SECURITY.md
+    about: Review our security policy and trust model before reporting vulnerabilities.

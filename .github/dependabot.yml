@@ -1,0 +1,104 @@
+version: 2
+
+updates:
+  # Python dependencies (pip)
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    labels:
+      - dependencies
+      - backend
+    reviewers:
+      - prowlrbot/core
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "pre-commit"
+          - "black"
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        exclude-patterns:
+          - "pytest*"
+          - "pre-commit"
+          - "black"
+        update-types:
+          - minor
+          - patch
+
+  # Console frontend (npm)
+  - package-ecosystem: npm
+    directory: /console
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    labels:
+      - dependencies
+      - frontend
+    reviewers:
+      - prowlrbot/core
+    open-pull-requests-limit: 10
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+        update-types:
+          - minor
+          - patch
+      ant-design:
+        patterns:
+          - "@ant-design/*"
+          - "antd"
+        update-types:
+          - minor
+          - patch
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  # Website frontend (npm/pnpm)
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    labels:
+      - dependencies
+      - website
+    reviewers:
+      - prowlrbot/core
+    open-pull-requests-limit: 10
+    groups:
+      all-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    labels:
+      - dependencies
+      - ci
+    reviewers:
+      - prowlrbot/core
+    open-pull-requests-limit: 5

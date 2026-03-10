@@ -1,0 +1,62 @@
+title: "[Help]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help with ProwlrBot? You are in the right place.
+
+        Before posting, please check:
+        - The [README](https://github.com/prowlrbot/prowlrbot/blob/main/README.md) for quick start instructions
+        - The [documentation](https://prowlrbot.github.io) for guides and reference
+        - [Existing discussions](https://github.com/prowlrbot/prowlrbot/discussions/categories/help) in case someone has already asked
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      description: What area do you need help with?
+      options:
+        - Installation & Setup
+        - Configuration
+        - Channels (Discord, Telegram, DingTalk, Feishu, QQ, iMessage)
+        - AI Providers & Models
+        - Skills
+        - MCP Integration
+        - Monitoring
+        - Console UI
+        - CLI Usage
+        - Deployment (Docker, self-hosting)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you need help with?
+      description: Describe your question or issue in detail. Include what you have tried so far.
+      placeholder: "I'm trying to... but I'm running into..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Share your environment details if relevant (OS, Python version, ProwlrBot version).
+      placeholder: |
+        - OS: macOS 15
+        - Python: 3.12
+        - ProwlrBot: 0.1.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Output or Errors
+      description: Paste any error messages or log output. This will be automatically formatted as code.
+      render: shell
+    validations:
+      required: false

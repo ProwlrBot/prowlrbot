@@ -4,9 +4,9 @@
   "description": "War Room multi-agent coordination — connect multiple Claude Code terminals as one team. Shared mission board, file locking, discovery store, and cross-machine support.",
   "author": {
     "name": "ProwlrBot",
-    "url": "https://github.com/mcpcentral/prowlrbot"
+    "url": "https://github.com/prowlrbot/prowlrbot"
   },
-  "repository": "https://github.com/mcpcentral/prowlrbot",
+  "repository": "https://github.com/prowlrbot/prowlrbot",
   "license": "Apache-2.0",
   "keywords": ["coordination", "multi-agent", "war-room", "collaboration", "file-locking", "mission-board"]
 }

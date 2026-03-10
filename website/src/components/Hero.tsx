@@ -159,7 +159,7 @@ export function Hero({
               <ArrowRight size={18} strokeWidth={2} aria-hidden />
             </Link>
             <a
-              href="https://github.com/mcpcentral/prowlrbot"
+              href="https://github.com/prowlrbot/prowlrbot"
               target="_blank"
               rel="noopener noreferrer"
               style={{

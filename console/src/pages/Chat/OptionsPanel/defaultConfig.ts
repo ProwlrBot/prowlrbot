@@ -2,10 +2,10 @@ const defaultConfig = {
   theme: {
     colorPrimary: "#615CED",
     darkMode: false,
-    prefix: "copaw",
+    prefix: "prowlrbot",
     leftHeader: {
       logo: "",
-      title: "Work with CoPaw",
+      title: "Work with ProwlrBot",
     },
   },
   sender: {
@@ -17,7 +17,7 @@ const defaultConfig = {
     greeting: "Hello, how can I help you today?",
     description:
       "I am a helpful assistant that can help you with your questions.",
-    avatar: `${import.meta.env.BASE_URL}copaw-symbol.svg`,
+    avatar: `${import.meta.env.BASE_URL}prowlrbot-symbol.svg`,
     prompts: [
       {
         value: "让我们开启一段新的旅程吧！",

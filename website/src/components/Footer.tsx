@@ -1,91 +1,206 @@
+import { Github, BookOpen, MessageCircle } from "lucide-react";
 import { type Lang } from "../i18n";
+
+const linkStyle = {
+  color: "var(--text-muted)",
+  textDecoration: "none",
+  transition: "color 0.2s ease",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.375rem",
+  fontSize: "0.8125rem",
+} as const;
 
 export function Footer({ lang: _lang }: { lang: Lang }) {
   return (
     <footer
       style={{
         marginTop: "auto",
-        padding: "var(--space-4) var(--space-4)",
         borderTop: "1px solid var(--border)",
-        textAlign: "center",
-        fontSize: "0.875rem",
-        color: "var(--text-muted)",
+        background: "var(--surface)",
       }}
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "var(--space-4)",
-          flexWrap: "wrap",
-          marginBottom: "var(--space-3)",
+          maxWidth: "var(--container)",
+          margin: "0 auto",
+          padding: "var(--space-5) var(--space-4) var(--space-4)",
         }}
       >
-        <a
-          href="https://github.com/mcpcentral/prowlrbot"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "inherit", transition: "color 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
-          }
+        {/* Top row: columns */}
+        <div
+          className="footer-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "var(--space-4)",
+            marginBottom: "var(--space-5)",
+          }}
         >
-          GitHub
-        </a>
-        <a
-          href="https://github.com/mcpcentral/roar-protocol"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "inherit", transition: "color 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
-          }
+          {/* Brand */}
+          <div>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: "1rem",
+                color: "var(--text)",
+                marginBottom: "var(--space-1)",
+              }}
+            >
+              ProwlrBot
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.8125rem",
+                color: "var(--text-muted)",
+                lineHeight: 1.6,
+              }}
+            >
+              Always watching. Always ready.
+            </p>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginBottom: "var(--space-2)",
+              }}
+            >
+              Resources
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
+              <a
+                href="https://github.com/prowlrbot/prowlrbot"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                <Github size={14} strokeWidth={2} aria-hidden />
+                GitHub
+              </a>
+              <a
+                href="https://github.com/prowlrbot/prowlrbot/tree/main/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                <BookOpen size={14} strokeWidth={2} aria-hidden />
+                Docs
+              </a>
+              <a
+                href="https://github.com/prowlrbot/prowlrbot/discussions"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                <MessageCircle size={14} strokeWidth={2} aria-hidden />
+                Discussions
+              </a>
+            </div>
+          </div>
+
+          {/* Community */}
+          <div>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginBottom: "var(--space-2)",
+              }}
+            >
+              Community
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
+              <a
+                href="https://discord.gg/prowlrbot"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                Discord
+              </a>
+              <a
+                href="https://x.com/prowlrbot"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                X / Twitter
+              </a>
+              <a
+                href="https://github.com/prowlrbot/prowlrbot/blob/main/CONTRIBUTING.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={linkStyle}
+                className="footer-link"
+              >
+                Contributing
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div
+          style={{
+            borderTop: "1px solid var(--border)",
+            paddingTop: "var(--space-3)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "var(--space-2)",
+          }}
         >
-          ROAR Protocol
-        </a>
-        <a
-          href="https://github.com/mcpcentral/prowlr-marketplace"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "inherit", transition: "color 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
-          }
-        >
-          Marketplace
-        </a>
-        <a
-          href="https://github.com/mcpcentral/prowlrbot/tree/main/docs/blog"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "inherit", transition: "color 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
-          }
-        >
-          Blog
-        </a>
-        <a
-          href="https://github.com/mcpcentral/agentverse"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "inherit", transition: "color 0.2s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
-          }
-        >
-          AgentVerse
-        </a>
+          <div
+            style={{
+              fontSize: "0.75rem",
+              color: "var(--text-muted)",
+              opacity: 0.7,
+            }}
+          >
+            Made with prowl by the community. &copy; {new Date().getFullYear()} ProwlrBot.
+          </div>
+          <a
+            href="https://github.com/prowlrbot/prowlrbot/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://img.shields.io/badge/license-MIT-00E5FF?style=flat-square&labelColor=0a0a0f"
+              alt="MIT License"
+              style={{ height: "20px", border: "none", boxShadow: "none" }}
+            />
+          </a>
+        </div>
       </div>
-      <div style={{ fontSize: "0.8125rem", opacity: 0.7 }}>
-        &copy; {new Date().getFullYear()} ProwlrBot. Always watching. Always
-        ready.
-      </div>
+
+      <style>{`
+        .footer-link:hover {
+          color: var(--accent) !important;
+        }
+        @media (max-width: 768px) {
+          .footer-grid {
+            grid-template-columns: 1fr !important;
+            gap: var(--space-3) !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

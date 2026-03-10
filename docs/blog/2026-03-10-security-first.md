@@ -94,7 +94,7 @@ No skill can access your filesystem, network, or secrets without explicit permis
 
 Found something? We want to know.
 
-- **Email**: Open a [GitHub issue](https://github.com/mcpcentral/prowlrbot/issues) with the `security` label
+- **Email**: Open a [GitHub issue](https://github.com/prowlrbot/prowlrbot/issues) with the `security` label
 - **Severity**: Use CVSS scoring if you can
 - **Disclosure**: We'll acknowledge within 48 hours and patch within 7 days for critical issues
 

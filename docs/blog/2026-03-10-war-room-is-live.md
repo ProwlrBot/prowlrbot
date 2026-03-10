@@ -102,7 +102,7 @@ The war room works. Ship it.
 
 ```bash
 # In your project directory
-git clone https://github.com/mcpcentral/prowlrbot.git
+git clone https://github.com/prowlrbot/prowlrbot.git
 cd prowlrbot
 pip install -e .
 ```

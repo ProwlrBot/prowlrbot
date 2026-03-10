@@ -3,7 +3,10 @@ import { type Lang } from "../i18n";
 import { Nav } from "../components/Nav";
 import { Hero } from "../components/Hero";
 import { Features } from "../components/Features";
+import { CompetitorComparison } from "../components/CompetitorComparison";
 import { UseCases } from "../components/UseCases";
+import { CommunitySection } from "../components/CommunitySection";
+import { RoadmapVisual } from "../components/RoadmapVisual";
 import { QuickStart } from "../components/QuickStart";
 import { BrandStory } from "../components/BrandStory";
 import { Footer } from "../components/Footer";
@@ -36,7 +39,10 @@ export function Home({ config, lang, onLangClick }: HomeProps) {
           docsPath={config.docsPath}
         />
         <Features lang={lang} />
+        <CompetitorComparison lang={lang} />
         <UseCases lang={lang} />
+        <CommunitySection lang={lang} />
+        <RoadmapVisual lang={lang} />
         <QuickStart config={config} lang={lang} />
         <BrandStory lang={lang} />
       </main>

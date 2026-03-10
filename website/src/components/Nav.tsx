@@ -138,7 +138,7 @@ export function Nav({
             <span>{t(lang, "nav.docs")}</span>
           </Link>
           <a
-            href="https://github.com/mcpcentral/prowlrbot/tree/main/docs/blog"
+            href="https://github.com/prowlrbot/prowlrbot/tree/main/docs/blog"
             target="_blank"
             rel="noopener noreferrer"
             className={linkClass}
@@ -148,7 +148,7 @@ export function Nav({
             <span>Blog</span>
           </a>
           <a
-            href="https://github.com/mcpcentral/prowlrbot"
+            href="https://github.com/prowlrbot/prowlrbot"
             target="_blank"
             rel="noopener noreferrer"
             className={linkClass}
@@ -230,7 +230,7 @@ export function Nav({
           <BookOpen size={18} /> {t(lang, "nav.docs")}
         </Link>
         <a
-          href="https://github.com/mcpcentral/prowlrbot/tree/main/docs/blog"
+          href="https://github.com/prowlrbot/prowlrbot/tree/main/docs/blog"
           target="_blank"
           rel="noopener noreferrer"
           className={linkClass}
@@ -240,7 +240,7 @@ export function Nav({
           <Newspaper size={18} /> Blog
         </a>
         <a
-          href="https://github.com/mcpcentral/prowlrbot"
+          href="https://github.com/prowlrbot/prowlrbot"
           target="_blank"
           rel="noopener noreferrer"
           className={linkClass}

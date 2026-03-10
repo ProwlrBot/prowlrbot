@@ -72,7 +72,7 @@
     "pleaseInputName": "请输入技能名称",
     "pleaseInputContent": "请输入技能内容",
     "skillNamePlaceholder": "例如：weather_query",
-    "contentPlaceholder": "---\nname: <技能名称>（必填）\ndescription: <技能功能描述>（必填）\nmetadata: { \"copaw\": { \"emoji\": \"🔧\" } }\n---\n\n技能实现内容...\n\n# 示例：\n# ---\n# name: cron\n# description: 通过 copaw 命令管理定时任务 - 创建、查询、暂停、恢复、删除任务\n# metadata: { \"copaw\": { \"emoji\": \"⏰\" } }\n# ---",
+    "contentPlaceholder": "---\nname: <技能名称>（必填）\ndescription: <技能功能描述>（必填）\nmetadata: { \"prowlrbot\": { \"emoji\": \"🔧\" } }\n---\n\n技能实现内容...\n\n# 示例：\n# ---\n# name: cron\n# description: 通过 prowlrbot 命令管理定时任务 - 创建、查询、暂停、恢复、删除任务\n# metadata: { \"prowlrbot\": { \"emoji\": \"⏰\" } }\n# ---",
     "createSuccess": "技能创建成功",
     "createFailed": "技能创建失败",
     "deleteConfirm": "确定要删除此技能吗？",

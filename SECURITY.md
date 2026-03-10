@@ -4,7 +4,7 @@ If you believe you've found a security issue in ProwlrBot, please report it priv
 
 ## Reporting
 
-Report vulnerabilities via [GitHub Issues](https://github.com/mcpcentral/prowlrbot/issues) with the `security` label, or email the maintainers directly.
+Report vulnerabilities via [GitHub Issues](https://github.com/prowlrbot/prowlrbot/issues) with the `security` label, or email the maintainers directly.
 
 ### Required in Reports
 

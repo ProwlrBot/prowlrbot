@@ -2,7 +2,7 @@
 
 > **Just tell your Claude Code agent:**
 >
-> *"Set up the war room using https://github.com/mcpcentral/prowlrbot/blob/main/INSTALL.md"*
+> *"Set up the war room using https://github.com/prowlrbot/prowlrbot/blob/main/INSTALL.md"*
 >
 > Your agent will clone the repo, ask you a few questions, configure everything, and verify the connection. You don't need to do anything manually.
 
@@ -17,7 +17,7 @@ Follow these steps exactly. Ask the user questions where indicated.
 ### Step 1: Clone and install
 
 ```bash
-git clone https://github.com/mcpcentral/prowlrbot.git
+git clone https://github.com/prowlrbot/prowlrbot.git
 cd prowlrbot
 pip install -e .
 ```
@@ -163,5 +163,5 @@ You are connected to ProwlrHub. Before any work:
 - [Cross-Network Setup Guide](docs/guides/cross-network-setup.md) — Tailscale, Cloudflare, ngrok, SSH tunnels
 - [War Room Protocol](src/prowlrbot/hub/SKILL.md) — The 7 Iron Rules
 - [Hub Architecture](src/prowlrbot/hub/README.md) — Database schema, bridge API, developer guide
-- [GitHub](https://github.com/mcpcentral/prowlrbot) — Source code
-- [Issues](https://github.com/mcpcentral/prowlrbot/issues) — Bug reports
+- [GitHub](https://github.com/prowlrbot/prowlrbot) — Source code
+- [Issues](https://github.com/prowlrbot/prowlrbot/issues) — Bug reports

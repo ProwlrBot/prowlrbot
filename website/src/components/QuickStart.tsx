@@ -8,8 +8,8 @@ import { SectionWrapper } from "./SectionWrapper";
 const COMMANDS = {
   pip: ["pip install prowlrbot", "prowlr init --defaults", "prowlr app"],
   docker: [
-    "docker pull mcpcentral/prowlrbot:latest",
-    "docker run -p 8088:8088 -v prowlrbot-data:/app/working mcpcentral/prowlrbot:latest",
+    "docker pull prowlrbot/prowlrbot:latest",
+    "docker run -p 8088:8088 -v prowlrbot-data:/app/working prowlrbot/prowlrbot:latest",
   ],
 } as const;
 

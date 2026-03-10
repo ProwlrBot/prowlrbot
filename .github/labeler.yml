@@ -1,0 +1,61 @@
+# Configuration for actions/labeler
+# https://github.com/actions/labeler
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/prowlrbot/**"
+          - "pyproject.toml"
+          - "setup.py"
+          - "setup.cfg"
+          - "tests/**"
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "console/**"
+
+website:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "website/**"
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "**/*.md"
+          - "!CHANGELOG.md"
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/security.yml"
+          - "**/*security*"
+          - "**/*auth*"
+          - "**/*secret*"
+          - "**/*crypt*"
+          - "src/prowlrbot/envs/**"
+          - "src/prowlrbot/providers/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "deploy/Dockerfile"
+          - "docker-compose*.yml"
+          - "swarm/**"
+
+monitoring:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/prowlrbot/monitor/**"
+
+channels:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/prowlrbot/app/channels/**"

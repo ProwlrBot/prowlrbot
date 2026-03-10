@@ -60,7 +60,7 @@ export function BrandStory({ lang }: BrandStoryProps) {
           {t(lang, "brandstory.para4")}
         </p>
         <a
-          href="https://github.com/mcpcentral/prowlrbot"
+          href="https://github.com/prowlrbot/prowlrbot"
           target="_blank"
           rel="noopener noreferrer"
           style={{

@@ -1,0 +1,56 @@
+title: "[Idea]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share your ideas for ProwlrBot. This is the place to brainstorm, explore possibilities, and get community feedback before turning an idea into a formal feature request.
+
+        No idea is too small or too ambitious -- we want to hear what you think would make ProwlrBot better.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: The Idea
+      description: Describe your idea. What should ProwlrBot be able to do?
+      placeholder: "What if ProwlrBot could..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why would this be valuable? What use case does it unlock?
+      placeholder: "This would be useful because..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of ProwlrBot does this relate to?
+      multiple: true
+      options:
+        - Agents & AI
+        - Channels & Communication
+        - Monitoring & Automation
+        - Skills & Tools
+        - Console UI
+        - CLI
+        - Multi-Agent Coordination
+        - Security
+        - Deployment & DevOps
+        - Integrations (MCP, APIs)
+        - Other
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or References
+      description: Links, screenshots, or examples from other tools that inspire this idea.
+    validations:
+      required: false

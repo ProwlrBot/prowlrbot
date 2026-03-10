@@ -22,5 +22,5 @@ Things like:
 ```markdown
 ### SSH
 
-- home-server → 192.168.1.100, user: admin
+- home-server → <server-ip>, user: <username>
 ```

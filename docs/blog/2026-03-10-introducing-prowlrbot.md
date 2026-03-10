@@ -73,10 +73,10 @@ Want multi-agent coordination? [Set up the war room](../guides/cross-network-set
 
 ## What's Next
 
-We're building toward something bigger. The [ROAR Protocol](https://github.com/mcpcentral/roar-protocol) for agent-to-agent communication. A [marketplace](https://github.com/mcpcentral/prowlr-marketplace) for community skills. And [AgentVerse](https://github.com/mcpcentral/agentverse) — a virtual world where agents live, interact, and evolve.
+We're building toward something bigger. The [ROAR Protocol](https://github.com/prowlrbot/roar-protocol) for agent-to-agent communication. A [marketplace](https://github.com/prowlrbot/marketplace) for community skills. And [AgentVerse](https://github.com/prowlrbot/agentverse) — a virtual world where agents live, interact, and evolve.
 
 But that's a story for another post.
 
 ---
 
-*ProwlrBot is open source. Star us on [GitHub](https://github.com/mcpcentral/prowlrbot).*
+*ProwlrBot is open source. Star us on [GitHub](https://github.com/prowlrbot/prowlrbot).*

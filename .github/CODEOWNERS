@@ -1,0 +1,22 @@
+# Default owners for the entire repository
+*                           @prowlrbot/core
+
+# Backend
+/src/prowlrbot/             @prowlrbot/core
+/tests/                     @prowlrbot/core
+/pyproject.toml             @prowlrbot/core
+
+# Console frontend
+/console/                   @prowlrbot/core
+
+# Website
+/website/                   @prowlrbot/core
+
+# CI/CD and infrastructure
+/.github/                   @prowlrbot/core
+/deploy/                    @prowlrbot/core
+/swarm/                     @prowlrbot/core
+
+# Security-sensitive paths
+/src/prowlrbot/envs/        @prowlrbot/core
+/src/prowlrbot/providers/   @prowlrbot/core

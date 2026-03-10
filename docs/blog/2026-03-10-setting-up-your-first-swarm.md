@@ -23,7 +23,7 @@ Takes about 5 minutes.
 ## Step 1: Install ProwlrBot
 
 ```bash
-git clone https://github.com/mcpcentral/prowlrbot.git
+git clone https://github.com/prowlrbot/prowlrbot.git
 cd prowlrbot
 pip install -e .
 ```
@@ -153,8 +153,8 @@ Different networks? Use Tailscale, Cloudflare Tunnel, or ngrok. See the [cross-n
 Once you're comfortable with the basics, explore:
 - The [War Room Coordinator agent](../../plugins/prowlr-hub/agents/war-room-coordinator.md) for automated task planning
 - [Remote execution via the Swarm](../../README.swarm.md) for cross-machine capabilities
-- The [ROAR Protocol](https://github.com/mcpcentral/roar-protocol) for standardized agent communication
+- The [ROAR Protocol](https://github.com/prowlrbot/roar-protocol) for standardized agent communication
 
 ---
 
-*Questions? [Open an issue](https://github.com/mcpcentral/prowlrbot/issues).*
+*Questions? [Open an issue](https://github.com/prowlrbot/prowlrbot/issues).*

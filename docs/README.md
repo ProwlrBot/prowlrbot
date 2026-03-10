@@ -150,7 +150,7 @@ Layer 1: Identity  ──► W3C DID-based agent identity
 | 4. Exchange | **[ROAR-EXCHANGE.md](protocols/ROAR-EXCHANGE.md)** | Message format, 7 intent types, signing |
 | 5. Stream | **[ROAR-STREAM.md](protocols/ROAR-STREAM.md)** | StreamEvent, backpressure, subscriptions |
 
-> **External spec:** [github.com/mcpcentral/roar-protocol](https://github.com/mcpcentral/roar-protocol)
+> **External spec:** [github.com/prowlrbot/roar-protocol](https://github.com/prowlrbot/roar-protocol)
 
 ---
 
@@ -286,5 +286,5 @@ WS     /ws/dashboard       Real-time events
 ---
 
 <p align="center">
-  Can't find what you need? <a href="https://github.com/mcpcentral/prowlrbot/issues">Open an issue</a> — we respond fast.
+  Can't find what you need? <a href="https://github.com/prowlrbot/prowlrbot/issues">Open an issue</a> — we respond fast.
 </p>

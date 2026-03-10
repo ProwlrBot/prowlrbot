@@ -14,12 +14,12 @@ FROM agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/node:slim
 # ENV variables
 ENV NODE_ENV=production
 ENV WORKSPACE_DIR=/app
-ENV COPAW_WORKING_DIR=/app/working
+ENV PROWLRBOT_WORKING_DIR=/app/working
 
 # Available channels for this image (imessage & discord excluded).
-# Override at runtime with -e COPAW_ENABLED_CHANNELS=... if needed.
-ARG COPAW_ENABLED_CHANNELS="dingtalk,feishu,qq,console"
-ENV COPAW_ENABLED_CHANNELS=${COPAW_ENABLED_CHANNELS}
+# Override at runtime with -e PROWLRBOT_ENABLED_CHANNELS=... if needed.
+ARG PROWLRBOT_ENABLED_CHANNELS="dingtalk,feishu,qq,console"
+ENV PROWLRBOT_ENABLED_CHANNELS=${PROWLRBOT_ENABLED_CHANNELS}
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -72,7 +72,7 @@ ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 # Avoid Playwright downloading its own browser when executable_path is used.
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 # Indicate running in container (used e.g. for Chromium --no-sandbox).
-ENV COPAW_RUNNING_IN_CONTAINER=1
+ENV PROWLRBOT_RUNNING_IN_CONTAINER=1
 
 WORKDIR ${WORKSPACE_DIR}
 
@@ -82,14 +82,14 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY pyproject.toml setup.py README.md ./
 COPY src ./src
 # Inject console dist from build stage (repo does not commit dist).
-COPY --from=console-builder /app/console/dist/ ./src/copaw/console/
+COPY --from=console-builder /app/console/dist/ ./src/prowlrbot/console/
 RUN pip install --no-cache-dir .
 
 # Init working dir with default config.json and HEARTBEAT.md (build time).
-RUN copaw init --defaults --accept-security
+RUN prowlr init --defaults --accept-security
 
-# CoPaw app port (default 8088). Override at runtime with -e COPAW_PORT=3000.
-ENV COPAW_PORT=8088
+# ProwlrBot app port (default 8088). Override at runtime with -e PROWLRBOT_PORT=3000.
+ENV PROWLRBOT_PORT=8088
 
 COPY deploy/config/supervisord.conf.template /etc/supervisor/conf.d/supervisord.conf.template
 COPY --chmod=755 deploy/entrypoint.sh /entrypoint.sh

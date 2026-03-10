@@ -10,7 +10,7 @@ const defaultConfig: SiteConfig = {
   projectName: "ProwlrBot",
   projectTaglineEn: "Always watching. Always ready.",
   projectTaglineZh: "Always watching. Always ready.",
-  repoUrl: "https://github.com/mcpcentral/prowlrbot",
+  repoUrl: "https://github.com/prowlrbot/prowlrbot",
   docsPath: "/docs/",
 };
 

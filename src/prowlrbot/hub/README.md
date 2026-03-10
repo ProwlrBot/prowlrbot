@@ -4,7 +4,7 @@
 
 ProwlrHub is an MCP (Model Context Protocol) server that gives every Claude Code instance in your project shared awareness: who's working on what, which files are locked, what's been discovered, and what still needs doing.
 
-Part of the [ProwlrBot](https://github.com/mcpcentral/prowlrbot) ecosystem. Built on the [ROAR Protocol](https://github.com/mcpcentral/roar-protocol) for agent identity and communication.
+Part of the [ProwlrBot](https://github.com/prowlrbot/prowlrbot) ecosystem. Built on the [ROAR Protocol](https://github.com/prowlrbot/roar-protocol) for agent identity and communication.
 
 ---
 
@@ -27,14 +27,14 @@ When you run 4 Claude Code terminals on the same codebase, they can't see each o
 ## Quick Start
 
 > **Shortest path:** Tell your Claude Code agent:
-> *"Connect me to the ProwlrBot war room using https://github.com/mcpcentral/prowlrbot/blob/main/INSTALL.md"*
+> *"Connect me to the ProwlrBot war room using https://github.com/prowlrbot/prowlrbot/blob/main/INSTALL.md"*
 
 ### Manual Setup
 
 #### 1. Clone and install
 
 ```bash
-git clone https://github.com/mcpcentral/prowlrbot.git
+git clone https://github.com/prowlrbot/prowlrbot.git
 cd prowlrbot
 pip install -e .
 ```
@@ -151,7 +151,7 @@ Add `PROWLR_HUB_URL` to the remote terminal's `.mcp.json`:
         "PYTHONPATH": "/path/to/prowlrbot/src",
         "PROWLR_AGENT_NAME": "wsl-agent",
         "PROWLR_CAPABILITIES": "code,testing",
-        "PROWLR_HUB_URL": "http://192.168.1.100:8099"
+        "PROWLR_HUB_URL": "http://<host-ip>:8099"
       }
     }
   }
@@ -400,6 +400,6 @@ The bridge exposes all operations as REST endpoints:
 - **[INSTALL.md](../../INSTALL.md)** — Full setup guide with wizard, one-liner, and manual options
 - **[ROAR Protocol](../protocols/roar.py)** — Core agent communication protocol (5 layers)
 - **[ROAR SDK](../protocols/sdk/)** — Client/server/router/streaming/crypto implementations
-- **[roar-protocol repo](https://github.com/mcpcentral/roar-protocol)** — Protocol specification
-- **[prowlr-marketplace](https://github.com/mcpcentral/prowlr-marketplace)** — Skill and agent marketplace
-- **[prowlr-docs](https://github.com/mcpcentral/prowlr-docs)** — Documentation site
+- **[roar-protocol repo](https://github.com/prowlrbot/roar-protocol)** — Protocol specification
+- **[prowlr-marketplace](https://github.com/prowlrbot/marketplace)** — Skill and agent marketplace
+- **[prowlr-docs](https://github.com/prowlrbot/docs)** — Documentation site
