@@ -31,6 +31,8 @@ from .runner.manager import ChatManager
 from .routers import router as api_router
 from .auth import AuthConfig, AuthDependency
 from .rate_limit import RateLimitMiddleware
+from .websocket import create_websocket_router
+from ..dashboard.events import EventBus
 from ..envs import load_envs_into_environ
 
 # Apply log level on load so reload child process gets same level as CLI.
@@ -120,6 +122,7 @@ async def lifespan(app: FastAPI):  # pylint: disable=too-many-statements
             logger.exception("Failed to start MCP watcher")
 
     # expose to endpoints
+    app.state.event_bus = event_bus
     app.state.runner = runner
     app.state.channel_manager = channel_manager
     app.state.cron_manager = cron_manager
@@ -225,6 +228,10 @@ auth_config = AuthConfig(
 auth_dep = AuthDependency(auth_config)
 
 app.include_router(api_router, prefix="/api", dependencies=[Depends(auth_dep)])
+
+# --- WebSocket (real-time dashboard events) ---
+event_bus = EventBus()
+app.include_router(create_websocket_router(event_bus))
 
 app.include_router(
     agent_app.router,

@@ -22,6 +22,7 @@
     "contentPlaceholder": "Enter content..."
   },
   "nav": {
+    "dashboard": "Dashboard",
     "chat": "Chat",
     "control": "Control",
     "channels": "Channels",

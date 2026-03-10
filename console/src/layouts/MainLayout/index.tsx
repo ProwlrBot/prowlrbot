@@ -4,6 +4,7 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import Header from "../Header";
 import ConsoleCronBubble from "../../components/ConsoleCronBubble";
+import Dashboard from "../../pages/Dashboard";
 import Chat from "../../pages/Chat";
 import ChannelsPage from "../../pages/Control/Channels";
 import SessionsPage from "../../pages/Control/Sessions";
@@ -19,6 +20,7 @@ import EnvironmentsPage from "../../pages/Settings/Environments";
 const { Content } = Layout;
 
 const pathToKey: Record<string, string> = {
+  "/dashboard": "dashboard",
   "/chat": "chat",
   "/channels": "channels",
   "/sessions": "sessions",
@@ -37,11 +39,11 @@ export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
-  const selectedKey = pathToKey[currentPath] || "chat";
+  const selectedKey = pathToKey[currentPath] || "dashboard";
 
   useEffect(() => {
     if (currentPath === "/") {
-      navigate("/chat", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [currentPath, navigate]);
 
@@ -54,6 +56,7 @@ export default function MainLayout() {
           <ConsoleCronBubble />
           <div className="page-content">
             <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/channels" element={<ChannelsPage />} />
               <Route path="/sessions" element={<SessionsPage />} />
@@ -65,7 +68,7 @@ export default function MainLayout() {
               <Route path="/models" element={<ModelsPage />} />
               <Route path="/environments" element={<EnvironmentsPage />} />
               <Route path="/agent-config" element={<AgentConfigPage />} />
-              <Route path="/" element={<Chat />} />
+              <Route path="/" element={<Dashboard />} />
             </Routes>
           </div>
         </Content>

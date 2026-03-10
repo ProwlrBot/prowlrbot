@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 const { Header: AntHeader } = Layout;
 
 const keyToLabel: Record<string, string> = {
+  dashboard: "nav.dashboard",
   chat: "nav.chat",
   channels: "nav.channels",
   sessions: "nav.sessions",

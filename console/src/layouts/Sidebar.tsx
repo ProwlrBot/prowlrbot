@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../api";
 import {
+  LayoutDashboard,
   MessageSquare,
   Radio,
   Zap,
@@ -24,6 +25,7 @@ import {
 const { Sider } = Layout;
 
 const keyToPath: Record<string, string> = {
+  dashboard: "/dashboard",
   chat: "/chat",
   channels: "/channels",
   sessions: "/sessions",
@@ -60,6 +62,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
   }, []);
 
   const menuItems: MenuProps["items"] = [
+    {
+      key: "dashboard",
+      label: t("nav.dashboard"),
+      icon: <LayoutDashboard size={16} />,
+    },
     {
       key: "chat-group",
       label: t("nav.chat"),
@@ -165,7 +172,7 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       >
         <img
           src="/logo.png"
-          alt="CoPaw"
+          alt="ProwlrBot"
           style={{ height: 32, width: "auto" }}
         />
         {version && (
