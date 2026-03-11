@@ -269,10 +269,11 @@ const DOC_TITLES: Record<Lang, Record<string, string>> = {
 interface DocsProps {
   config: SiteConfig;
   lang: Lang;
-  onLangClick: () => void;
+  theme: "dark" | "light";
+  onThemeToggle: () => void;
 }
 
-export function Docs({ config, lang, onLangClick }: DocsProps) {
+export function Docs({ config, lang, theme, onThemeToggle }: DocsProps) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -414,7 +415,8 @@ export function Docs({ config, lang, onLangClick }: DocsProps) {
       <Nav
         projectName={config.projectName}
         lang={lang}
-        onLangClick={onLangClick}
+        theme={theme}
+        onThemeToggle={onThemeToggle}
         docsPath={config.docsPath}
         repoUrl={config.repoUrl}
       />

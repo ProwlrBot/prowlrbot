@@ -12,15 +12,15 @@ Please check the [Comparison](/docs/comparison) page for detailed feature compar
 ### How to install ProwlrBot
 
 ProwlrBot supports multiple installation methods. See
-[Quick Start](https://prowlr.agentscope.io/docs/quickstart) for details:
+[Quick Start](https://prowlrbot.dev/docs/quickstart) for details:
 
 1. One-line installer (sets up Python automatically)
 
 ```
 # macOS / Linux:
-curl -fsSL https://prowlr.agentscope.io/install.sh | bash
+curl -fsSL https://prowlrbot.dev/install.sh | bash
 # Windows (PowerShell):
-irm https://prowlr.agentscope.io/install.ps1 | iex
+irm https://prowlrbot.dev/install.ps1 | iex
 # For latest instructions, refer to docs and prefer pip if needed.
 ```
 
@@ -38,8 +38,8 @@ If Docker is installed, run the following commands and then open
 `http://127.0.0.1:8088/` in your browser:
 
 ```
-docker pull agentscope/prowlr:latest
-docker run -p 8088:8088 -v prowlr-data:/app/working agentscope/prowlr:latest
+docker pull prowlrbot/prowlr:latest
+docker run -p 8088:8088 -v prowlr-data:/app/working prowlrbot/prowlr:latest
 ```
 
 ### How to update ProwlrBot
@@ -65,8 +65,8 @@ pip install -e .
 4. If using Docker, pull the latest image and restart the container:
 
 ```
-docker pull agentscope/prowlr:latest
-docker run -p 8088:8088 -v prowlr-data:/app/working agentscope/prowlr:latest
+docker pull prowlrbot/prowlr:latest
+docker run -p 8088:8088 -v prowlr-data:/app/working prowlrbot/prowlr:latest
 ```
 
 After upgrading, restart the service with `prowlr app`.
@@ -87,22 +87,22 @@ prowlr app
 
 The default Console URL is `http://127.0.0.1:8088/`. After quick init, you can
 open Console and customize settings. See
-[Quick Start](https://prowlr.agentscope.io/docs/quickstart).
+[Quick Start](https://prowlrbot.dev/docs/quickstart).
 
 ### Open-source repository
 
 ProwlrBot is open source. Official repository:
-`https://github.com/agentscope-ai/ProwlrBot`
+`https://github.com/prowlrbot/prowlrbot`
 
 ### Where to check latest version upgrade details
 
 You can check version changes in ProwlrBot GitHub
-[Releases](https://github.com/agentscope-ai/ProwlrBot/releases).
+[Releases](https://github.com/prowlrbot/prowlrbot/releases).
 
 ### How to configure models
 
 In Console, go to **Settings -> Models**. See
-[Console -> Models](https://prowlr.agentscope.io/docs/console#models) for
+[Console -> Models](https://prowlrbot.dev/docs/console#models) for
 details.
 
 - Cloud models: fill provider API key (ModelScope, DashScope, or custom), then
@@ -112,18 +112,18 @@ details.
 
 You can also use `prowlr models` CLI commands for configuration, download, and
 switching. See
-[CLI -> Models and Environment Variables -> prowlr models](https://prowlr.agentscope.io/docs/cli#prowlr-models).
+[CLI -> Models and Environment Variables -> prowlr models](https://prowlrbot.dev/docs/cli#prowlr-models).
 
 ### How to manage Skills
 
 Go to **Agent -> Skills** in Console. You can enable/disable Skills, create
 custom Skills, and import Skills from Skills Hub. See
-[Skills](https://prowlr.agentscope.io/docs/skills).
+[Skills](https://prowlrbot.dev/docs/skills).
 
 ### How to configure MCP
 
 Go to **Agent -> MCP** in Console. You can enable/disable/delete/create MCP
-clients there. See [MCP](https://prowlr.agentscope.io/docs/mcp).
+clients there. See [MCP](https://prowlrbot.dev/docs/mcp).
 
 ### Common error
 
@@ -158,7 +158,7 @@ https://help.aliyun.com/zh/model-studio/coding-plan-quickstart#2531c37fd64f9
 
 To speed up troubleshooting and fixes, please create an issue in the ProwlrBot
 GitHub repository and include complete error information:
-https://github.com/agentscope-ai/ProwlrBot/issues
+https://github.com/prowlrbot/prowlrbot/issues
 
 In many Console errors, a detailed error file path is included. For example:
 

@@ -7,24 +7,35 @@ import { Docs } from "./pages/Docs";
 import "./index.css";
 
 const LANG_KEY = "site-lang";
+const THEME_KEY = "site-theme";
 
 function getStoredLang(): Lang {
   const v = localStorage.getItem(LANG_KEY);
   return v === "zh" ? "zh" : "en";
 }
 
+function getStoredTheme(): "dark" | "light" {
+  const v = localStorage.getItem(THEME_KEY);
+  return v === "light" ? "light" : "dark";
+}
+
 export default function App() {
   const [config, setConfig] = useState<SiteConfig | null>(null);
-  const [lang, setLang] = useState<Lang>(getStoredLang);
+  const [lang] = useState<Lang>(getStoredLang);
+  const [theme, setTheme] = useState<"dark" | "light">(getStoredTheme);
 
   useEffect(() => {
     loadSiteConfig().then(setConfig);
   }, []);
 
-  const toggleLang = () => {
-    const next: Lang = lang === "zh" ? "en" : "zh";
-    setLang(next);
-    localStorage.setItem(LANG_KEY, next);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem(THEME_KEY, next);
   };
 
   if (!config) {
@@ -47,12 +58,12 @@ export default function App() {
     <Routes>
       <Route
         path="/"
-        element={<Home config={config} lang={lang} onLangClick={toggleLang} />}
+        element={<Home config={config} lang={lang} theme={theme} onThemeToggle={toggleTheme} />}
       />
       <Route path="/docs" element={<Navigate to="/docs/intro" replace />} />
       <Route
         path="/docs/:slug"
-        element={<Docs config={config} lang={lang} onLangClick={toggleLang} />}
+        element={<Docs config={config} lang={lang} theme={theme} onThemeToggle={toggleTheme} />}
       />
     </Routes>
   );

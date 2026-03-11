@@ -17,9 +17,10 @@ from typing import Any, Dict, Optional
 class ACPServer:
     """Minimal ACP JSON-RPC 2.0 server over stdio."""
 
-    def __init__(self) -> None:
+    def __init__(self, runner=None) -> None:
         self._session_id: Optional[str] = None
         self._initialized = False
+        self._runner = runner
 
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Route a JSON-RPC request to the appropriate handler."""
@@ -69,14 +70,28 @@ class ACPServer:
         """Process a prompt in the current session."""
         prompt = params.get("prompt", "")
         if not self._session_id:
-            return {"error": "No active session. Call session/new first."}
+            return {"error": "No active session. Call session/new first.", "status": "error"}
 
-        # TODO: Wire to ProwlrBot agent runner for actual execution
-        return {
-            "session_id": self._session_id,
-            "response": f"[ProwlrBot ACP] Received: {prompt[:100]}",
-            "status": "stub",
-        }
+        if self._runner is None:
+            return {
+                "session_id": self._session_id,
+                "response": f"[ProwlrBot ACP] No runner configured. Received: {prompt[:100]}",
+                "status": "no_runner",
+            }
+
+        try:
+            result = await self._runner.process_query(prompt)
+            return {
+                "session_id": self._session_id,
+                "response": result.get("response", ""),
+                "status": "ok",
+            }
+        except Exception as exc:
+            return {
+                "session_id": self._session_id,
+                "response": str(exc),
+                "status": "error",
+            }
 
     async def _handle_session_cancel(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Cancel the current session."""

@@ -116,6 +116,16 @@ from .migrate_cmd import migrate_group  # noqa: E402
 
 _record(".migrate_cmd", time.perf_counter() - _t)
 
+_t = time.perf_counter()
+from .acp_cmd import acp_cmd  # noqa: E402
+
+_record(".acp_cmd", time.perf_counter() - _t)
+
+_t = time.perf_counter()
+from .market_cmd import market_group  # noqa: E402
+
+_record(".market_cmd", time.perf_counter() - _t)
+
 _total = time.perf_counter() - _t0_main
 _init_timings.append(("(total imports)", _total))
 logger.debug("%.3fs (total imports)", _total)
@@ -170,3 +180,5 @@ cli.add_command(backup_group)
 cli.add_command(export_group)
 cli.add_command(completion_group)
 cli.add_command(migrate_group)
+cli.add_command(acp_cmd)
+cli.add_command(market_group)

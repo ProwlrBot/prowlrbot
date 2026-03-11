@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Github, BookOpen, MessageCircle } from "lucide-react";
 import { type Lang } from "../i18n";
 
@@ -86,16 +87,14 @@ export function Footer({ lang: _lang }: { lang: Lang }) {
                 <Github size={14} strokeWidth={2} aria-hidden />
                 GitHub
               </a>
-              <a
-                href="https://github.com/prowlrbot/prowlrbot/tree/main/docs"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/docs"
                 style={linkStyle}
                 className="footer-link"
               >
                 <BookOpen size={14} strokeWidth={2} aria-hidden />
                 Docs
-              </a>
+              </Link>
               <a
                 href="https://github.com/prowlrbot/prowlrbot/discussions"
                 target="_blank"
@@ -174,19 +173,21 @@ export function Footer({ lang: _lang }: { lang: Lang }) {
               opacity: 0.7,
             }}
           >
-            Made with prowl by the community. &copy; {new Date().getFullYear()} ProwlrBot.
+            &copy; {new Date().getFullYear()} ProwlrBot. Always watching. Always ready.
           </div>
-          <a
-            href="https://github.com/prowlrbot/prowlrbot/blob/main/LICENSE"
-            target="_blank"
-            rel="noopener noreferrer"
+          <div
+            style={{
+              fontSize: "0.75rem",
+              color: "var(--text-muted)",
+              opacity: 0.5,
+              display: "flex",
+              gap: "var(--space-2)",
+            }}
           >
-            <img
-              src="https://img.shields.io/badge/license-MIT-00E5FF?style=flat-square&labelColor=0a0a0f"
-              alt="MIT License"
-              style={{ height: "20px", border: "none", boxShadow: "none" }}
-            />
-          </a>
+            <span>Privacy</span>
+            <span>&middot;</span>
+            <span>Terms</span>
+          </div>
         </div>
       </div>
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 48" fill="none">
+  <!-- Eye icon (stylized prowling eye) -->
+  <ellipse cx="24" cy="24" rx="18" ry="14" stroke="#00E5FF" stroke-width="2.5" fill="none"/>
+  <circle cx="24" cy="24" r="6" fill="#00E5FF"/>
+  <circle cx="26" cy="22" r="2" fill="#0a0a0f"/>
+  <!-- Scan lines radiating from eye -->
+  <line x1="44" y1="14" x2="52" y2="10" stroke="#00E5FF" stroke-width="1.5" opacity="0.6"/>
+  <line x1="44" y1="24" x2="54" y2="24" stroke="#00E5FF" stroke-width="1.5" opacity="0.4"/>
+  <line x1="44" y1="34" x2="52" y2="38" stroke="#00E5FF" stroke-width="1.5" opacity="0.6"/>
+  <!-- ProwlrBot text -->
+  <text x="62" y="33" font-family="'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="800" letter-spacing="-0.02em">
+    <tspan fill="#f0f0f5">Prowlr</tspan><tspan fill="#00E5FF">Bot</tspan>
+  </text>
+</svg>

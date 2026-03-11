@@ -15,6 +15,7 @@ from ...constant import WORKING_DIR
 _BLOCKED_PREFIXES = [
     Path.home() / ".ssh",
     Path.home() / ".prowlrbot.secret",
+    # Legacy CoPaw secret path (kept for backward compat during migration)
     Path.home() / ".copaw.secret",
     Path.home() / ".aws",
     Path.home() / ".gnupg",

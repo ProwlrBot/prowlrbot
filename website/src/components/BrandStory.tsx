@@ -59,10 +59,12 @@ export function BrandStory({ lang }: BrandStoryProps) {
         >
           {t(lang, "brandstory.para4")}
         </p>
-        <a
-          href="https://github.com/prowlrbot/prowlrbot"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => {
+            const cta = document.querySelector('.waitlist-cta-section');
+            if (cta) cta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
           style={{
             display: "inline-block",
             padding: "0.75rem 2rem",
@@ -71,7 +73,8 @@ export function BrandStory({ lang }: BrandStoryProps) {
             color: "var(--bg)",
             background: "var(--accent)",
             borderRadius: "0.5rem",
-            textDecoration: "none",
+            border: "none",
+            cursor: "pointer",
             transition: "opacity 0.2s ease, transform 0.15s ease",
           }}
           onMouseEnter={(e) => {
@@ -84,7 +87,7 @@ export function BrandStory({ lang }: BrandStoryProps) {
           }}
         >
           {t(lang, "brandstory.cta")}
-        </a>
+        </button>
       </div>
     </SectionWrapper>
   );

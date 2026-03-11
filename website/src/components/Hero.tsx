@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Github } from "lucide-react";
+import { Github } from "lucide-react";
 import { motion } from "motion/react";
 import { t, type Lang } from "../i18n";
 import { AnimatedTerminal } from "./AnimatedTerminal";
+import { EarlyAccessForm } from "./EarlyAccessForm";
 
 interface HeroProps {
   projectName: string;
@@ -28,7 +28,7 @@ export function Hero({
   projectName,
   tagline: _tagline,
   lang,
-  docsPath,
+  docsPath: _docsPath,
 }: HeroProps) {
   return (
     <section
@@ -38,15 +38,27 @@ export function Hero({
         overflow: "hidden",
       }}
     >
-      {/* Gradient background */}
+      {/* Gradient background — more dramatic */}
       <div
         aria-hidden
         style={{
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,229,255,0.06) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,229,255,0.12) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(0,229,255,0.04) 0%, transparent 40%)",
           pointerEvents: "none",
+        }}
+      />
+
+      {/* Scan line animation overlay */}
+      <div
+        aria-hidden
+        className="hero-scanline"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          opacity: 0.03,
         }}
       />
 
@@ -68,34 +80,43 @@ export function Hero({
       >
         {/* Left — Text */}
         <div>
+          {/* Badge — pulsing dot + compelling text */}
           <motion.div
             variants={item}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "var(--space-1)",
-              padding: "0.25rem 0.75rem",
+              padding: "0.3rem 0.875rem",
               marginBottom: "var(--space-3)",
               fontSize: "0.75rem",
-              fontWeight: 500,
+              fontWeight: 600,
               fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
               color: "var(--accent)",
               background: "var(--accent-dim)",
-              border: "1px solid rgba(0,229,255,0.15)",
+              border: "1px solid rgba(0,229,255,0.2)",
               borderRadius: "9999px",
               letterSpacing: "0.05em",
             }}
           >
-            v0.1.0 — Now Open Source
+            <span className="hero-pulse-dot" style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "var(--accent)",
+              display: "inline-block",
+              flexShrink: 0,
+            }} />
+            {t(lang, "hero.badge")}
           </motion.div>
 
           <motion.h1
             variants={item}
             style={{
-              margin: "0 0 var(--space-3)",
-              fontSize: "clamp(2rem, 5vw, 3.25rem)",
+              margin: "0 0 var(--space-2)",
+              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
               fontWeight: 800,
-              lineHeight: 1.1,
+              lineHeight: 1.08,
               letterSpacing: "-0.03em",
               color: "var(--text)",
             }}
@@ -107,10 +128,10 @@ export function Hero({
             variants={item}
             style={{
               margin: "0 0 var(--space-2)",
-              fontSize: "clamp(1rem, 2vw, 1.25rem)",
-              fontWeight: 600,
+              fontSize: "clamp(1.125rem, 2.5vw, 1.375rem)",
+              fontWeight: 700,
               color: "var(--text)",
-              lineHeight: 1.4,
+              lineHeight: 1.3,
             }}
           >
             {t(lang, "hero.slogan")}
@@ -120,65 +141,57 @@ export function Hero({
             variants={item}
             style={{
               margin: "0 0 var(--space-4)",
-              maxWidth: "28rem",
-              fontSize: "0.9375rem",
+              maxWidth: "30rem",
+              fontSize: "1rem",
               color: "var(--text-muted)",
-              lineHeight: 1.6,
+              lineHeight: 1.65,
             }}
           >
             {t(lang, "hero.sub")}
           </motion.p>
 
+          {/* Email capture form */}
+          <motion.div variants={item} style={{ marginBottom: "var(--space-4)" }}>
+            <EarlyAccessForm variant="hero" />
+          </motion.div>
+
+          {/* Secondary CTA */}
           <motion.div
             variants={item}
             style={{
               display: "flex",
-              gap: "var(--space-2)",
-              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "var(--space-3)",
               marginBottom: "var(--space-5)",
             }}
           >
-            <Link
-              to={docsPath.replace(/\/$/, "") || "/docs"}
-              className="hero-cta-primary"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "var(--space-1)",
-                padding: "0.75rem 1.5rem",
-                background: "var(--accent)",
-                color: "var(--bg)",
-                borderRadius: "0.5rem",
-                fontSize: "0.9375rem",
-                fontWeight: 700,
-                border: "none",
-                transition: "all 0.2s ease",
-              }}
-            >
-              {t(lang, "hero.cta")}
-              <ArrowRight size={18} strokeWidth={2} aria-hidden />
-            </Link>
             <a
               href="https://github.com/prowlrbot/prowlrbot"
               target="_blank"
               rel="noopener noreferrer"
+              className="hero-github-link"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "var(--space-1)",
-                padding: "0.75rem 1.5rem",
-                background: "transparent",
-                color: "var(--text)",
-                border: "1px solid var(--border)",
-                borderRadius: "0.5rem",
-                fontSize: "0.9375rem",
+                fontSize: "0.875rem",
                 fontWeight: 600,
-                transition: "all 0.2s ease",
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                transition: "color 0.2s ease",
               }}
             >
-              <Github size={18} strokeWidth={2} aria-hidden />
-              GitHub
+              <Github size={16} strokeWidth={2} aria-hidden />
+              Star on GitHub
             </a>
+            <span style={{ color: "var(--border)", fontSize: "0.75rem" }}>|</span>
+            <span style={{
+              fontSize: "0.8125rem",
+              color: "var(--text-muted)",
+              opacity: 0.7,
+            }}>
+              Free during beta
+            </span>
           </motion.div>
 
           {/* Stats row */}
@@ -198,20 +211,24 @@ export function Hero({
             ].map(({ value, label }) => (
               <div key={label}>
                 <div
+                  className="hero-stat-value"
                   style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
+                    fontSize: "1.75rem",
+                    fontWeight: 800,
                     color: "var(--accent)",
                     lineHeight: 1.2,
+                    fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
                   }}
                 >
                   {value}
                 </div>
                 <div
                   style={{
-                    fontSize: "0.75rem",
+                    fontSize: "0.6875rem",
                     color: "var(--text-muted)",
                     fontWeight: 500,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
                   }}
                 >
                   {label}
@@ -235,6 +252,29 @@ export function Hero({
       </motion.div>
 
       <style>{`
+        @keyframes hero-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(0.8); }
+        }
+        @keyframes hero-scanline-move {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100vh); }
+        }
+        .hero-pulse-dot {
+          animation: hero-pulse 2s ease-in-out infinite;
+        }
+        .hero-scanline::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, var(--accent), transparent);
+          animation: hero-scanline-move 8s linear infinite;
+        }
+        .hero-github-link:hover {
+          color: var(--accent) !important;
+        }
         @media (max-width: 768px) {
           .hero-grid {
             grid-template-columns: 1fr !important;
@@ -247,11 +287,6 @@ export function Hero({
             flex-direction: column;
             align-items: center;
           }
-        }
-        .hero-cta-primary:hover {
-          opacity: 0.9;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 20px var(--accent-glow);
         }
       `}</style>
     </section>

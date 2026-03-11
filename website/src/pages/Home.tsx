@@ -10,20 +10,23 @@ import { RoadmapVisual } from "../components/RoadmapVisual";
 import { QuickStart } from "../components/QuickStart";
 import { BrandStory } from "../components/BrandStory";
 import { Footer } from "../components/Footer";
+import { WaitlistCTA } from "../components/WaitlistCTA";
 
 interface HomeProps {
   config: SiteConfig;
   lang: Lang;
-  onLangClick: () => void;
+  theme: "dark" | "light";
+  onThemeToggle: () => void;
 }
 
-export function Home({ config, lang, onLangClick }: HomeProps) {
+export function Home({ config, lang, theme, onThemeToggle }: HomeProps) {
   return (
     <>
       <Nav
         projectName={config.projectName}
         lang={lang}
-        onLangClick={onLangClick}
+        theme={theme}
+        onThemeToggle={onThemeToggle}
         docsPath={config.docsPath}
         repoUrl={config.repoUrl}
       />
@@ -45,6 +48,7 @@ export function Home({ config, lang, onLangClick }: HomeProps) {
         <RoadmapVisual lang={lang} />
         <QuickStart config={config} lang={lang} />
         <BrandStory lang={lang} />
+        <WaitlistCTA />
       </main>
       <Footer lang={lang} />
     </>

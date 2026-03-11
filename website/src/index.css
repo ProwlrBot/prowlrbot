@@ -1,5 +1,7 @@
 /* ProwlrBot — Black + White + Teal */
-:root {
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
   --bg: #0a0a0f;
   --surface: #111118;
   --text: #f0f0f5;
@@ -9,8 +11,25 @@
   --accent-dim: rgba(0, 229, 255, 0.08);
   --accent-glow: rgba(0, 229, 255, 0.15);
   --mascot-accent: #00E5FF;
-  --logo-paw: #00BCD4;
-  --logo-paw-soft: #004d54;
+  --logo-accent: #00BCD4;
+  --logo-accent-soft: #004d54;
+  --nav-bg-scrolled: rgba(10, 10, 15, 0.92);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f8f9fa;
+  --text: #111118;
+  --text-muted: #555566;
+  --border: #e2e4e8;
+  --accent: #0097A7;
+  --accent-dim: rgba(0, 151, 167, 0.08);
+  --accent-glow: rgba(0, 151, 167, 0.15);
+  --mascot-accent: #0097A7;
+  --logo-accent: #0097A7;
+  --logo-accent-soft: #e0f7fa;
+  --nav-bg-scrolled: rgba(255, 255, 255, 0.92);
 }
 
 :root {
@@ -35,6 +54,7 @@ html {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
   scroll-padding-top: 4rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -141,7 +161,7 @@ button {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: var(--logo-paw);
+  background: var(--logo-accent);
 }
 
 .usecases-sub {
@@ -219,6 +239,7 @@ button {
 }
 
 /* Code block: dark background + high-contrast text (target our wrapper) */
+/* Terminal/code blocks stay dark in both themes */
 .docs-content .docs-code-wrap pre {
   padding: var(--space-4);
   margin: 0;

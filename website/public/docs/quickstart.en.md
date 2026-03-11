@@ -4,9 +4,7 @@ This section describes five ways to run ProwlrBot:
 
 - **Option A — One-line install (recommended)**: run on your machine with no Python setup required.
 - **Option B — pip install**: if you prefer managing Python yourself.
-- **Option C — ModelScope Studio**: one-click cloud deploy, no local install needed.
-- **Option D — Docker**: use official images from Docker Hub (ACR also available for users in China); tags include `latest` (stable) and `pre` (PyPI pre-release).
-- **Option E — Alibaba Cloud ECS**: one-click deploy on Alibaba Cloud, no local install.
+- **Option C — Docker**: use official images from Docker Hub; tags include `latest` (stable) and `pre` (PyPI pre-release).
 
 > 📖 Read [Introduction](./intro) first; after install see [Console](./console).
 
@@ -23,7 +21,7 @@ No Python required — the installer handles everything automatically using [uv]
 **macOS / Linux:**
 
 ```bash
-curl -fsSL https://prowlr.agentscope.io/install.sh | bash
+curl -fsSL https://prowlrbot.dev/install.sh | bash
 ```
 
 Then open a new terminal (or `source ~/.zshrc` / `source ~/.bashrc`).
@@ -31,7 +29,7 @@ Then open a new terminal (or `source ~/.zshrc` / `source ~/.bashrc`).
 **Windows (PowerShell):**
 
 ```powershell
-irm https://prowlr.agentscope.io/install.ps1 | iex
+irm https://prowlrbot.dev/install.ps1 | iex
 ```
 
 Then open a new terminal (the installer adds ProwlrBot to your PATH automatically).
@@ -118,41 +116,18 @@ Then follow [Step 2: Init](#step-2-init) and [Step 3: Start the server](#step-3-
 
 ---
 
-## Option C: ModelScope Studio one-click setup (no install)
+## Option C: Docker
 
-If you prefer not to install Python locally, you can deploy ProwlrBot to ModelScope Studio's cloud:
-
-1. First, sign up and log in at [ModelScope](https://modelscope.cn/register?back=%2Fhome);
-2. Open the [ProwlrBot Studio](https://modelscope.cn/studios/fork?target=AgentScope/ProwlrBot) and complete the one-click setup.
-
-**Important**: Set your Studio to **non-public**, or others may control your
-ProwlrBot.
-
----
-
-## Option D: Docker
-
-Images are on **Docker Hub** (`agentscope/prowlr`). Image tags: `latest` (stable); `pre` (PyPI pre-release). Also available on Alibaba Cloud ACR for users in China: `agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/prowlr` (same tags).
+Images are on **Docker Hub** (`prowlrbot/prowlr`). Image tags: `latest` (stable); `pre` (PyPI pre-release).
 
 Pull and run:
 
 ```bash
-docker pull agentscope/prowlr:latest
-docker run -p 8088:8088 -v prowlr-data:/app/working agentscope/prowlr:latest
+docker pull prowlrbot/prowlr:latest
+docker run -p 8088:8088 -v prowlr-data:/app/working prowlrbot/prowlr:latest
 ```
 
 Then open **http://127.0.0.1:8088/** in your browser for the Console. Config, memory, and skills are stored in the `prowlr-data` volume. To pass API keys, add `-e DASHSCOPE_API_KEY=xxx` or `--env-file .env` to `docker run`.
-
----
-
-## Option E: Deploy on Alibaba Cloud ECS
-
-To run ProwlrBot on Alibaba Cloud, use the ECS one-click deployment:
-
-1. Open the [ProwlrBot on Alibaba Cloud (ECS) deployment link](https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&ServiceId=service-1ed84201799f40879884) and fill in the parameters as prompted;
-2. Confirm the cost and create the instance; when deployment finishes, you can get the access URL and start using the service.
-
-For step-by-step instructions, see [Alibaba Cloud Developer: Deploy your AI assistant in 3 minutes](https://developer.aliyun.com/article/1713682).
 
 ---
 

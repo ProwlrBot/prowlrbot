@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Github, Newspaper } from "lucide-react";
+import { Menu, X, BookOpen, Github, Newspaper, Sun, Moon } from "lucide-react";
 import { t, type Lang } from "../i18n";
 
 interface NavProps {
   projectName: string;
   lang: Lang;
-  onLangClick: () => void;
+  theme: "dark" | "light";
+  onThemeToggle: () => void;
   docsPath: string;
   repoUrl: string;
 }
@@ -14,7 +15,8 @@ interface NavProps {
 export function Nav({
   projectName,
   lang,
-  onLangClick: _onLangClick,
+  theme,
+  onThemeToggle,
   docsPath,
   repoUrl: _repoUrl,
 }: NavProps) {
@@ -30,8 +32,7 @@ export function Nav({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const linkClass =
-    "nav-item text-[var(--text-muted)] hover:text-[var(--text)] transition-colors";
+  const linkClass = "nav-item";
 
   const scrollTo = (id: string) => {
     setOpen(false);
@@ -49,8 +50,8 @@ export function Nav({
         right: 0,
         zIndex: 50,
         background: scrolled
-          ? "rgba(10, 10, 15, 0.9)"
-          : "rgba(10, 10, 15, 0)",
+          ? "var(--nav-bg-scrolled, rgba(10, 10, 15, 0.9))"
+          : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled
           ? "1px solid var(--border)"
@@ -84,9 +85,9 @@ export function Nav({
           aria-label={projectName}
         >
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt={projectName}
-            style={{ height: 36, width: "auto" }}
+            style={{ height: 32, width: "auto" }}
           />
         </Link>
 
@@ -157,6 +158,53 @@ export function Nav({
             <Github size={18} strokeWidth={1.5} aria-hidden />
             <span>{t(lang, "nav.github")}</span>
           </a>
+          <button
+            type="button"
+            onClick={onThemeToggle}
+            className={linkClass}
+            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              font: "inherit",
+            }}
+          >
+            {theme === "light" ? (
+              <Moon size={18} strokeWidth={1.5} aria-hidden />
+            ) : (
+              <Sun size={18} strokeWidth={1.5} aria-hidden />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const hero = document.querySelector('.hero-section');
+              if (hero) {
+                hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                  const input = hero.querySelector('input[type="email"]');
+                  if (input) (input as HTMLElement).focus();
+                }, 600);
+              }
+            }}
+            className="nav-signup-btn"
+            style={{
+              padding: "0.5rem 1rem",
+              fontSize: "0.8125rem",
+              fontWeight: 700,
+              color: "var(--bg)",
+              background: "var(--accent)",
+              border: "none",
+              borderRadius: "0.375rem",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Get Early Access
+          </button>
         </div>
 
         <button
@@ -249,9 +297,77 @@ export function Nav({
         >
           <Github size={18} /> {t(lang, "nav.github")}
         </a>
+        <button
+          type="button"
+          onClick={() => {
+            onThemeToggle();
+            setOpen(false);
+          }}
+          className={linkClass}
+          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          style={{
+            background: "none",
+            border: "none",
+            padding: "var(--space-1) 0",
+            cursor: "pointer",
+            font: "inherit",
+            textAlign: "left",
+          }}
+        >
+          {theme === "light" ? (
+            <><Moon size={18} /> Dark mode</>
+          ) : (
+            <><Sun size={18} /> Light mode</>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            const hero = document.querySelector('.hero-section');
+            if (hero) {
+              hero.scrollIntoView({ behavior: 'smooth' });
+              setTimeout(() => {
+                const form = hero.querySelector('input[type="email"]');
+                if (form) (form as HTMLElement).focus();
+              }, 500);
+            }
+          }}
+          style={{
+            marginTop: "var(--space-1)",
+            padding: "0.625rem 1.25rem",
+            fontSize: "0.875rem",
+            fontWeight: 700,
+            color: "var(--bg)",
+            background: "var(--accent)",
+            border: "none",
+            borderRadius: "0.375rem",
+            cursor: "pointer",
+            textAlign: "center",
+          }}
+        >
+          Get Early Access
+        </button>
       </div>
 
       <style>{`
+        .nav-item {
+          color: var(--text-muted);
+          transition: color 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.375rem;
+          font-size: 0.875rem;
+          text-decoration: none;
+        }
+        .nav-item:hover {
+          color: var(--text);
+        }
+        .nav-signup-btn:hover {
+          opacity: 0.9;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 12px var(--accent-glow);
+        }
         @media (max-width: 640px) {
           .nav-links { display: none !important; }
           .nav-mobile-toggle { display: flex !important; }
