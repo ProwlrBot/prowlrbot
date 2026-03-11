@@ -6,18 +6,18 @@ from __future__ import annotations
 import time
 import unittest
 
-from src.prowlrbot.protocols.sdk.crypto import NACL_AVAILABLE
-from src.prowlrbot.protocols.sdk.identity.delegation import (
+from prowlrbot.protocols.sdk.crypto import NACL_AVAILABLE
+from prowlrbot.protocols.sdk.identity.delegation import (
     AutonomyLevel,
     CapabilityDelegation,
     DelegationToken,
 )
-from src.prowlrbot.protocols.sdk.identity.did_document import (
+from prowlrbot.protocols.sdk.identity.did_document import (
     DIDDocument,
     ServiceEndpoint,
     VerificationMethod,
 )
-from src.prowlrbot.protocols.sdk.identity.did_web import DIDWebIdentity, DIDWebMethod
+from prowlrbot.protocols.sdk.identity.did_web import DIDWebIdentity, DIDWebMethod
 
 
 class TestDIDDocument(unittest.TestCase):
@@ -299,7 +299,7 @@ class TestEd25519Signing(unittest.TestCase):
     """Tests for Ed25519 cryptographic signing (requires PyNaCl)."""
 
     def test_keypair_generation(self):
-        from src.prowlrbot.protocols.sdk.crypto import KeyPair
+        from prowlrbot.protocols.sdk.crypto import KeyPair
 
         kp = KeyPair.generate()
         assert kp.private_key
@@ -307,7 +307,7 @@ class TestEd25519Signing(unittest.TestCase):
         assert kp.did_key.startswith("did:key:z")
 
     def test_sign_and_verify(self):
-        from src.prowlrbot.protocols.sdk.crypto import Ed25519Signer, KeyPair
+        from prowlrbot.protocols.sdk.crypto import Ed25519Signer, KeyPair
 
         kp = KeyPair.generate()
         signer = Ed25519Signer(kp)
@@ -315,7 +315,7 @@ class TestEd25519Signing(unittest.TestCase):
         assert signer.verify(b"hello world", sig)
 
     def test_verify_fails_for_wrong_message(self):
-        from src.prowlrbot.protocols.sdk.crypto import Ed25519Signer, KeyPair
+        from prowlrbot.protocols.sdk.crypto import Ed25519Signer, KeyPair
 
         kp = KeyPair.generate()
         signer = Ed25519Signer(kp)
@@ -328,7 +328,7 @@ class TestEd25519Unavailable(unittest.TestCase):
 
     @unittest.skipIf(NACL_AVAILABLE, "PyNaCl is installed")
     def test_generate_raises(self):
-        from src.prowlrbot.protocols.sdk.crypto import KeyPair
+        from prowlrbot.protocols.sdk.crypto import KeyPair
 
         with self.assertRaises(RuntimeError) as ctx:
             KeyPair.generate()

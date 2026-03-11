@@ -7,7 +7,7 @@ import asyncio
 import json
 import unittest
 
-from src.prowlrbot.protocols.roar import (
+from prowlrbot.protocols.roar import (
     AgentCard,
     AgentDirectory,
     AgentIdentity,
@@ -17,8 +17,8 @@ from src.prowlrbot.protocols.roar import (
     ROARMessage,
     TransportType,
 )
-from src.prowlrbot.protocols.sdk.client import ROARClient
-from src.prowlrbot.protocols.sdk.server import ROARServer
+from prowlrbot.protocols.sdk.client import ROARClient
+from prowlrbot.protocols.sdk.server import ROARServer
 
 
 class TestROARServer(unittest.TestCase):
@@ -224,7 +224,7 @@ class TestTransportDispatcher(unittest.TestCase):
     """Tests for the transport dispatcher routing logic."""
 
     def test_unsupported_transport_raises(self):
-        from src.prowlrbot.protocols.sdk.transports import send_message
+        from prowlrbot.protocols.sdk.transports import send_message
 
         config = ConnectionConfig(
             transport=TransportType.GRPC,

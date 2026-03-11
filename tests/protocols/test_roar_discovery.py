@@ -6,8 +6,8 @@ from __future__ import annotations
 import time
 import unittest
 
-from src.prowlrbot.protocols.roar import AgentCard, AgentIdentity, DiscoveryEntry
-from src.prowlrbot.protocols.sdk.discovery.cache import DiscoveryCache
+from prowlrbot.protocols.roar import AgentCard, AgentIdentity, DiscoveryEntry
+from prowlrbot.protocols.sdk.discovery.cache import DiscoveryCache
 
 
 def _make_entry(name: str, skills: list = None) -> DiscoveryEntry:

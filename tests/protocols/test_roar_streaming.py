@@ -7,10 +7,10 @@ import asyncio
 import time
 import unittest
 
-from src.prowlrbot.protocols.roar import StreamEvent, StreamEventType
-from src.prowlrbot.protocols.sdk.streaming.backpressure import AIMDController
-from src.prowlrbot.protocols.sdk.streaming.dedup import IdempotencyGuard
-from src.prowlrbot.protocols.sdk.streaming.local import EventBus, StreamFilter
+from prowlrbot.protocols.roar import StreamEvent, StreamEventType
+from prowlrbot.protocols.sdk.streaming.backpressure import AIMDController
+from prowlrbot.protocols.sdk.streaming.dedup import IdempotencyGuard
+from prowlrbot.protocols.sdk.streaming.local import EventBus, StreamFilter
 
 
 def _make_event(
@@ -349,8 +349,8 @@ class TestServerEventBusIntegration(unittest.TestCase):
     """Tests for ROARServer with integrated event bus."""
 
     def test_server_has_event_bus(self):
-        from src.prowlrbot.protocols.roar import AgentIdentity
-        from src.prowlrbot.protocols.sdk.server import ROARServer
+        from prowlrbot.protocols.roar import AgentIdentity
+        from prowlrbot.protocols.sdk.server import ROARServer
 
         identity = AgentIdentity(display_name="test-server")
         server = ROARServer(identity)
@@ -361,8 +361,8 @@ class TestServerEventBusIntegration(unittest.TestCase):
         loop = asyncio.new_event_loop()
 
         async def run():
-            from src.prowlrbot.protocols.roar import AgentIdentity
-            from src.prowlrbot.protocols.sdk.server import ROARServer
+            from prowlrbot.protocols.roar import AgentIdentity
+            from prowlrbot.protocols.sdk.server import ROARServer
 
             identity = AgentIdentity(display_name="test-server")
             server = ROARServer(identity)

@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import unittest
 
-from src.prowlrbot.protocols.roar import (
+from prowlrbot.protocols.roar import (
     AgentCard,
     AgentIdentity,
     MessageIntent,
     ROARMessage,
 )
-from src.prowlrbot.protocols.sdk.adapters.a2a import A2AFullAdapter
-from src.prowlrbot.protocols.sdk.adapters.detect import ProtocolType, detect_protocol
-from src.prowlrbot.protocols.sdk.adapters.mcp import MCPFullAdapter
+from prowlrbot.protocols.sdk.adapters.a2a import A2AFullAdapter
+from prowlrbot.protocols.sdk.adapters.detect import ProtocolType, detect_protocol
+from prowlrbot.protocols.sdk.adapters.mcp import MCPFullAdapter
 
 
 class TestProtocolDetection(unittest.TestCase):
