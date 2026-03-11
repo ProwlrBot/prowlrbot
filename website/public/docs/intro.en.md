@@ -1,74 +1,94 @@
-# Introduction
+# Welcome to ProwlrBot
 
-This page describes what ProwlrBot is, what it can do, and how to get started by
-following the docs.
-
----
-
-## What is ProwlrBot?
-
-ProwlrBot is an **autonomous AI agent platform** that runs in your own environment. Always watching. Always ready.
-
-> Unlike closed-source alternatives like Manus.ai ($2B acquisition), Devin ($500/mo), or OpenAI Operator, ProwlrBot is fully open source (Apache 2.0), self-hosted, and free — with more features than any of them. See the [full comparison](./comparison).
-
-- **Multi-channel chat** — Talk to your agent via DingTalk, Feishu, QQ, Discord, Telegram, iMessage, and more.
-- **Scheduled execution** — Run tasks automatically on your configured schedule.
-- **Driven by Skills — the possibilities are open-ended** — Built-in skills include cron (scheduled jobs), PDF and forms, Word/Excel/PPT handling, news digest, file reading, and more; add custom skills as described in [Skills](./skills).
-- **Web monitoring** — Detect website changes, monitor APIs, and get smart notifications automatically.
-- **All data stays local** — No third-party hosting. Your secrets, your servers.
-
-ProwlrBot is built on the [AgentScope](https://github.com/agentscope-ai/agentscope) framework, fully rebranded and enhanced with provider detection, smart routing, war room coordination, a skills marketplace, and security hardening.
+Your personal automation team — always watching, always ready.
 
 ---
 
-## How do you use ProwlrBot?
+## What if you never had to do repetitive tasks again?
 
-You use ProwlrBot in two main ways:
+ProwlrBot gives you a team of AI agents that handle the boring stuff so you can focus on what matters. No coding required. No subscriptions. Runs on your own computer.
 
-1. **Chat in your messaging apps**
-   Send messages in DingTalk, Feishu, QQ, Discord, Telegram, or iMessage (Mac only); ProwlrBot replies
-   in the same app and can look things up, manage todos, answer questions —
-   whatever the enabled Skills support. One ProwlrBot instance can be connected to
-   several apps; it replies in the channel where you last talked.
-
-2. **Run on a schedule**
-   Without sending a message each time, ProwlrBot can run at set times:
-   - Send a fixed message to a channel (e.g. "Good morning" to DingTalk at 9am);
-   - Ask ProwlrBot a question and send the answer to a channel (e.g. every 2 hours
-     ask "What are my todos?" and post the reply to DingTalk);
-   - Run a "check-in" or digest: ask ProwlrBot a block of questions you wrote and
-     send the answer to the channel you last used.
-
-After you install, connect at least one channel, and start the server, you can
-chat with ProwlrBot in DingTalk, Feishu, QQ, etc. and use scheduled messages and check-ins;
-what it actually does depends on which Skills you enable.
+> **Free. Open source. Private.** Unlike Manus.ai ($2B, closed), Devin ($500/mo), or OpenAI Operator, ProwlrBot is Apache 2.0 licensed, self-hosted, and yours forever. [See the comparison →](./comparison)
 
 ---
 
-## Terms you'll see in the docs
+## Pick your path
 
-- **Channel** — Where you talk to ProwlrBot (DingTalk, Feishu, QQ, Discord, Telegram, iMessage, etc.).
-  Configure each in [Channels](./channels).
-- **Heartbeat** — On a fixed interval, ask ProwlrBot a block of text you wrote and
-  optionally send the answer to the channel you last used. See
-  [Heartbeat](./heartbeat).
-- **Cron jobs** — Scheduled tasks (send X at 9am, ask Y every 2h, etc.), managed
-  via [CLI](./cli) or API.
+Not sure where to start? Pick the one that sounds like you:
 
-Each term is explained in detail in its chapter.
+### 🏠 I'm a Parent
+- **Morning Briefing** — Your whole day (email, calendar, weather, school events) in 30 seconds
+- **Homework Helper** — Walks kids through problems step-by-step without giving away answers
+- **Meal Planner** — Weekly meal plans based on what's in your fridge and dietary needs
+- **Smart Reminders** — "Pick up kids at 3pm" reminders that adapt when your schedule shifts
+
+→ [Browse parent-friendly agents in the Marketplace](/marketplace?persona=parent)
+
+### 💼 I'm a Business Owner
+- **Competitor Watch** — Get alerts when competitors change pricing, launch features, or update their sites
+- **Invoice Chaser** — Tracks every unpaid invoice and sends polite follow-ups automatically
+- **Morning Briefing** — Email + calendar + KPIs summarized before your first meeting
+- **Client Follow-up** — Never let a lead go cold with automated, personalized check-ins
+
+→ [Browse business agents in the Marketplace](/marketplace?persona=business)
+
+### 🎓 I'm a Student
+- **Study Planner** — Builds smart study schedules from your syllabus and adapts when life happens
+- **Homework Helper** — Step-by-step guidance that teaches, never cheats
+- **Smart Reminders** — Assignment deadlines, study sessions, and exam prep on autopilot
+
+→ [Browse student agents in the Marketplace](/marketplace?persona=student)
+
+### 🎨 I'm a Creator
+- **Content Scheduler** — Plan, write, and schedule posts across Twitter, Instagram, LinkedIn, and more
+- **Competitor Watch** — Track what's working in your niche
+- **Smart Reminders** — Content calendar reminders that keep you consistent
+
+→ [Browse creator tools in the Marketplace](/marketplace?persona=creator)
+
+### 🔧 I'm a Freelancer
+- **Invoice Chaser** — Stop chasing payments. Let your agent handle it.
+- **Client Follow-up** — Automated check-ins that feel personal
+- **Site Monitor** — Know instantly when your client's site goes down
+
+→ [Browse freelancer tools in the Marketplace](/marketplace?persona=freelancer)
+
+### 💻 I'm a Developer
+- **Site Monitor** — Uptime, SSL, and change detection for any URL
+- **MCP Integration** — Connect to any tool via Model Context Protocol
+- **Custom Skills** — Build your own agents with YAML workflows
+- **CLI Power** — Full command-line control, cron jobs, API access
+
+→ [Browse developer tools in the Marketplace](/marketplace?persona=developer)
+
+### 🌍 I'm Just Exploring
+No worries — check out everything we have.
+
+→ [Browse the full Marketplace](/marketplace)
 
 ---
 
-## Suggested order
+## How it works (30-second version)
 
-1. **[Quick start](./quickstart)** — Get the server running in three commands.
-2. **[Console](./console)** — Once the server is running, **before configuring
-   channels**, you can use the Console (open the root URL in your browser) to
-   chat with ProwlrBot and configure the agent. This helps you see how ProwlrBot works.
-3. **Configure and use as needed**:
-   - [Channels](./channels) — Connect DingTalk / Feishu / QQ / Discord / Telegram / iMessage to
-     chat with ProwlrBot in those apps;
-   - [Heartbeat](./heartbeat) — Set up scheduled check-in or digest (optional);
-   - [CLI](./cli) — Init, cron jobs, clean working dir, etc.;
-   - [Skills](./skills) — Understand and extend ProwlrBot's capabilities;
-   - [Config & working dir](./config) — Working directory and config file.
+```
+1. Install       →  One command. Done.
+2. Pick agents   →  Choose from the Marketplace or build your own.
+3. Connect       →  Discord, Telegram, iMessage, or just the web console.
+4. Relax         →  Your agents handle the rest.
+```
+
+Your agents run on **your machine**. Your data never leaves your control. No cloud required.
+
+---
+
+## Get started now
+
+Ready? It takes about 2 minutes:
+
+→ **[Quick start — install in one command](./quickstart)**
+
+Or explore what's possible first:
+
+→ **[Browse the Marketplace](/marketplace)** — See real agents solving real problems
+→ **[Console](./console)** — Chat with your agents in the browser
+→ **[Skills](./skills)** — Understand what agents can do

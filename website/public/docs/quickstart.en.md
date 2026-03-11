@@ -1,22 +1,12 @@
 # Quick start
 
-This section describes five ways to run ProwlrBot:
-
-- **Option A — One-line install (recommended)**: run on your machine with no Python setup required.
-- **Option B — pip install**: if you prefer managing Python yourself.
-- **Option C — Docker**: use official images from Docker Hub; tags include `latest` (stable) and `pre` (PyPI pre-release).
-
-> 📖 Read [Introduction](./intro) first; after install see [Console](./console).
-
-> 💡 **After install & start**: Before configuring channels, you can open the [Console](./console) (`http://127.0.0.1:8088/`) to chat with ProwlrBot and configure the agent. When you're ready to chat in DingTalk, Feishu, QQ, etc., head to [Channels](./channels) to add a channel.
+Get ProwlrBot running in under 2 minutes. No coding required.
 
 ---
 
-## Option A: One-line install (recommended)
+## Step 1: Install (30 seconds)
 
-No Python required — the installer handles everything automatically using [uv](https://docs.astral.sh/uv/).
-
-### Step 1: Install
+Pick your OS and run one command:
 
 **macOS / Linux:**
 
@@ -24,135 +14,107 @@ No Python required — the installer handles everything automatically using [uv]
 curl -fsSL https://prowlrbot.dev/install.sh | bash
 ```
 
-Then open a new terminal (or `source ~/.zshrc` / `source ~/.bashrc`).
-
 **Windows (PowerShell):**
 
 ```powershell
 irm https://prowlrbot.dev/install.ps1 | iex
 ```
 
-Then open a new terminal (the installer adds ProwlrBot to your PATH automatically).
+Then open a new terminal window.
 
-You can also pass options:
+> 💡 No Python required — the installer handles everything automatically.
 
-**macOS / Linux:**
+---
+
+## Step 2: Set up (30 seconds)
 
 ```bash
-# Install a specific version
-curl -fsSL ... | bash -s -- --version 0.0.2
-
-# Install from source (dev/testing)
-curl -fsSL ... | bash -s -- --from-source
-
-# With local model support (see Local Models docs)
-bash install.sh --extras llamacpp    # llama.cpp (cross-platform)
-bash install.sh --extras mlx         # MLX (Apple Silicon)
-bash install.sh --extras ollama      # Ollama (cross-platform, requires Ollama service)
+prowlr init --defaults
 ```
 
-**Windows (PowerShell):**
+This creates your config with sensible defaults. You can customize everything later.
 
-```powershell
-# Install a specific version
-.\install.ps1 -Version 0.0.2
+> Want to be guided through setup interactively? Run `prowlr init` (without `--defaults`).
 
-# Install from source (dev/testing)
-.\install.ps1 -FromSource
+---
 
-# With local model support (see Local Models docs)
-.\install.ps1 -Extras llamacpp      # llama.cpp (cross-platform)
-.\install.ps1 -Extras mlx           # MLX
-.\install.ps1 -Extras ollama        # Ollama
-```
-
-To upgrade, simply re-run the install command. To uninstall, run `prowlr uninstall`.
-
-### Step 2: Init
-
-Generate `config.json` and `HEARTBEAT.md` in the working directory (default
-`~/.prowlr`). Two options:
-
-- **Use defaults** (no prompts; good for getting running first, then editing
-  config later):
-  ```bash
-  prowlr init --defaults
-  ```
-- **Interactive** (prompts for heartbeat interval, target, active hours, and
-  optional channel and Skills setup):
-  ```bash
-  prowlr init
-  ```
-  See [CLI - Getting started](./cli#getting-started).
-
-To overwrite existing config, use `prowlr init --force` (you will be prompted).
-After init, if no channel is enabled yet, follow [Channels](./channels) to add
-DingTalk, Feishu, QQ, etc.
-
-### Step 3: Start the server
+## Step 3: Start (10 seconds)
 
 ```bash
 prowlr app
 ```
 
-The server listens on `127.0.0.1:8088` by default. If you have already
-configured a channel, ProwlrBot will reply there; otherwise you can add one after
-this step via [Channels](./channels).
+That's it. Open **http://127.0.0.1:8088** in your browser to chat with your agent.
 
 ---
 
-## Option B: pip install
+## What just happened?
 
-If you prefer managing Python yourself (requires Python >= 3.10, < 3.14):
+You now have a personal AI agent running on your machine. Here's what you can do:
+
+| What | How |
+|:-----|:----|
+| **Chat with your agent** | Open the [Console](./console) at `http://127.0.0.1:8088` |
+| **Add a messaging app** | Connect [Discord, Telegram, or iMessage](./channels) |
+| **Install agents** | Browse the [Marketplace](/marketplace) for ready-made agents |
+| **Schedule tasks** | Set up [automated check-ins](./heartbeat) |
+| **Build your own** | Create [custom skills](./skills) |
+
+---
+
+## Recommended next steps
+
+### For everyone
+1. **[Browse the Marketplace](/marketplace)** — Find agents that match your life
+2. **[Console](./console)** — Chat with your agent and see it in action
+3. **[Connect a channel](./channels)** — Get responses in Discord, Telegram, or iMessage
+
+### For power users
+4. **[Skills](./skills)** — Enable and customize agent capabilities
+5. **[Heartbeat](./heartbeat)** — Set up daily briefings and scheduled check-ins
+6. **[CLI reference](./cli)** — Full command-line power
+
+### For developers
+7. **[MCP](./mcp)** — Connect to external tools via Model Context Protocol
+8. **[Workflows](./marketplace)** — Build multi-step automation pipelines
+9. **[Config](./config)** — Advanced configuration and customization
+
+---
+
+## Other install methods
+
+### pip install
+
+If you prefer managing Python yourself (Python 3.10–3.13):
 
 ```bash
 pip install prowlr
 ```
 
-Optional: create and activate a virtualenv first (`python -m venv .venv`, then
-`source .venv/bin/activate` on Linux/macOS or `.venv\Scripts\Activate.ps1` on Windows). This installs the `prowlr` command.
+Then follow Steps 2 and 3 above.
 
-Then follow [Step 2: Init](#step-2-init) and [Step 3: Start the server](#step-3-start-the-server) above.
-
----
-
-## Option C: Docker
-
-Images are on **Docker Hub** (`prowlrbot/prowlr`). Image tags: `latest` (stable); `pre` (PyPI pre-release).
-
-Pull and run:
+### Docker
 
 ```bash
 docker pull prowlrbot/prowlr:latest
 docker run -p 8088:8088 -v prowlr-data:/app/working prowlrbot/prowlr:latest
 ```
 
-Then open **http://127.0.0.1:8088/** in your browser for the Console. Config, memory, and skills are stored in the `prowlr-data` volume. To pass API keys, add `-e DASHSCOPE_API_KEY=xxx` or `--env-file .env` to `docker run`.
+Open **http://127.0.0.1:8088** for the Console. Pass API keys with `-e OPENAI_API_KEY=xxx` or `--env-file .env`.
+
+### Upgrading
+
+Re-run the install command. To uninstall: `prowlr uninstall`.
 
 ---
 
-## Verify install (optional)
+## Troubleshooting
 
-After the server is running, you can call the Agent API to confirm the setup.
-Endpoint: **POST** `/api/agent/process`, JSON body, SSE streaming. Single-turn example:
+| Problem | Fix |
+|:--------|:----|
+| `prowlr: command not found` | Open a new terminal, or run `source ~/.zshrc` |
+| Port 8088 already in use | `prowlr app --port 8089` |
+| No AI responses | Set an API key: `prowlr env set OPENAI_API_KEY sk-...` |
+| Want to start over | `prowlr init --force` to reset config |
 
-```bash
-curl -N -X POST "http://localhost:8088/api/agent/process" \
-  -H "Content-Type: application/json" \
-  -d '{"input":[{"role":"user","content":[{"type":"text","text":"Hello"}]}],"session_id":"session123"}'
-```
-
-Use the same `session_id` for multi-turn.
-
----
-
-## What to do next
-
-- **Chat with ProwlrBot** — [Channels](./channels): connect one channel
-  (DingTalk or Feishu is a good first), create the app, fill config, then send a message
-  in that app.
-- **Run a scheduled "check-in" or digest** — [Heartbeat](./heartbeat): edit
-  HEARTBEAT.md and set interval and target in config.
-- **More commands** — [CLI](./cli) (interactive init, cron jobs, clean),
-  [Skills](./skills).
-- **Change working dir or config path** — [Config & working dir](./config).
+Still stuck? Check the [FAQ](./faq) or [file a bug](./community).

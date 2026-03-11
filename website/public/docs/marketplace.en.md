@@ -1,86 +1,101 @@
 # Marketplace
 
-The ProwlrBot marketplace is a community registry for skills, agents, prompts, MCP servers, themes, and workflows.
+Find agents, skills, and workflows that solve real problems — then install them in one command.
 
 ---
 
-## Browse & Install
+## Browse by who you are
+
+The Marketplace organizes everything by the kind of person you are, not just by category:
+
+| Who you are | What you'll find |
+|:------------|:-----------------|
+| **Parents** | Morning briefings, homework helpers, meal planners, family reminders |
+| **Business owners** | Competitor monitoring, invoice tracking, client follow-ups, KPI dashboards |
+| **Students** | Study planners, homework guides, deadline trackers, research assistants |
+| **Creators** | Content schedulers, analytics agents, audience growth tools |
+| **Freelancers** | Invoice chasers, client CRM, site monitoring, time tracking |
+| **Developers** | Site monitors, MCP integrations, CI/CD agents, custom workflows |
+
+→ **[Open the Marketplace](/marketplace)** to browse with filters, search, and skill scores.
+
+---
+
+## Install from the CLI
 
 ```bash
-# Sync the latest listings from the registry
+# Update your local registry
 prowlr market update
 
-# Search for listings
-prowlr market search "code review"
+# Search for something specific
+prowlr market search "morning briefing"
 
-# Install a listing
-prowlr market install skill-code-review
+# Install an agent
+prowlr market install morning-briefing
 
-# View ecosystem repos
-prowlr market repos
+# See what you've installed
+prowlr market list
 ```
+
+---
+
+## What's in a listing?
+
+Every listing includes:
+
+- **Skill Scan** — 5-dimension rating: automation, ease, privacy, reliability, personalization
+- **Before / After** — Concrete proof of what changes (e.g., "45 min sorting email → 30-second glance")
+- **Time saved** — How much time you get back per week
+- **Difficulty** — Beginner, intermediate, or advanced
+- **Setup steps** — Guided walkthrough to get it running
+- **Works with** — Integrations (Gmail, Slack, Google Calendar, etc.)
+- **User stories** — Real quotes from people using it
+
+---
 
 ## Categories
 
-| Category | What's Inside |
+| Category | What's inside |
 |:---------|:-------------|
-| **Skills** | Agent capabilities — code review, web monitoring, PDF reading, etc. |
-| **Agents** | Pre-configured agent personalities with specific specializations |
-| **Prompts** | Domain-specific prompt packs (business, coding, analysis) |
+| **Skills** | Single capabilities — monitoring, file handling, search, analysis |
+| **Agents** | Pre-configured personalities with specialized knowledge |
+| **Workflows** | Multi-step automation pipelines (trigger → action → action) |
+| **Prompts** | Domain-specific prompt packs for business, coding, analysis |
 | **MCP Servers** | Tool integrations via Model Context Protocol |
-| **Themes** | Console UI themes (dark, light, custom) |
-| **Workflows** | Multi-step automation pipelines |
+| **Themes** | Console UI customizations |
 
-## Pricing & Credits
+---
 
-ProwlrBot uses a credits-based economy. Free listings are always free. Premium listings cost credits.
+## Publishing your own
 
-| Tier | Monthly | Credits | Access |
-|:-----|:--------|:--------|:-------|
-| Free | $0 | 50/mo | All free listings |
-| Starter | $5 | 500/mo | + Premium skills |
-| Pro | $15 | 2,000/mo | + Premium agents, priority support |
-| Team | $29 | 5,000/mo | + Team features, bulk operations |
+Share what you've built with the community:
 
-### Earning Credits
+1. Create a directory with `manifest.json` and `SKILL.md`
+2. Follow the [manifest schema](https://github.com/ProwlrBot/prowlr-marketplace)
+3. Open a pull request
 
-Agents earn credits by completing tasks:
+Premium listings earn **70% revenue share** on credit purchases. Free listings are always welcome.
+
+---
+
+## Credits
+
+ProwlrBot uses credits for premium content. Free listings are always free.
+
+| Tier | Price | Credits | What you get |
+|:-----|:------|:--------|:-------------|
+| Free | $0 | 50/mo | All free listings, unlimited agents |
+| Starter | $5 | 500/mo | Premium skills, custom branding |
+| Pro | $15 | 2,000/mo | Premium agents, priority support |
+| Team | $29 | 5,000/mo | Team features, bulk operations |
+
+> **No limits on agents or teams** — every tier gets unlimited agents. Credits only apply to premium marketplace content.
+
+### Earn credits
 
 | Action | Credits |
 |:-------|:--------|
 | Complete a task | +10 |
 | Share a finding | +5 |
-| Win a tournament | +50 |
 | Publish a listing | +100 |
-
-## Publishing
-
-Want to share your work with the community?
-
-1. Fork [prowlr-marketplace](https://github.com/ProwlrBot/prowlr-marketplace)
-2. Create your listing directory: `{category}/{name}/manifest.json`
-3. Follow the manifest schema (id, title, description, version, author, category, tags, pricing_model)
-4. Open a PR
-
-Premium listings earn **70% revenue share** on credit purchases.
-
-## Registry Architecture
-
-```
-prowlr market update
-    |
-    v
-GitHub API → ProwlrBot/prowlr-marketplace
-    |
-    v
-Walk category directories → fetch manifest.json files
-    |
-    v
-Upsert into local SQLite → ~/.prowlrbot/marketplace.db
-```
-
-The marketplace is fully decentralized — your local copy works offline after the initial sync.
-
----
-
-*Browse the registry: [github.com/ProwlrBot/prowlr-marketplace](https://github.com/ProwlrBot/prowlr-marketplace)*
+| Community contribution | +25 |

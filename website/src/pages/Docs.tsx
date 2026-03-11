@@ -40,6 +40,9 @@ import {
   ArrowUp,
   Copy,
   Check,
+  Store,
+  Shield,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 import { Nav } from "../components/Nav";
@@ -133,6 +136,7 @@ interface DocEntry {
   slug: string;
   titleKey: string;
   children?: DocEntry[];
+  section?: string; // If set, renders a section label above this entry
 }
 
 interface FaqItem {
@@ -188,19 +192,29 @@ const DOC_SLUG_ICONS: Record<string, LucideIcon> = {
   heartbeat: Activity,
   config: Settings,
   cli: Terminal,
+  marketplace: Store,
+  "agents-external": Plug,
+  teams: Users,
+  credits: Zap,
   faq: CircleHelp,
   community: Users,
   contributing: GitBranch,
   roadmap: Map,
+  privacy: Shield,
+  terms: FileText,
 };
 
 const DOC_SLUGS: DocEntry[] = [
-  { slug: "intro", titleKey: "docs.intro" },
+  // ── Get Started ──
+  { slug: "intro", titleKey: "docs.intro", section: "Get Started" },
   { slug: "quickstart", titleKey: "docs.quickstart" },
   { slug: "console", titleKey: "docs.console" },
-  { slug: "channels", titleKey: "docs.channels" },
+  { slug: "marketplace", titleKey: "docs.marketplace" },
+
+  // ── Your Agents ──
+  { slug: "channels", titleKey: "docs.channels", section: "Your Agents" },
   { slug: "skills", titleKey: "docs.skills" },
-  { slug: "mcp", titleKey: "docs.mcp" },
+  { slug: "heartbeat", titleKey: "docs.heartbeat" },
   {
     slug: "memory",
     titleKey: "docs.memory",
@@ -209,14 +223,17 @@ const DOC_SLUGS: DocEntry[] = [
       { slug: "commands", titleKey: "docs.commands" },
     ],
   },
-  { slug: "heartbeat", titleKey: "docs.heartbeat" },
-  { slug: "config", titleKey: "docs.config" },
-  { slug: "cli", titleKey: "docs.cli" },
-  { slug: "marketplace", titleKey: "docs.marketplace" },
+
+  // ── Power Up ──
+  { slug: "mcp", titleKey: "docs.mcp", section: "Power Up" },
   { slug: "agents-external", titleKey: "docs.agents-external" },
   { slug: "teams", titleKey: "docs.teams" },
   { slug: "credits", titleKey: "docs.credits" },
-  { slug: "faq", titleKey: "docs.faq" },
+  { slug: "config", titleKey: "docs.config" },
+  { slug: "cli", titleKey: "docs.cli" },
+
+  // ── Community ──
+  { slug: "faq", titleKey: "docs.faq", section: "Community" },
   { slug: "community", titleKey: "docs.community" },
   { slug: "contributing", titleKey: "docs.contributing" },
   { slug: "roadmap", titleKey: "docs.roadmap" },
@@ -467,13 +484,29 @@ export function Docs({ config, lang, theme, onThemeToggle }: DocsProps) {
           <DocSearch lang={lang} initialQuery={isSearchPage ? searchQ : ""} />
           <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {DOC_SLUGS.map((entry) => {
-              const { slug: s, titleKey, children } = entry;
+              const { slug: s, titleKey, children, section } = entry;
               const isParentActive =
                 activeSlug === s ||
                 (children?.some((c) => c.slug === activeSlug) ?? false);
               const ParentIcon = DOC_SLUG_ICONS[s] ?? BookOpen;
               return (
                 <div key={s}>
+                  {section && (
+                    <div
+                      style={{
+                        fontSize: "0.6875rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: "var(--text-muted)",
+                        padding: "var(--space-3) var(--space-2) var(--space-1)",
+                        marginTop: "var(--space-1)",
+                        opacity: 0.7,
+                      }}
+                    >
+                      {section}
+                    </div>
+                  )}
                   <Link
                     to={`/docs/${s}`}
                     style={{
