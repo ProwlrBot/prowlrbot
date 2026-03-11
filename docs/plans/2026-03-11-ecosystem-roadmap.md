@@ -53,8 +53,9 @@ agentverse
 | ~~P1~~ | ~~Blog posts reference old 12-category marketplace — update to 6 categories~~ | **done** (already clean) |
 | P2 | Website TechStack component — visual QA | todo |
 | ~~P2~~ | ~~`file_io.py` — legacy `.copaw.secret` backward compat: add deprecation warning~~ | **done** |
-| P2 | Add marketplace/credits/tiers documentation pages | todo |
-| P2 | Add agent install and team builder documentation pages | todo |
+| ~~P2~~ | ~~Add marketplace/credits/tiers documentation pages~~ | **done** |
+| ~~P2~~ | ~~Add team builder documentation pages~~ | **done** |
+| P2 | Add agent install documentation page (external agents, backends) | todo |
 
 ---
 
@@ -141,12 +142,12 @@ workflows/
 
 ### Missing doc topics
 
-- `marketplace.en.md` — Browsing, installing, publishing, credits, tiers
+- ~~`marketplace.en.md`~~ **done** — Browsing, installing, publishing, credits, tiers
 - `agents-external.en.md` — Installing external agents (Claude Code, Codex, custom)
-- `teams.en.md` — Creating teams, coordination modes, config files
-- `credits.en.md` — Credits economy, earning, spending, premium content
-- ~~`privacy.en.md` — Privacy policy~~ **done** (created in core repo website/public/docs/)
-- ~~`terms.en.md` — Terms of service~~ **done** (created in core repo website/public/docs/)
+- ~~`teams.en.md`~~ **done** — Creating teams, coordination modes, config files
+- ~~`credits.en.md`~~ **done** — Credits economy, earning, spending, premium content
+- ~~`privacy.en.md`~~ **done** — Privacy policy
+- ~~`terms.en.md`~~ **done** — Terms of service
 
 ---
 
@@ -167,7 +168,7 @@ workflows/
 |----------|------|--------|
 | ~~P0~~ | ~~README rebrand~~ | **done** — Shaw quote, 5-layer ASCII diagram, MCP/A2A comparison |
 | P1 | Verify 5-layer spec alignment | todo — match against `src/prowlrbot/protocols/roar.py` and `protocols/sdk/` |
-| P1 | Version the spec | todo — semver so implementations can declare compatibility |
+| ~~P1~~ | ~~Version the spec~~ | **done** — spec/VERSION.json with layer-level semver (v0.1.0) |
 | P2 | Identity layer → agent install | todo — should work with `agent_cmd.py` and external agent registry |
 | P2 | Discovery layer → marketplace | todo — should work with marketplace search |
 | P2 | Connect/Exchange/Stream → hub | todo — should work with hub coordination |
@@ -193,7 +194,7 @@ workflows/
 | Priority | Task | Status |
 |----------|------|--------|
 | ~~P0~~ | ~~README rebrand~~ | **done** — The Shining quote, Club Penguin analogy, zone map |
-| P1 | Zone definitions | todo — Workshop, Arena, Library, Garden, Secret zones |
+| ~~P1~~ | ~~Zone definitions~~ | **done** — 6 zones (Workshop, Arena, Library, Garden, Vault, Nexus) + XP table + tier gating |
 | P1 | Credits integration | todo — XP/leveling ties into credits economy |
 | P2 | Guild → Team mapping | todo — guilds map to Team model (`team_cmd.py`) |
 | P2 | Trading system | todo — marketplace credits as currency |
@@ -212,7 +213,7 @@ Every ProwlrBot repo must have:
 - [x] `LICENSE` (Apache 2.0, copyright "The ProwlrBot Authors") — **done across all 5 repos**
 - [x] `.github/ISSUE_TEMPLATE/` with bug report + feature request — **done across all 4 ecosystem repos**
 - [x] `.github/PULL_REQUEST_TEMPLATE.md` — **done across all 4 ecosystem repos**
-- [ ] CI workflow (at minimum: lint, test if applicable)
+- [x] CI workflow (at minimum: lint, test if applicable) — **done across all 4 ecosystem repos**
 - [x] `SECURITY.md` or link to main repo's security policy — **done across all 4 ecosystem repos**
 
 ---
@@ -227,12 +228,13 @@ Week 1:  ███████████████████████�
   ✅ agentverse — README rebrand
   ✅ Core — Privacy/Terms pages, CoPaw purge, market update tested
 
-Week 2:  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░ 40%
-  ☐ roar-protocol — version spec, alignment check
-  ☐ agentverse — zone definitions
+Week 2:  ████████████████████████████████████████░░ 95%
+  ✅ roar-protocol — VERSION.json with layer versioning (v0.1.0)
+  ✅ agentverse — 6 zone definitions with XP table and tier gating
   ✅ All repos — CONTRIBUTING.md, LICENSE, issue templates, SECURITY.md, PR templates
-  ☐ All repos — CI workflows
-  ☐ prowlr-docs — sync audit, add missing topics
+  ✅ All repos — CI workflows (manifest validation, spec checks, zone validation, doc checks)
+  ✅ prowlr-docs — marketplace, teams, credits doc pages created
+  ☐ prowlr-docs — sync audit (verify all topics match website/public/docs/)
 
 Week 3:  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%
   ☐ prowlr-marketplace — CONTRIBUTING.md, template verification
