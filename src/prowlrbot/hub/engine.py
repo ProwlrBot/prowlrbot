@@ -374,8 +374,9 @@ class WarRoomEngine:
             self._notify("task.claimed", {"task_id": task_id, "agent_id": agent_id})
             return ClaimResult(success=True, lock_token=lock_token)
 
-        except sqlite3.IntegrityError as e:
-            return ClaimResult(success=False, reason=f"conflict: {e}")
+        except sqlite3.IntegrityError:
+            logger.warning("Claim conflict for task %s by agent %s", task_id, agent_id)
+            return ClaimResult(success=False, reason="conflict")
 
     def update_task(
         self,
@@ -486,29 +487,29 @@ class WarRoomEngine:
         room_id: str,
         branch: str = "",
     ) -> LockResult:
-        """Advisory file lock outside of a task."""
+        """Advisory file lock outside of a task. Atomic via transaction."""
         try:
-            existing = self._conn.execute(
-                """SELECT * FROM file_locks
-                   WHERE file_path=? AND room_id=?
-                   AND (branch='' OR branch=? OR ?='')""",
-                (file_path, room_id, branch, branch),
-            ).fetchone()
+            with self._conn:
+                existing = self._conn.execute(
+                    """SELECT * FROM file_locks
+                       WHERE file_path=? AND room_id=?
+                       AND (branch='' OR branch=? OR ?='')""",
+                    (file_path, room_id, branch, branch),
+                ).fetchone()
 
-            if existing and existing["agent_id"] != agent_id:
-                return LockResult(
-                    success=False, reason="already_locked",
-                    owner=existing["agent_id"],
+                if existing and existing["agent_id"] != agent_id:
+                    return LockResult(
+                        success=False, reason="already_locked",
+                        owner=existing["agent_id"],
+                    )
+
+                lock_token = uuid.uuid4().hex
+                self._conn.execute(
+                    """INSERT OR REPLACE INTO file_locks
+                       (file_path, room_id, agent_id, lock_token, branch)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (file_path, room_id, agent_id, lock_token, branch),
                 )
-
-            lock_token = uuid.uuid4().hex
-            self._conn.execute(
-                """INSERT OR REPLACE INTO file_locks
-                   (file_path, room_id, agent_id, lock_token, branch)
-                   VALUES (?, ?, ?, ?, ?)""",
-                (file_path, room_id, agent_id, lock_token, branch),
-            )
-            self._conn.commit()
             self._emit_event(room_id, "lock.acquired", agent_id=agent_id,
                              payload={"file": file_path, "branch": branch})
             self._notify("lock.acquired", {"file_path": file_path, "agent_id": agent_id})
@@ -652,6 +653,15 @@ class WarRoomEngine:
              json.dumps(payload or {})),
         )
         self._conn.commit()
+
+    def purge_old_events(self, retention_days: int = 30) -> int:
+        """Delete events older than retention_days. Returns count deleted."""
+        result = self._conn.execute(
+            "DELETE FROM events WHERE timestamp < datetime('now', ?)",
+            (f"-{retention_days} days",),
+        )
+        self._conn.commit()
+        return result.rowcount
 
     def close(self) -> None:
         """Close the database connection."""

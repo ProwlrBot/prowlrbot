@@ -1,4 +1,5 @@
 const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || "http://localhost:8099";
+const BRIDGE_TOKEN = import.meta.env.VITE_BRIDGE_TOKEN || "";
 
 export interface Agent {
   agent_id: string;
@@ -51,7 +52,11 @@ export interface FileLock {
 }
 
 async function bridgeFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${BRIDGE_URL}${path}`);
+  const headers: Record<string, string> = {};
+  if (BRIDGE_TOKEN) {
+    headers["Authorization"] = `Bearer ${BRIDGE_TOKEN}`;
+  }
+  const res = await fetch(`${BRIDGE_URL}${path}`, { headers });
   if (!res.ok) throw new Error(`Bridge ${path}: ${res.status}`);
   return res.json();
 }
@@ -59,7 +64,7 @@ async function bridgeFetch<T>(path: string): Promise<T> {
 export const warroom = {
   agents: () => bridgeFetch<Agent[]>("/api/agents"),
   board: (status?: string) =>
-    bridgeFetch<Task[]>(`/api/board${status ? `?status=${status}` : ""}`),
+    bridgeFetch<Task[]>(`/api/board${status ? `?status=${encodeURIComponent(status)}` : ""}`),
   events: (limit = 50) =>
     bridgeFetch<WarRoomEvent[]>(`/api/events?limit=${limit}`),
   context: () => bridgeFetch<Finding[]>("/api/context"),
@@ -70,7 +75,8 @@ export function connectWarRoomWS(
   onEvent: (event: WarRoomEvent) => void,
   onStatus: (connected: boolean) => void,
 ): () => void {
-  const wsUrl = BRIDGE_URL.replace(/^http/, "ws") + "/ws/warroom";
+  const tokenParam = BRIDGE_TOKEN ? `?token=${encodeURIComponent(BRIDGE_TOKEN)}` : "";
+  const wsUrl = BRIDGE_URL.replace(/^http/, "ws") + "/ws/warroom" + tokenParam;
   let ws: WebSocket | null = null;
   let pingTimer: ReturnType<typeof setInterval> | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;

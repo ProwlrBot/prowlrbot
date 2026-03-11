@@ -8,20 +8,25 @@ Run on the machine that hosts the database:
     python -m prowlrbot.hub.bridge
 
 Remote terminals connect by setting PROWLR_HUB_URL in their MCP config.
+
+Security: Set PROWLR_HUB_SECRET to enable Bearer token authentication.
+Without it, the bridge is open (suitable for local-only use).
 """
 # NOTE: intentionally no `from __future__ import annotations` here.
 # FastAPI needs runtime-evaluable type annotations to detect Pydantic
 # BaseModel parameters as request bodies (not query params).
 
 import asyncio
+import hmac
 import logging
 import os
 from typing import List
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from .engine import WarRoomEngine
 from .status_page import STATUS_HTML
@@ -29,62 +34,130 @@ from .websocket import broadcast_ws, warroom_ws
 
 logger = logging.getLogger(__name__)
 
+# Max items returned by any list endpoint
+_MAX_LIMIT = 500
+_VALID_PRIORITIES = {"critical", "high", "normal", "low"}
 
-# --- Request models (module-level so FastAPI can introspect them) ---
+
+# --- Security middleware ---
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        return response
+
+
+# --- Authentication ---
+
+
+def _get_hub_secret() -> str:
+    return os.environ.get("PROWLR_HUB_SECRET", "")
+
+
+async def verify_auth(request: Request):
+    """Verify Bearer token if PROWLR_HUB_SECRET is set."""
+    secret = _get_hub_secret()
+    if not secret:
+        return  # Open mode when no secret configured
+
+    # Allow unauthenticated access to health, status page, and docs
+    if request.url.path in ("/", "/health", "/docs", "/redoc", "/openapi.json"):
+        return
+
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing authentication")
+
+    token = auth[7:]
+    if not hmac.compare_digest(token, secret):
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+
+# --- Request models with input validation ---
+
 
 class RegisterRequest(BaseModel):
-    name: str
-    capabilities: List[str] = ["general"]
+    name: str = Field(..., min_length=1, max_length=128)
+    capabilities: List[str] = Field(default=["general"], max_length=20)
 
 
 class ClaimRequest(BaseModel):
-    task_id: str = ""
-    title: str = ""
-    file_scopes: List[str] = []
-    description: str = ""
-    priority: str = "normal"
+    task_id: str = Field(default="", max_length=64)
+    title: str = Field(default="", max_length=512)
+    file_scopes: List[str] = Field(default=[], max_length=50)
+    description: str = Field(default="", max_length=8192)
+    priority: str = Field(default="normal", max_length=16)
 
 
 class UpdateRequest(BaseModel):
-    task_id: str
-    progress_note: str
+    task_id: str = Field(..., max_length=64)
+    progress_note: str = Field(..., max_length=4096)
 
 
 class CompleteRequest(BaseModel):
-    task_id: str
-    summary: str = ""
+    task_id: str = Field(..., max_length=64)
+    summary: str = Field(default="", max_length=8192)
 
 
 class FailRequest(BaseModel):
-    task_id: str
-    reason: str = ""
+    task_id: str = Field(..., max_length=64)
+    reason: str = Field(default="", max_length=4096)
 
 
 class LockRequest(BaseModel):
-    path: str
+    path: str = Field(..., min_length=1, max_length=1024)
 
 
 class ConflictRequest(BaseModel):
-    paths: List[str]
+    paths: List[str] = Field(..., max_length=50)
 
 
 class BroadcastRequest(BaseModel):
-    message: str
+    message: str = Field(..., min_length=1, max_length=4096)
 
 
 class FindingRequest(BaseModel):
-    key: str
-    value: str
+    key: str = Field(..., min_length=1, max_length=256)
+    value: str = Field(..., max_length=65536)
+
+
+# --- Path validation ---
+
+
+def _validate_lock_path(path: str) -> str:
+    """Reject path traversal and absolute paths."""
+    if "\x00" in path:
+        raise HTTPException(status_code=400, detail="Invalid path")
+    if path.startswith("/") or path.startswith("\\"):
+        raise HTTPException(status_code=400, detail="Absolute paths not allowed")
+    normalized = os.path.normpath(path)
+    if normalized.startswith(".."):
+        raise HTTPException(status_code=400, detail="Path traversal not allowed")
+    return normalized
+
+
+def _clamp_limit(limit: int) -> int:
+    return max(1, min(limit, _MAX_LIMIT))
 
 
 def create_bridge_app() -> FastAPI:
     """Create a FastAPI app that exposes the war room engine over HTTP."""
-    app = FastAPI(title="ProwlrHub Bridge", version="1.0.0")
+    app = FastAPI(
+        title="ProwlrHub Bridge",
+        version="1.0.0",
+        dependencies=[Depends(verify_auth)],
+    )
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:8088", "http://127.0.0.1:8088"],
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "Authorization"],
+        allow_credentials=False,
     )
     db_path = os.environ.get("PROWLR_HUB_DB", None)
     engine = WarRoomEngine(db_path)
@@ -145,6 +218,8 @@ def create_bridge_app() -> FastAPI:
 
     @app.post("/claim/{agent_id}")
     def claim_task(agent_id: str, req: ClaimRequest):
+        if req.priority not in _VALID_PRIORITIES:
+            raise HTTPException(status_code=400, detail="Invalid priority")
         room = engine.get_or_create_default_room()
         task_id = req.task_id
         if not task_id and req.title:
@@ -177,16 +252,18 @@ def create_bridge_app() -> FastAPI:
 
     @app.post("/lock/{agent_id}")
     def lock_file(agent_id: str, req: LockRequest):
+        safe_path = _validate_lock_path(req.path)
         room = engine.get_or_create_default_room()
-        result = engine.lock_file(req.path, agent_id, room["room_id"])
+        result = engine.lock_file(safe_path, agent_id, room["room_id"])
         if result.success:
             return {"success": True, "lock_token": result.lock_token}
         return {"success": False, "reason": result.reason, "owner": result.owner}
 
     @app.post("/unlock/{agent_id}")
     def unlock_file(agent_id: str, req: LockRequest):
+        safe_path = _validate_lock_path(req.path)
         room = engine.get_or_create_default_room()
-        ok = engine.unlock_file(req.path, agent_id, room["room_id"])
+        ok = engine.unlock_file(safe_path, agent_id, room["room_id"])
         return {"ok": ok}
 
     @app.post("/conflicts")
@@ -220,7 +297,7 @@ def create_bridge_app() -> FastAPI:
     @app.get("/events")
     def get_events(limit: int = 20, event_type: str = ""):
         room = engine.get_or_create_default_room()
-        return {"events": engine.get_events(room["room_id"], limit, event_type)}
+        return {"events": engine.get_events(room["room_id"], _clamp_limit(limit), event_type)}
 
     # --- JSON API endpoints for dashboard consumption ---
 
@@ -240,7 +317,7 @@ def create_bridge_app() -> FastAPI:
     @app.get("/api/events")
     def api_events(limit: int = 50, event_type: str = ""):
         room = engine.get_or_create_default_room()
-        return engine.get_events(room["room_id"], limit, event_type)
+        return engine.get_events(room["room_id"], _clamp_limit(limit), event_type)
 
     @app.get("/api/context")
     def api_context(key: str = ""):
@@ -268,7 +345,7 @@ def run_bridge():
     """Run the HTTP bridge server."""
     import uvicorn
 
-    host = os.environ.get("PROWLR_BRIDGE_HOST", "0.0.0.0")
+    host = os.environ.get("PROWLR_BRIDGE_HOST", "127.0.0.1")
     port = int(os.environ.get("PROWLR_BRIDGE_PORT", "8099"))
 
     logging.basicConfig(level=logging.INFO)
