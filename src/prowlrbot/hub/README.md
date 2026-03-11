@@ -4,7 +4,7 @@
 
 ProwlrHub is an MCP (Model Context Protocol) server that gives every Claude Code instance in your project shared awareness: who's working on what, which files are locked, what's been discovered, and what still needs doing.
 
-Part of the [ProwlrBot](https://github.com/prowlrbot/prowlrbot) ecosystem. Built on the [ROAR Protocol](https://github.com/prowlrbot/roar-protocol) for agent identity and communication.
+Part of the [ProwlrBot](https://github.com/prowlrbot/prowlrbot) ecosystem. Built on the [ROAR Protocol](https://github.com/ProwlrBot/roar-protocol) for agent identity and communication.
 
 ---
 
@@ -400,6 +400,6 @@ The bridge exposes all operations as REST endpoints:
 - **[INSTALL.md](../../INSTALL.md)** — Full setup guide with wizard, one-liner, and manual options
 - **[ROAR Protocol](../protocols/roar.py)** — Core agent communication protocol (5 layers)
 - **[ROAR SDK](../protocols/sdk/)** — Client/server/router/streaming/crypto implementations
-- **[roar-protocol repo](https://github.com/prowlrbot/roar-protocol)** — Protocol specification
-- **[prowlr-marketplace](https://github.com/prowlrbot/marketplace)** — Skill and agent marketplace
-- **[prowlr-docs](https://github.com/prowlrbot/docs)** — Documentation site
+- **[roar-protocol repo](https://github.com/ProwlrBot/roar-protocol)** — Protocol specification
+- **[prowlr-marketplace](https://github.com/ProwlrBot/prowlr-marketplace)** — Skill and agent marketplace
+- **[prowlr-docs](https://github.com/ProwlrBot/prowlr-docs)** — Documentation site

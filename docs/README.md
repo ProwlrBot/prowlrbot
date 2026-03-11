@@ -154,7 +154,7 @@ Layer 1: Identity  ──► W3C DID-based agent identity
 | 4. Exchange | **[ROAR-EXCHANGE.md](protocols/ROAR-EXCHANGE.md)** | Message format, 7 intent types, signing |
 | 5. Stream | **[ROAR-STREAM.md](protocols/ROAR-STREAM.md)** | StreamEvent, backpressure, subscriptions |
 
-> **External spec:** [github.com/prowlrbot/roar-protocol](https://github.com/prowlrbot/roar-protocol)
+> **External spec:** [github.com/prowlrbot/roar-protocol](https://github.com/ProwlrBot/roar-protocol)
 
 ---
 

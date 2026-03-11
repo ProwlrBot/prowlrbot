@@ -32,7 +32,7 @@ MCP gives agents tools. ProwlrBot already supports MCP clients and servers. Prow
 
 ACP is how agents talk to each other. Not through a shared database, but directly — agent to agent, with structured messages, capability negotiation, and trust verification.
 
-Our implementation: the [ROAR Protocol](https://github.com/prowlrbot/roar-protocol).
+Our implementation: the [ROAR Protocol](https://github.com/ProwlrBot/roar-protocol).
 
 Five layers:
 1. **Identity** — Who are you? Prove it.
@@ -64,7 +64,7 @@ Two tiers:
 
 Revenue sharing: 70% to creators, 30% to platform. Because creators should get paid.
 
-[Marketplace repo](https://github.com/prowlrbot/marketplace)
+[Marketplace repo](https://github.com/ProwlrBot/prowlr-marketplace)
 
 ## AgentVerse
 
@@ -82,7 +82,7 @@ Why? Because multi-agent coordination is a hard problem, and gamification makes 
 
 Plus it's going to be fun as hell to watch.
 
-[AgentVerse repo](https://github.com/prowlrbot/agentverse)
+[AgentVerse repo](https://github.com/ProwlrBot/agentverse)
 
 ## The 12-Month Roadmap
 

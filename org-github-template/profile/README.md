@@ -37,11 +37,11 @@ Open `http://localhost:8088` and start chatting with your agent.
 
 | Repo | Description |
 |------|-------------|
-| [prowlrbot](https://github.com/prowlrbot/prowlrbot) | Core agent platform |
-| [roar-protocol](https://github.com/prowlrbot/roar-protocol) | ROAR protocol specification |
-| [marketplace](https://github.com/prowlrbot/marketplace) | Skill and agent marketplace |
-| [agentverse](https://github.com/prowlrbot/agentverse) | Agent virtual world |
-| [docs](https://github.com/prowlrbot/docs) | Documentation |
+| [prowlrbot](https://github.com/ProwlrBot/prowlrbot) | Core agent platform |
+| [roar-protocol](https://github.com/ProwlrBot/roar-protocol) | ROAR protocol specification |
+| [prowlr-marketplace](https://github.com/ProwlrBot/prowlr-marketplace) | Community marketplace — skills, agents, prompts, MCP servers, themes, workflows |
+| [agentverse](https://github.com/ProwlrBot/agentverse) | Virtual agent world — zones, XP, guilds, tournaments |
+| [prowlr-docs](https://github.com/ProwlrBot/prowlr-docs) | Official documentation (en + zh) |
 
 ## Contributing
 

@@ -10,7 +10,7 @@
   <a href="https://pypi.org/project/prowlrbot/"><img src="https://img.shields.io/pypi/v/prowlrbot?style=flat-square" alt="PyPI" /></a>
   <a href="https://github.com/prowlrbot/prowlrbot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/prowlrbot/prowlrbot?style=flat-square" alt="License" /></a>
   <a href="https://github.com/prowlrbot/prowlrbot/stargazers"><img src="https://img.shields.io/github/stars/prowlrbot/prowlrbot?style=flat-square" alt="Stars" /></a>
-  <a href="https://prowlrbot.github.io/docs"><img src="https://img.shields.io/badge/docs-website-blue?style=flat-square" alt="Docs" /></a>
+  <a href="https://github.com/ProwlrBot/prowlr-docs"><img src="https://img.shields.io/badge/docs-website-blue?style=flat-square" alt="Docs" /></a>
 </p>
 
 <p align="center">
@@ -453,7 +453,7 @@ prowlrbot/
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Security policy | [SECURITY.md](SECURITY.md) |
 | Blog & updates | [docs/blog/](docs/blog/) |
-| Full docs site | [prowlrbot.github.io/docs](https://prowlrbot.github.io/docs) |
+| Full docs site | [prowlrbot.github.io/docs](https://github.com/ProwlrBot/prowlr-docs) |
 
 ---
 
@@ -466,19 +466,19 @@ prowlrbot/
 <sub>Core agent platform</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/prowlrbot/roar-protocol"><strong>ROAR Protocol</strong></a><br/>
+<a href="https://github.com/ProwlrBot/roar-protocol"><strong>ROAR Protocol</strong></a><br/>
 <sub>Agent communication</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/prowlrbot/marketplace"><strong>Marketplace</strong></a><br/>
+<a href="https://github.com/ProwlrBot/prowlr-marketplace"><strong>Marketplace</strong></a><br/>
 <sub>Skills & agents</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://prowlrbot.github.io/docs"><strong>Docs</strong></a><br/>
+<a href="https://github.com/ProwlrBot/prowlr-docs"><strong>Docs</strong></a><br/>
 <sub>Guides & reference</sub>
 </td>
 <td align="center" width="20%">
-<a href="https://github.com/prowlrbot/agentverse"><strong>AgentVerse</strong></a><br/>
+<a href="https://github.com/ProwlrBot/agentverse"><strong>AgentVerse</strong></a><br/>
 <sub>Virtual agent world</sub>
 </td>
 </tr>
@@ -508,6 +508,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit conventions, skill structure, 
   <a href="docs/README.md">Docs</a> ·
   <a href="docs/blog/">Blog</a> ·
   <a href="https://github.com/prowlrbot/prowlrbot/issues">Issues</a> ·
-  <a href="https://github.com/prowlrbot/marketplace">Marketplace</a> ·
+  <a href="https://github.com/ProwlrBot/prowlr-marketplace">Marketplace</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>

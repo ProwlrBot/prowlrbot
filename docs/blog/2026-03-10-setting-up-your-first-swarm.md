@@ -153,7 +153,7 @@ Different networks? Use Tailscale, Cloudflare Tunnel, or ngrok. See the [cross-n
 Once you're comfortable with the basics, explore:
 - The [War Room Coordinator agent](../../plugins/prowlr-hub/agents/war-room-coordinator.md) for automated task planning
 - [Remote execution via the Swarm](../../README.swarm.md) for cross-machine capabilities
-- The [ROAR Protocol](https://github.com/prowlrbot/roar-protocol) for standardized agent communication
+- The [ROAR Protocol](https://github.com/ProwlrBot/roar-protocol) for standardized agent communication
 
 ---
 
