@@ -51,6 +51,9 @@ agentverse
 | ~~P1~~ | ~~`prowlr market update` — test against real prowlr-marketplace repo content~~ | **done** |
 | ~~P1~~ | ~~Privacy and Terms pages — create placeholder content for Footer links~~ | **done** |
 | ~~P1~~ | ~~Blog posts reference old 12-category marketplace — update to 6 categories~~ | **done** (already clean) |
+| ~~P1~~ | ~~On-site blog — render markdown posts at /blog instead of linking to GitHub~~ | **done** |
+| ~~P1~~ | ~~Fix dead links — Nav blog, Footer Discord/Twitter~~ | **done** |
+| ~~P1~~ | ~~Security: JWT secret persistence + CORS whitelist~~ | **done** |
 | P2 | Website TechStack component — visual QA | todo |
 | ~~P2~~ | ~~`file_io.py` — legacy `.copaw.secret` backward compat: add deprecation warning~~ | **done** |
 | ~~P2~~ | ~~Add marketplace/credits/tiers documentation pages~~ | **done** |
@@ -80,7 +83,7 @@ agentverse
 | ~~P1~~ | ~~Default/starter listings~~ | **done** — 12 listings across all 6 categories |
 | ~~P1~~ | ~~Manifest schema alignment~~ | **done** — all manifests match MarketplaceListing model |
 | ~~P1~~ | ~~Add CONTRIBUTING.md~~ | **done** — links to main repo guide |
-| P2 | Verify templates | Ensure `templates/` match MarketplaceListing model fields |
+| ~~P2~~ | ~~Verify templates~~ | **done** — 6 submission templates pushed (all categories) |
 | P2 | Revenue sharing docs | Match our tier system (70/30 split, credit earn rates) |
 
 ### Starter listings (all done)
@@ -236,10 +239,14 @@ Week 2:  ███████████████████████�
   ✅ prowlr-docs — marketplace, teams, credits doc pages created
   ✅ prowlr-docs — sync audit complete (23 topics, all sidebar entries match files)
 
-Week 3:  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%
-  ☐ prowlr-marketplace — CONTRIBUTING.md, template verification
-  ☐ prowlr-docs → website sync strategy implementation
-  ☐ Core platform — visual QA, deprecation warnings, new doc pages
+Week 3:  ████████████████████████████████████████ 100%
+  ✅ prowlr-marketplace — 6 submission templates pushed (skill, agent, prompt, mcp-server, theme, workflow)
+  ✅ Core platform — on-site blog (6 posts, /blog + /blog/:slug routes)
+  ✅ Core platform — dead link fixes (Nav blog, Footer Discord/Twitter → Blog/Discussions)
+  ✅ Core platform — SPA fallback script updated (23 doc slugs + 6 blog slugs)
+  ✅ Security — JWT secret persistence to ~/.prowlrbot.secret/jwt_secret
+  ✅ Security — CORS methods/headers restricted to explicit whitelist
+  ✅ Security audit — full codebase review (0 critical, 2 high fixed, 1 medium fixed)
 ```
 
 ---
@@ -283,3 +290,14 @@ Week 3:  ░░░░░░░░░░░░░░░░░░░░░░░�
 - [x] Add Privacy & Terms to docs sidebar + i18n
 - [x] Test `prowlr market update` end-to-end — 13 listings synced
 - [x] Test `prowlr market repos` — all 5 ecosystem repos display
+
+### Session 4 — Week 3: Blog, Links, Security
+- [x] On-site blog page (Blog.tsx with markdown rendering, 6 posts)
+- [x] /blog and /blog/:slug routes with SPA fallback
+- [x] Fix Nav blog link (GitHub → internal /blog)
+- [x] Fix Footer dead links (Discord/Twitter → Blog/Discussions)
+- [x] JWT secret persisted to ~/.prowlrbot.secret/jwt_secret (survives restarts)
+- [x] CORS methods/headers restricted to explicit whitelist
+- [x] Full security audit (0 critical, 2 high fixed, 1 medium fixed)
+- [x] Marketplace submission templates (6 templates pushed to prowlr-marketplace)
+- [x] SPA fallback script updated (23 doc + 6 blog routes)
