@@ -1,21 +1,32 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 # pylint: disable=line-too-long
+import logging
 import os
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 from agentscope.message import TextBlock
 from agentscope.tool import ToolResponse
 
 from ...constant import WORKING_DIR
 
+# Legacy secret path — emit deprecation warning on first access
+_LEGACY_SECRET_DIR = Path.home() / ".copaw.secret"
+if _LEGACY_SECRET_DIR.exists():
+    logger.warning(
+        "Deprecated: ~/.copaw.secret detected. "
+        "Migrate secrets to ~/.prowlrbot.secret/ and remove the old directory. "
+        "Legacy path support will be removed in v1.0."
+    )
+
 # Directories that are always blocked
 _BLOCKED_PREFIXES = [
     Path.home() / ".ssh",
     Path.home() / ".prowlrbot.secret",
-    # Legacy secret path (kept for backward compat during migration)
-    Path.home() / ".copaw.secret",
+    _LEGACY_SECRET_DIR,
     Path.home() / ".aws",
     Path.home() / ".gnupg",
     Path("/etc"),
