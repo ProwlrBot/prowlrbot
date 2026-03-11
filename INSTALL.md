@@ -42,15 +42,18 @@ If the repo already exists, `cd` into it and run `git pull && pip install -e .` 
 
 ### Step 3: Register the MCP server
 
-**If same machine (local mode):**
+**If same machine (recommended — all agents share one war room):**
 
 ```bash
 claude mcp add prowlr-hub -s local \
   -e PYTHONPATH="$(pwd)/src" \
   -e PROWLR_AGENT_NAME="<agent_name>" \
   -e PROWLR_CAPABILITIES="<capabilities>" \
+  -e PROWLR_HUB_URL="http://localhost:8099" \
   -- python3 -m prowlrbot.hub
 ```
+
+> **Important:** Always include `PROWLR_HUB_URL` even on the same machine. Without it, each terminal creates its own isolated database and agents can't see each other's tasks.
 
 **If different machine (remote mode):**
 
@@ -153,6 +156,7 @@ You are connected to ProwlrHub. Before any work:
 | "Database is locked" | Kill stale processes: `ps aux \| grep prowlrbot.hub` |
 | Bridge connection refused | Check bridge is running: `curl http://HOST:8099/health` |
 | Agent not on board | Call any tool — agents auto-register on first use |
+| Board empty / agents can't see tasks | Add `PROWLR_HUB_URL=http://localhost:8099` to MCP config — without it each terminal gets its own DB |
 | Can't reach bridge from WSL | Check firewall, try `ping HOST_IP` first |
 | Different networks | Use Tailscale or Cloudflare Tunnel — see [guide](docs/guides/cross-network-setup.md) |
 
