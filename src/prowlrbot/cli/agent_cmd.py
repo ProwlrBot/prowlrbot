@@ -21,7 +21,9 @@ def _get_manager() -> ExternalAgentManager:
 # ── Agent group ──────────────────────────────────────────────────────────────
 
 
-@click.group(name="agent", help="Manage external agents — install, remove, list, health")
+@click.group(
+    name="agent", help="Manage external agents — install, remove, list, health"
+)
 def agent_group():
     """External agent management."""
     pass
@@ -32,17 +34,39 @@ def agent_group():
 
 @agent_group.command(name="install")
 @click.argument("name", required=False)
-@click.option("--config", "config_path", type=click.Path(exists=True), help="Install from YAML/JSON config file")
-@click.option("--type", "backend", type=click.Choice(["claude_code", "codex", "custom_cli", "http_api", "docker"]), help="Agent backend type")
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(exists=True),
+    help="Install from YAML/JSON config file",
+)
+@click.option(
+    "--type",
+    "backend",
+    type=click.Choice(["claude_code", "codex", "custom_cli", "http_api", "docker"]),
+    help="Agent backend type",
+)
 @click.option("--command", default="", help="CLI command or Docker image")
 @click.option("--api-url", default="", help="HTTP API endpoint")
 @click.option("--api-key", default="", help="API key for HTTP agents")
-def agent_install(name: str | None, config_path: str | None, backend: str | None, command: str, api_url: str, api_key: str):
+def agent_install(
+    name: str | None,
+    config_path: str | None,
+    backend: str | None,
+    command: str,
+    api_url: str,
+    api_key: str,
+):
     """Install an external agent. Interactive wizard if no flags provided."""
     mgr = _get_manager()
 
     # Config file mode — auto-detect if path given as name
-    if not config_path and name and Path(name).exists() and Path(name).suffix in (".json", ".yaml", ".yml"):
+    if (
+        not config_path
+        and name
+        and Path(name).exists()
+        and Path(name).suffix in (".json", ".yaml", ".yml")
+    ):
         config_path = name
         name = None
 
@@ -62,8 +86,10 @@ def agent_install(name: str | None, config_path: str | None, backend: str | None
     # Auto-detect backend from agent name
     if not backend:
         _auto_backends = {
-            "claude": "claude_code", "claude-code": "claude_code",
-            "codex": "codex", "openai-codex": "codex",
+            "claude": "claude_code",
+            "claude-code": "claude_code",
+            "codex": "codex",
+            "openai-codex": "codex",
         }
         detected = _auto_backends.get(name.lower().strip())
         if detected:
@@ -80,14 +106,30 @@ def agent_install(name: str | None, config_path: str | None, backend: str | None
         click.echo("    5) docker       — Docker container agent")
         click.echo()
         choice = click.prompt("  Select backend [1-5]", type=int, default=1)
-        backend_map = {1: "claude_code", 2: "codex", 3: "custom_cli", 4: "http_api", 5: "docker"}
+        backend_map = {
+            1: "claude_code",
+            2: "codex",
+            3: "custom_cli",
+            4: "http_api",
+            5: "docker",
+        }
         backend = backend_map.get(choice, "custom_cli")
 
     backend_type = AgentBackendType(backend)
 
     # Prompt for backend-specific config
-    if backend_type in (AgentBackendType.CUSTOM_CLI, AgentBackendType.CLAUDE_CODE, AgentBackendType.CODEX) and not command:
-        default_cmd = {"claude_code": "claude", "codex": "codex", "custom_cli": ""}.get(backend, "")
+    if (
+        backend_type
+        in (
+            AgentBackendType.CUSTOM_CLI,
+            AgentBackendType.CLAUDE_CODE,
+            AgentBackendType.CODEX,
+        )
+        and not command
+    ):
+        default_cmd = {"claude_code": "claude", "codex": "codex", "custom_cli": ""}.get(
+            backend, ""
+        )
         command = click.prompt("  Command", default=default_cmd)
 
     if backend_type == AgentBackendType.DOCKER and not command:
@@ -97,7 +139,9 @@ def agent_install(name: str | None, config_path: str | None, backend: str | None
         if not api_url:
             api_url = click.prompt("  API URL", type=str)
         if not api_key:
-            api_key = click.prompt("  API Key (optional)", default="", show_default=False)
+            api_key = click.prompt(
+                "  API Key (optional)", default="", show_default=False
+            )
 
     config = ExternalAgentConfig(
         name=name,
@@ -131,9 +175,12 @@ def _install_from_config(mgr: ExternalAgentManager, path: Path) -> None:
     if path.suffix in (".yaml", ".yml"):
         try:
             import yaml
+
             data = yaml.safe_load(text)
         except ImportError:
-            click.echo("Error: PyYAML required for YAML configs. Install with: pip install pyyaml")
+            click.echo(
+                "Error: PyYAML required for YAML configs. Install with: pip install pyyaml"
+            )
             return
     else:
         data = json.loads(text)

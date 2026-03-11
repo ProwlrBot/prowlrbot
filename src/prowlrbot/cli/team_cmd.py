@@ -41,15 +41,32 @@ def team_group():
 
 @team_group.command(name="create")
 @click.argument("name", required=False)
-@click.option("--config", "config_path", type=click.Path(exists=True), help="Create from team.yaml config")
-@click.option("--coordination", "-c", type=click.Choice(["round_robin", "hierarchical", "consensus", "auction"]), default="hierarchical")
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(exists=True),
+    help="Create from team.yaml config",
+)
+@click.option(
+    "--coordination",
+    "-c",
+    type=click.Choice(["round_robin", "hierarchical", "consensus", "auction"]),
+    default="hierarchical",
+)
 @click.option("--description", "-d", default="")
-def team_create(name: str | None, config_path: str | None, coordination: str, description: str):
+def team_create(
+    name: str | None, config_path: str | None, coordination: str, description: str
+):
     """Create a new agent team. Interactive wizard if no name provided."""
     store = _get_store()
 
     # Auto-detect: if name looks like a file path, treat as config
-    if not config_path and name and Path(name).exists() and Path(name).suffix in (".json", ".yaml", ".yml"):
+    if (
+        not config_path
+        and name
+        and Path(name).exists()
+        and Path(name).suffix in (".json", ".yaml", ".yml")
+    ):
         config_path = name
         name = None
 
@@ -104,27 +121,36 @@ def _create_from_config(store: TeamStore, path: Path) -> None:
     if path.suffix in (".yaml", ".yml"):
         try:
             import yaml
+
             data = yaml.safe_load(text)
         except ImportError:
-            click.echo("Error: PyYAML required for YAML configs. Install with: pip install pyyaml")
+            click.echo(
+                "Error: PyYAML required for YAML configs. Install with: pip install pyyaml"
+            )
             return
     else:
         data = json.loads(text)
 
     members = []
     for m in data.get("agents", data.get("members", [])):
-        members.append(TeamMember(
-            agent_id=m.get("name", m.get("agent_id", "")),
-            role=TeamRole(m.get("role", "specialist")),
-            personality=m.get("personality", ""),
-            skills=m.get("skills", []),
-            model_preference=m.get("model_preference", ""),
-        ))
+        members.append(
+            TeamMember(
+                agent_id=m.get("name", m.get("agent_id", "")),
+                role=TeamRole(m.get("role", "specialist")),
+                personality=m.get("personality", ""),
+                skills=m.get("skills", []),
+                model_preference=m.get("model_preference", ""),
+            )
+        )
 
     team = AgentTeam(
         name=data.get("name", path.stem),
         description=data.get("description", ""),
-        coordination=CoordinationMode(data.get("coordination", {}).get("pattern", data.get("coordination", "hierarchical"))),
+        coordination=CoordinationMode(
+            data.get("coordination", {}).get(
+                "pattern", data.get("coordination", "hierarchical")
+            )
+        ),
         fallback_strategy=data.get("fallback_strategy", "escalate"),
         members=members,
     )
@@ -146,7 +172,9 @@ def _interactive_add_members(store: TeamStore, team_id: str) -> None:
         click.echo()
 
     while True:
-        agent_id = click.prompt("  Agent ID or name (blank to finish)", default="", show_default=False)
+        agent_id = click.prompt(
+            "  Agent ID or name (blank to finish)", default="", show_default=False
+        )
         if not agent_id:
             break
 
@@ -161,7 +189,11 @@ def _interactive_add_members(store: TeamStore, team_id: str) -> None:
 
         member = TeamMember(
             agent_id=agent_id,
-            role=TeamRole(role) if role in ("director", "specialist", "observer") else TeamRole.SPECIALIST,
+            role=(
+                TeamRole(role)
+                if role in ("director", "specialist", "observer")
+                else TeamRole.SPECIALIST
+            ),
         )
         store.add_member(team_id, member)
         click.echo(f"  Added {agent_id} as {member.role}")
@@ -188,7 +220,9 @@ def team_list():
     click.echo(f"  {'ID':<10} {'Name':<20} {'Members':<9} {'Coordination':<15}")
     click.echo(f"  {'─'*10} {'─'*20} {'─'*9} {'─'*15}")
     for t in teams:
-        click.echo(f"  {t.id:<10} {t.name:<20} {len(t.members):<9} {t.coordination:<15}")
+        click.echo(
+            f"  {t.id:<10} {t.name:<20} {len(t.members):<9} {t.coordination:<15}"
+        )
     click.echo()
     store.close()
 
@@ -233,7 +267,12 @@ def team_info(team_id: str):
 @team_group.command(name="add-member")
 @click.argument("team_id")
 @click.argument("agent_id")
-@click.option("--role", "-r", type=click.Choice(["director", "specialist", "observer"]), default="specialist")
+@click.option(
+    "--role",
+    "-r",
+    type=click.Choice(["director", "specialist", "observer"]),
+    default="specialist",
+)
 @click.option("--skills", "-s", multiple=True, help="Skills this member contributes")
 def team_add_member(team_id: str, agent_id: str, role: str, skills: tuple):
     """Add an agent to a team."""

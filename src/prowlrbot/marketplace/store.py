@@ -440,7 +440,15 @@ class MarketplaceStore:
         self._conn.execute(
             "INSERT INTO credit_transactions (id, user_id, amount, transaction_type, reference_id, description, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (txn.id, txn.user_id, txn.amount, txn.transaction_type, txn.reference_id, txn.description, txn.created_at),
+            (
+                txn.id,
+                txn.user_id,
+                txn.amount,
+                txn.transaction_type,
+                txn.reference_id,
+                txn.description,
+                txn.created_at,
+            ),
         )
 
         # Upsert balance
@@ -481,7 +489,15 @@ class MarketplaceStore:
         self._conn.execute(
             "INSERT INTO credit_transactions (id, user_id, amount, transaction_type, reference_id, description, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (txn.id, txn.user_id, txn.amount, txn.transaction_type, txn.reference_id, txn.description, txn.created_at),
+            (
+                txn.id,
+                txn.user_id,
+                txn.amount,
+                txn.transaction_type,
+                txn.reference_id,
+                txn.description,
+                txn.created_at,
+            ),
         )
         self._conn.execute(
             "UPDATE credit_balances SET balance = balance - ?, total_spent = total_spent + ? WHERE user_id = ?",

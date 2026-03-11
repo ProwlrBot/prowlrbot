@@ -92,9 +92,7 @@ class RegistryClient:
 
     def fetch_categories(self) -> list[str]:
         """List available category directories in the repo."""
-        resp = self._client.get(
-            f"/repos/{REGISTRY_OWNER}/{REGISTRY_REPO}/contents"
-        )
+        resp = self._client.get(f"/repos/{REGISTRY_OWNER}/{REGISTRY_REPO}/contents")
         if resp.status_code != 200:
             logger.warning("Failed to fetch repo contents: %s", resp.status_code)
             return []
@@ -152,7 +150,9 @@ class RegistryClient:
                         decoded = b64decode(content).decode("utf-8")
                         return json.loads(decoded)
                     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-                        logger.warning("Bad manifest %s/%s/%s: %s", category, name, filename, exc)
+                        logger.warning(
+                            "Bad manifest %s/%s/%s: %s", category, name, filename, exc
+                        )
         return None
 
 
@@ -196,24 +196,33 @@ def sync_registry(
 
         existing = store.get_listing(listing_id)
         if existing:
-            store.update_listing(listing_id, {
-                "title": title,
-                "description": description,
-                "version": version,
-                "tags": tags,
-                "category": cat.value,
-            })
+            store.update_listing(
+                listing_id,
+                {
+                    "title": title,
+                    "description": description,
+                    "version": version,
+                    "tags": tags,
+                    "category": cat.value,
+                },
+            )
             updated += 1
         else:
             try:
                 pm = PricingModel(pricing)
             except ValueError:
-                logger.warning("Unknown pricing model '%s' for %s, defaulting to free", pricing, dir_name)
+                logger.warning(
+                    "Unknown pricing model '%s' for %s, defaulting to free",
+                    pricing,
+                    dir_name,
+                )
                 pm = PricingModel.free
 
             listing = MarketplaceListing(
                 id=listing_id,
-                author_id=author if isinstance(author, str) else author.get("name", "unknown"),
+                author_id=(
+                    author if isinstance(author, str) else author.get("name", "unknown")
+                ),
                 title=title,
                 description=description,
                 category=cat,

@@ -179,7 +179,12 @@ if CORS_ORIGINS:
         allow_origins=origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization", "X-CSRF-Token", "X-Session-Token"],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "X-CSRF-Token",
+            "X-Session-Token",
+        ],
     )
 
 
