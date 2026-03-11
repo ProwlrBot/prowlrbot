@@ -348,7 +348,8 @@ export function Blog({ config, lang, theme, onThemeToggle }: BlogProps) {
       return;
     }
 
-    fetch(`/blog/${file}`)
+    const base = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "") || "";
+    fetch(`${base}/blog/${file}`)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load post");
         return r.text();
@@ -372,9 +373,10 @@ export function Blog({ config, lang, theme, onThemeToggle }: BlogProps) {
     setLoading(true);
     setError(null);
 
+    const base = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "") || "";
     Promise.all(
       BLOG_FILES.map(async (file) => {
-        const resp = await fetch(`/blog/${file}`);
+        const resp = await fetch(`${base}/blog/${file}`);
         if (!resp.ok) return null;
         const raw = await resp.text();
         const { meta, body } = parseFrontmatter(raw);

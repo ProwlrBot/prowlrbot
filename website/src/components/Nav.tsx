@@ -85,7 +85,7 @@ export function Nav({
           aria-label={projectName}
         >
           <img
-            src="/logo.svg"
+            src={`${import.meta.env.BASE_URL}logo.svg`}
             alt={projectName}
             style={{ height: 32, width: "auto" }}
           />

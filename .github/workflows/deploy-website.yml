@@ -38,6 +38,8 @@ jobs:
 
       - name: Build
         working-directory: website
+        env:
+          VITE_BASE_PATH: /prowlrbot/
         run: npm run build
 
       - name: Create 404 fallback for SPA routing
