@@ -54,6 +54,7 @@ async function main() {
     ...DOC_SLUGS.map((s) => `docs/${s}`),
     "blog",
     ...BLOG_SLUGS.map((s) => `blog/${s}`),
+    "marketplace",
   ];
   for (const p of paths) {
     const out = join(distDir, p, "index.html");

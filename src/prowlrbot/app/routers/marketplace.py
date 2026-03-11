@@ -48,11 +48,19 @@ async def publish_listing(listing: MarketplaceListing) -> MarketplaceListing:
 async def search_listings(
     query: str = "",
     category: Optional[str] = None,
+    persona: Optional[str] = None,
+    difficulty: Optional[str] = None,
     limit: int = 50,
 ) -> list[MarketplaceListing]:
-    """Search marketplace listings by query and/or category."""
+    """Search marketplace listings by query, category, persona, and/or difficulty."""
     limit = max(1, min(limit, 200))
-    return _get_store().search_listings(query=query, category=category, limit=limit)
+    return _get_store().search_listings(
+        query=query,
+        category=category,
+        persona=persona,
+        difficulty=difficulty,
+        limit=limit,
+    )
 
 
 @router.get("/listings/{listing_id}", response_model=MarketplaceListing)
@@ -136,6 +144,29 @@ async def get_top_rated(limit: int = 20) -> list[MarketplaceListing]:
 async def list_categories() -> list[str]:
     """Return all available marketplace categories."""
     return [c.value for c in MarketplaceCategory]
+
+
+PERSONA_CATALOG = [
+    {"id": "parent", "label": "Parent & Family", "icon": "home", "description": "Automate family life"},
+    {"id": "business", "label": "Small Business", "icon": "briefcase", "description": "Run your business smarter"},
+    {"id": "student", "label": "Student", "icon": "book-open", "description": "Study smarter, not harder"},
+    {"id": "creator", "label": "Content Creator", "icon": "palette", "description": "Create more, manage less"},
+    {"id": "freelancer", "label": "Freelancer", "icon": "laptop", "description": "Handle the admin so you can do the work"},
+    {"id": "developer", "label": "Developer", "icon": "code", "description": "Automate your dev workflow"},
+    {"id": "everyone", "label": "Everyone", "icon": "globe", "description": "Daily life, automated"},
+]
+
+
+@router.get("/personas", response_model=list[dict])
+async def list_personas() -> list[dict]:
+    """Return all persona categories for onboarding."""
+    return PERSONA_CATALOG
+
+
+@router.get("/for/{persona}", response_model=list[MarketplaceListing])
+async def get_listings_for_persona(persona: str, limit: int = 20) -> list[MarketplaceListing]:
+    """Get curated listings for a specific persona."""
+    return _get_store().search_listings(persona=persona, limit=min(limit, 100))
 
 
 # ------------------------------------------------------------------

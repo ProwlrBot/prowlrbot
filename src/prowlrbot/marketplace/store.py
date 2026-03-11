@@ -48,22 +48,32 @@ class MarketplaceStore:
         cur = self._conn.cursor()
         cur.executescript("""
             CREATE TABLE IF NOT EXISTS listings (
-                id             TEXT PRIMARY KEY,
-                author_id      TEXT NOT NULL,
-                title          TEXT NOT NULL,
-                description    TEXT NOT NULL DEFAULT '',
-                category       TEXT NOT NULL,
-                version        TEXT NOT NULL DEFAULT '1.0.0',
-                pricing_model  TEXT NOT NULL DEFAULT 'free',
-                price          REAL NOT NULL DEFAULT 0.0,
-                revenue_split  REAL NOT NULL DEFAULT 0.70,
-                downloads      INTEGER NOT NULL DEFAULT 0,
-                rating         REAL NOT NULL DEFAULT 0.0,
-                ratings_count  INTEGER NOT NULL DEFAULT 0,
-                tags           TEXT NOT NULL DEFAULT '[]',
-                status         TEXT NOT NULL DEFAULT 'draft',
-                created_at     TEXT NOT NULL,
-                updated_at     TEXT NOT NULL
+                id                  TEXT PRIMARY KEY,
+                author_id           TEXT NOT NULL,
+                title               TEXT NOT NULL,
+                description         TEXT NOT NULL DEFAULT '',
+                category            TEXT NOT NULL,
+                version             TEXT NOT NULL DEFAULT '1.0.0',
+                pricing_model       TEXT NOT NULL DEFAULT 'free',
+                price               REAL NOT NULL DEFAULT 0.0,
+                revenue_split       REAL NOT NULL DEFAULT 0.70,
+                downloads           INTEGER NOT NULL DEFAULT 0,
+                rating              REAL NOT NULL DEFAULT 0.0,
+                ratings_count       INTEGER NOT NULL DEFAULT 0,
+                tags                TEXT NOT NULL DEFAULT '[]',
+                status              TEXT NOT NULL DEFAULT 'draft',
+                created_at          TEXT NOT NULL,
+                updated_at          TEXT NOT NULL,
+                difficulty          TEXT NOT NULL DEFAULT 'beginner',
+                setup_time_minutes  INTEGER NOT NULL DEFAULT 5,
+                persona_tags        TEXT NOT NULL DEFAULT '[]',
+                before_after        TEXT NOT NULL DEFAULT '{}',
+                skill_scan          TEXT NOT NULL DEFAULT '{}',
+                works_with          TEXT NOT NULL DEFAULT '[]',
+                demo_url            TEXT NOT NULL DEFAULT '',
+                setup_steps         TEXT NOT NULL DEFAULT '[]',
+                user_stories        TEXT NOT NULL DEFAULT '[]',
+                hero_animation      TEXT NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS reviews (
@@ -117,6 +127,31 @@ class MarketplaceStore:
             );
             """)
         self._conn.commit()
+        self._migrate_v2()
+
+    def _migrate_v2(self) -> None:
+        """Add v2 columns to existing databases (safe to run multiple times)."""
+        cur = self._conn.cursor()
+        existing = {
+            row[1]
+            for row in cur.execute("PRAGMA table_info(listings)").fetchall()
+        }
+        v2_columns = {
+            "difficulty": "TEXT NOT NULL DEFAULT 'beginner'",
+            "setup_time_minutes": "INTEGER NOT NULL DEFAULT 5",
+            "persona_tags": "TEXT NOT NULL DEFAULT '[]'",
+            "before_after": "TEXT NOT NULL DEFAULT '{}'",
+            "skill_scan": "TEXT NOT NULL DEFAULT '{}'",
+            "works_with": "TEXT NOT NULL DEFAULT '[]'",
+            "demo_url": "TEXT NOT NULL DEFAULT ''",
+            "setup_steps": "TEXT NOT NULL DEFAULT '[]'",
+            "user_stories": "TEXT NOT NULL DEFAULT '[]'",
+            "hero_animation": "TEXT NOT NULL DEFAULT ''",
+        }
+        for col, typedef in v2_columns.items():
+            if col not in existing:
+                cur.execute(f"ALTER TABLE listings ADD COLUMN {col} {typedef}")
+        self._conn.commit()
 
     # ------------------------------------------------------------------
     # Listings
@@ -129,8 +164,12 @@ class MarketplaceStore:
             INSERT INTO listings
                 (id, author_id, title, description, category, version,
                  pricing_model, price, revenue_split, downloads, rating,
-                 ratings_count, tags, status, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ratings_count, tags, status, created_at, updated_at,
+                 difficulty, setup_time_minutes, persona_tags, before_after,
+                 skill_scan, works_with, demo_url, setup_steps,
+                 user_stories, hero_animation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 listing.id,
@@ -149,6 +188,16 @@ class MarketplaceStore:
                 listing.status.value,
                 listing.created_at,
                 listing.updated_at,
+                listing.difficulty,
+                listing.setup_time_minutes,
+                json.dumps(listing.persona_tags),
+                json.dumps(listing.before_after),
+                json.dumps(listing.skill_scan),
+                json.dumps(listing.works_with),
+                listing.demo_url,
+                json.dumps(listing.setup_steps),
+                json.dumps(listing.user_stories),
+                listing.hero_animation,
             ),
         )
         self._conn.commit()
@@ -168,9 +217,11 @@ class MarketplaceStore:
         query: str = "",
         category: Optional[str] = None,
         tags: Optional[list[str]] = None,
+        persona: Optional[str] = None,
+        difficulty: Optional[str] = None,
         limit: int = 50,
     ) -> list[MarketplaceListing]:
-        """Search listings by text query, category, and/or tags."""
+        """Search listings by text, category, tags, persona, and/or difficulty."""
         conditions: list[str] = []
         params: list[object] = []
 
@@ -187,6 +238,14 @@ class MarketplaceStore:
             tag_clauses = ["tags LIKE ?" for _ in tags]
             conditions.append(f"({' OR '.join(tag_clauses)})")
             params.extend(f"%{t}%" for t in tags)
+
+        if persona:
+            conditions.append("persona_tags LIKE ?")
+            params.append(f"%{persona}%")
+
+        if difficulty:
+            conditions.append("difficulty = ?")
+            params.append(difficulty)
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
         sql = f"SELECT * FROM listings {where} ORDER BY downloads DESC LIMIT ?"
@@ -213,13 +272,33 @@ class MarketplaceStore:
             "revenue_split",
             "tags",
             "status",
+            "difficulty",
+            "setup_time_minutes",
+            "persona_tags",
+            "before_after",
+            "skill_scan",
+            "works_with",
+            "demo_url",
+            "setup_steps",
+            "user_stories",
+            "hero_animation",
         }
         filtered = {k: v for k, v in updates.items() if k in allowed}
         if not filtered:
             return existing
 
-        if "tags" in filtered:
-            filtered["tags"] = json.dumps(filtered["tags"])
+        # Serialize list/dict fields to JSON for DB storage
+        for json_field in (
+            "tags",
+            "persona_tags",
+            "works_with",
+            "setup_steps",
+            "user_stories",
+            "before_after",
+            "skill_scan",
+        ):
+            if json_field in filtered and not isinstance(filtered[json_field], str):
+                filtered[json_field] = json.dumps(filtered[json_field])
 
         # Normalize enum fields to their .value for DB storage
         if "category" in filtered:
@@ -534,9 +613,22 @@ class MarketplaceStore:
     def _row_to_listing(row: dict) -> MarketplaceListing:
         """Convert a DB row dict into a MarketplaceListing."""
         row = dict(row)  # shallow copy
-        tags_raw = row.get("tags", "[]")
-        if isinstance(tags_raw, str):
-            row["tags"] = json.loads(tags_raw)
+        # Deserialize all JSON-stored fields
+        for field, default in (
+            ("tags", "[]"),
+            ("persona_tags", "[]"),
+            ("works_with", "[]"),
+            ("setup_steps", "[]"),
+            ("user_stories", "[]"),
+            ("before_after", "{}"),
+            ("skill_scan", "{}"),
+        ):
+            raw = row.get(field, default)
+            if isinstance(raw, str):
+                try:
+                    row[field] = json.loads(raw)
+                except (json.JSONDecodeError, TypeError):
+                    row[field] = json.loads(default)
         return MarketplaceListing(**row)
 
     def close(self) -> None:

@@ -41,6 +41,14 @@ class PricingModel(StrEnum):
     usage_based = "usage_based"
 
 
+class Difficulty(StrEnum):
+    """How hard a listing is to set up and use."""
+
+    beginner = "beginner"
+    intermediate = "intermediate"
+    advanced = "advanced"
+
+
 class MarketplaceListing(BaseModel):
     """A single item published to the marketplace."""
 
@@ -64,6 +72,18 @@ class MarketplaceListing(BaseModel):
     updated_at: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat(),
     )
+
+    # ── v2 fields: persona-driven marketplace ────────────────────────────
+    difficulty: str = "beginner"  # beginner | intermediate | advanced
+    setup_time_minutes: int = 5
+    persona_tags: list[str] = Field(default_factory=list)
+    before_after: dict = Field(default_factory=dict)
+    skill_scan: dict = Field(default_factory=dict)
+    works_with: list[str] = Field(default_factory=list)
+    demo_url: str = ""
+    setup_steps: list[dict] = Field(default_factory=list)
+    user_stories: list[dict] = Field(default_factory=list)
+    hero_animation: str = ""
 
 
 class ReviewEntry(BaseModel):
@@ -116,32 +136,48 @@ class ProTier(StrEnum):
 
 PRO_TIER_LIMITS = {
     ProTier.free: {
-        "agents": 2,
-        "teams": 1,
-        "marketplace_publish": False,
-        "monthly_credits": 50,
+        "agents": -1,  # unlimited
+        "teams": -1,  # unlimited
+        "active_workflows": 5,
+        "marketplace_publish": True,  # free items only
+        "marketplace_publish_paid": False,
+        "monthly_credits": 100,
         "credit_earn_multiplier": 1,
+        "custom_branding": False,
+        "support": "community",
     },
     ProTier.starter: {
-        "agents": 3,
-        "teams": 1,
-        "marketplace_publish": False,
+        "agents": -1,
+        "teams": -1,
+        "active_workflows": 25,
+        "marketplace_publish": True,
+        "marketplace_publish_paid": False,
         "monthly_credits": 500,
         "credit_earn_multiplier": 2,
+        "custom_branding": False,
+        "support": "email",
     },
     ProTier.pro: {
-        "agents": 999,
-        "teams": 5,
+        "agents": -1,
+        "teams": -1,
+        "active_workflows": -1,  # unlimited
         "marketplace_publish": True,
+        "marketplace_publish_paid": True,
         "monthly_credits": 2000,
         "credit_earn_multiplier": 3,
+        "custom_branding": True,
+        "support": "priority",
     },
     ProTier.team: {
-        "agents": 999,
-        "teams": 999,
+        "agents": -1,
+        "teams": -1,
+        "active_workflows": -1,
         "marketplace_publish": True,
+        "marketplace_publish_paid": True,
         "monthly_credits": 10000,
         "credit_earn_multiplier": 5,
+        "custom_branding": True,
+        "support": "dedicated",
     },
 }
 

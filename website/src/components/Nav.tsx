@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Github, Newspaper, Sun, Moon } from "lucide-react";
+import { Menu, X, BookOpen, Github, Newspaper, Sun, Moon, Store } from "lucide-react";
 import { t, type Lang } from "../i18n";
 
 interface NavProps {
@@ -139,6 +139,14 @@ export function Nav({
             <span>{t(lang, "nav.docs")}</span>
           </Link>
           <Link
+            to="/marketplace"
+            className={linkClass}
+            title="ProwlrBot Marketplace"
+          >
+            <Store size={18} strokeWidth={1.5} aria-hidden />
+            <span>Marketplace</span>
+          </Link>
+          <Link
             to="/blog"
             className={linkClass}
             title="ProwlrBot Blog"
@@ -274,6 +282,14 @@ export function Nav({
           onClick={() => setOpen(false)}
         >
           <BookOpen size={18} /> {t(lang, "nav.docs")}
+        </Link>
+        <Link
+          to="/marketplace"
+          className={linkClass}
+          onClick={() => setOpen(false)}
+          title="ProwlrBot Marketplace"
+        >
+          <Store size={18} /> Marketplace
         </Link>
         <Link
           to="/blog"
