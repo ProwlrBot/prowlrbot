@@ -7,6 +7,7 @@ import logging
 import os
 import secrets
 from functools import lru_cache
+from pathlib import Path
 from typing import Callable, Sequence
 
 from fastapi import Depends, HTTPException, Request
@@ -17,16 +18,38 @@ from .store import UserStore
 
 logger = logging.getLogger(__name__)
 
-# Resolve JWT secret once at module load: prefer env var, fall back to a
-# random secret (safe for single-process, but tokens won't survive restarts).
-_JWT_SECRET: str = os.environ.get("PROWLRBOT_JWT_SECRET", "")
-if not _JWT_SECRET:
-    _JWT_SECRET = secrets.token_hex(32)
-    logger.warning(
-        "PROWLRBOT_JWT_SECRET is not set — using a randomly generated secret. "
-        "JWTs will not survive server restarts. Set PROWLRBOT_JWT_SECRET in "
-        "production."
+# Resolve JWT secret once at module load: prefer env var, then persisted file,
+# then generate and persist a new one.
+_JWT_SECRET_PATH = Path.home() / ".prowlrbot.secret" / "jwt_secret"
+
+
+def _resolve_jwt_secret() -> str:
+    """Return a stable JWT secret, persisting to disk if newly generated."""
+    # 1. Environment variable takes priority
+    env_secret = os.environ.get("PROWLRBOT_JWT_SECRET", "")
+    if env_secret:
+        return env_secret
+
+    # 2. Persisted secret file
+    if _JWT_SECRET_PATH.exists():
+        stored = _JWT_SECRET_PATH.read_text().strip()
+        if stored:
+            return stored
+
+    # 3. Generate, persist, and return
+    new_secret = secrets.token_hex(32)
+    _JWT_SECRET_PATH.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    _JWT_SECRET_PATH.write_text(new_secret)
+    _JWT_SECRET_PATH.chmod(0o600)
+    logger.info(
+        "Generated and persisted JWT secret to %s. "
+        "Set PROWLRBOT_JWT_SECRET env var to override.",
+        _JWT_SECRET_PATH,
     )
+    return new_secret
+
+
+_JWT_SECRET: str = _resolve_jwt_secret()
 
 
 @lru_cache(maxsize=1)

@@ -123,23 +123,21 @@ export function Footer({ lang: _lang }: { lang: Lang }) {
               Community
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
+              <Link
+                to="/blog"
+                style={linkStyle}
+                className="footer-link"
+              >
+                Blog
+              </Link>
               <a
-                href="https://discord.gg/prowlrbot"
+                href="https://github.com/prowlrbot/prowlrbot/discussions"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={linkStyle}
                 className="footer-link"
               >
-                Discord
-              </a>
-              <a
-                href="https://x.com/prowlrbot"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={linkStyle}
-                className="footer-link"
-              >
-                X / Twitter
+                Discussions
               </a>
               <Link
                 to="/docs/contributing"

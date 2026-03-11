@@ -138,16 +138,14 @@ export function Nav({
             <BookOpen size={18} strokeWidth={1.5} aria-hidden />
             <span>{t(lang, "nav.docs")}</span>
           </Link>
-          <a
-            href="https://github.com/prowlrbot/prowlrbot/tree/main/docs/blog"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/blog"
             className={linkClass}
             title="ProwlrBot Blog"
           >
             <Newspaper size={18} strokeWidth={1.5} aria-hidden />
             <span>Blog</span>
-          </a>
+          </Link>
           <a
             href="https://github.com/prowlrbot/prowlrbot"
             target="_blank"
@@ -277,16 +275,14 @@ export function Nav({
         >
           <BookOpen size={18} /> {t(lang, "nav.docs")}
         </Link>
-        <a
-          href="https://github.com/prowlrbot/prowlrbot/tree/main/docs/blog"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/blog"
           className={linkClass}
           onClick={() => setOpen(false)}
           title="ProwlrBot Blog"
         >
           <Newspaper size={18} /> Blog
-        </a>
+        </Link>
         <a
           href="https://github.com/prowlrbot/prowlrbot"
           target="_blank"

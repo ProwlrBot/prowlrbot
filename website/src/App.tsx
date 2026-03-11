@@ -4,6 +4,7 @@ import { loadSiteConfig, type SiteConfig } from "./config";
 import { type Lang, t } from "./i18n";
 import { Home } from "./pages/Home";
 import { Docs } from "./pages/Docs";
+import { Blog } from "./pages/Blog";
 import "./index.css";
 
 const LANG_KEY = "site-lang";
@@ -65,6 +66,8 @@ export default function App() {
         path="/docs/:slug"
         element={<Docs config={config} lang={lang} theme={theme} onThemeToggle={toggleTheme} />}
       />
+      <Route path="/blog" element={<Blog config={config} lang={lang} theme={theme} onThemeToggle={toggleTheme} />} />
+      <Route path="/blog/:slug" element={<Blog config={config} lang={lang} theme={theme} onThemeToggle={toggleTheme} />} />
     </Routes>
   );
 }
