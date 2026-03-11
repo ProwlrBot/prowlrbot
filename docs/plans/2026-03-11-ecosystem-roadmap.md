@@ -46,8 +46,8 @@ agentverse
 
 | Priority | Task | Status |
 |----------|------|--------|
-| P0 | Verify CI workflows pass after StrEnum + path traversal fixes | pending-ci |
-| P0 | Dependabot alerts — pip deps need lockfile regeneration in CI | pending-ci |
+| ~~P0~~ | ~~Verify CI workflows pass after StrEnum + path traversal fixes~~ | **done** — StrEnum `__str__` fixed, Black target-version py310, flaky lock test relaxed |
+| ~~P0~~ | ~~Dependabot alerts — pip deps need lockfile regeneration in CI~~ | **done** — npm overrides added, pip alerts dismissed (minimums already safe), 0 open alerts |
 | ~~P1~~ | ~~`prowlr market update` — test against real prowlr-marketplace repo content~~ | **done** |
 | ~~P1~~ | ~~Privacy and Terms pages — create placeholder content for Footer links~~ | **done** |
 | ~~P1~~ | ~~Blog posts reference old 12-category marketplace — update to 6 categories~~ | **done** (already clean) |
