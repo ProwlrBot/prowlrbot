@@ -29,6 +29,15 @@ _BLOCKED_PREFIXES = [
     _LEGACY_SECRET_DIR,
     Path.home() / ".aws",
     Path.home() / ".gnupg",
+    Path.home() / ".kube",
+    Path.home() / ".docker",
+    Path.home() / ".config",
+    Path.home() / ".npmrc",
+    Path.home() / ".pypirc",
+    Path.home() / ".git-credentials",
+    Path.home() / ".bash_history",
+    Path.home() / ".zsh_history",
+    Path.home() / ".netrc",
     Path("/etc"),
     Path("/dev"),
     Path("/proc"),
@@ -45,10 +54,18 @@ def validate_file_path(file_path: str) -> bool:
     """Validate that a file path is safe to access.
 
     Returns True if the path is within allowed directories
-    and not in any blocked directory.
+    and not in any blocked directory. Rejects symlinks whose
+    targets fall outside allowed directories (TOCTOU mitigation).
     """
     try:
-        resolved = Path(file_path).resolve()
+        p = Path(file_path)
+        resolved = p.resolve()
+
+        # If the path is a symlink, verify the target is also allowed
+        if p.is_symlink():
+            target = p.resolve(strict=False)
+            if str(target) != str(resolved):
+                return False
     except (ValueError, OSError):
         return False
 
@@ -255,7 +272,18 @@ async def write_file(
         )
 
     try:
-        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        parent = Path(file_path).parent
+        # Validate parent directory is also within allowed paths
+        if not validate_file_path(str(parent)):
+            return ToolResponse(
+                content=[
+                    TextBlock(
+                        type="text",
+                        text=f"Error: Access denied — parent directory is outside allowed directories.",
+                    ),
+                ],
+            )
+        parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
         return ToolResponse(
@@ -375,7 +403,17 @@ async def append_file(
         )
 
     try:
-        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        parent = Path(file_path).parent
+        if not validate_file_path(str(parent)):
+            return ToolResponse(
+                content=[
+                    TextBlock(
+                        type="text",
+                        text=f"Error: Access denied — parent directory is outside allowed directories.",
+                    ),
+                ],
+            )
+        parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "a", encoding="utf-8") as file:
             file.write(content)
         return ToolResponse(

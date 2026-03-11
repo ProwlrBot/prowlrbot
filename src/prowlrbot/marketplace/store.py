@@ -36,7 +36,7 @@ class MarketplaceStore:
             db_path = WORKING_DIR / "marketplace.db"
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn = sqlite3.connect(str(self.db_path))
+        self._conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
         self._conn.row_factory = _dict_factory
         self._init_db()
 
@@ -133,7 +133,7 @@ class MarketplaceStore:
         """Add v2 columns to existing databases (safe to run multiple times)."""
         cur = self._conn.cursor()
         existing = {
-            row[1]
+            row["name"]
             for row in cur.execute("PRAGMA table_info(listings)").fetchall()
         }
         v2_columns = {

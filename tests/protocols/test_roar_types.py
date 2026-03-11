@@ -119,23 +119,29 @@ class TestROARMessage:
 
         This is the cross-SDK compatibility test — TypeScript MUST produce
         the same canonical body for the same message fields.
+        The canonical body covers: id, from, to, intent, payload, context, timestamp.
         """
         msg = ROARMessage(
             **{"from": self.alice, "to": self.bob},
             intent=MessageIntent.EXECUTE,
             payload={"action": "test", "params": {"x": 1}},
         )
+        # Sign first to populate auth.timestamp
+        msg.sign("cross-sdk-secret")
+
         # Manually compute what the canonical body should be
         expected_body = json.dumps(
             {
                 "id": msg.id,
+                "from": self.alice.did,
+                "to": self.bob.did,
                 "intent": "execute",
                 "payload": {"action": "test", "params": {"x": 1}},
+                "context": {},
+                "timestamp": msg.auth["timestamp"],
             },
             sort_keys=True,
         )
-        # Sign and extract the hex
-        msg.sign("cross-sdk-secret")
         sig_hex = msg.auth["signature"].split(":")[1]
 
         # Independently compute HMAC

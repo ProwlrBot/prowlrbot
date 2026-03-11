@@ -14,8 +14,9 @@ import asyncio
 import logging
 import time
 import uuid
+from collections import deque
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Dict, List, Optional, Set
+from typing import AsyncIterator, Deque, Dict, List, Optional, Set
 
 from ...roar import StreamEvent, StreamEventType
 
@@ -132,8 +133,10 @@ class EventBus:
         event = await sub.get(timeout=2.0)
     """
 
-    def __init__(self, max_buffer: int = 1000) -> None:
+    def __init__(self, max_buffer: int = 1000, replay_size: int = 100) -> None:
         self._max_buffer = max_buffer
+        self._replay_size = replay_size
+        self._replay_buffer: Deque[StreamEvent] = deque(maxlen=replay_size)
         self._subscriptions: Dict[str, Subscription] = {}
         self._event_count: int = 0
 
@@ -149,26 +152,41 @@ class EventBus:
         self,
         filter_spec: Optional[StreamFilter] = None,
         buffer_size: Optional[int] = None,
+        replay: bool = False,
     ) -> Subscription:
         """Create a new subscription.
 
         Args:
             filter_spec: Event filter (None = receive all events).
             buffer_size: Per-subscriber buffer size (None = bus default).
+            replay: If True, pre-fill the subscriber's queue with matching
+                events from the replay buffer so late subscribers can
+                catch up on recent history.
 
         Returns:
             A Subscription that can be iterated or polled.
         """
         sub_id = f"sub-{uuid.uuid4().hex[:12]}"
         queue: asyncio.Queue = asyncio.Queue(maxsize=buffer_size or self._max_buffer)
+        effective_filter = filter_spec or StreamFilter()
+
+        # Pre-fill queue with matching events from the replay buffer
+        if replay:
+            for event in self._replay_buffer:
+                if effective_filter.matches(event):
+                    try:
+                        queue.put_nowait(event)
+                    except asyncio.QueueFull:
+                        break
+
         sub = Subscription(
             sub_id=sub_id,
-            filter_spec=filter_spec or StreamFilter(),
+            filter_spec=effective_filter,
             queue=queue,
             bus=self,
         )
         self._subscriptions[sub_id] = sub
-        logger.debug("Subscription %s created (filter=%s)", sub_id, filter_spec)
+        logger.debug("Subscription %s created (filter=%s, replay=%s)", sub_id, filter_spec, replay)
         return sub
 
     async def publish(self, event: StreamEvent) -> int:
@@ -181,6 +199,7 @@ class EventBus:
             Number of subscribers that received the event.
         """
         self._event_count += 1
+        self._replay_buffer.append(event)
         delivered = 0
 
         for sub in list(self._subscriptions.values()):

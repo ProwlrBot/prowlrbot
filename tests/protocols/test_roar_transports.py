@@ -255,19 +255,10 @@ class TestMessageSigningCrossTransport(unittest.TestCase):
             content={"action": "test", "params": {"x": 1}},
         )
 
-        # Verify the signature matches the canonical body
-        import hashlib
-        import hmac as hmac_mod
-
-        canonical = json.dumps(
-            {"id": msg.id, "intent": "execute", "payload": msg.payload},
-            sort_keys=True,
-        )
-        expected_sig = hmac_mod.new(
-            b"cross-transport-secret", canonical.encode(), hashlib.sha256
-        ).hexdigest()
-        actual_sig = msg.auth["signature"].split(":")[1]
-        assert actual_sig == expected_sig
+        # Verify the message can be verified with the same secret
+        assert msg.verify("cross-transport-secret", max_age_seconds=60)
+        # And fails with wrong secret
+        assert not msg.verify("wrong-secret", max_age_seconds=60)
 
 
 if __name__ == "__main__":

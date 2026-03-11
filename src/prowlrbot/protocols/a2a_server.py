@@ -230,9 +230,18 @@ class A2ATaskStore:
         status: TaskStatus,
         message: Optional[str] = None,
     ) -> Optional[A2ATask]:
-        """Transition a task to a new status with history tracking."""
+        """Transition a task to a new status with history tracking.
+
+        Validates the transition against the A2A v0.3.0 state machine.
+        Raises ValueError if the transition is invalid.
+        """
         task = self._tasks.get(task_id)
         if task:
+            allowed = _VALID_TRANSITIONS.get(task.status, set())
+            if status not in allowed:
+                raise ValueError(
+                    f"Invalid transition: {task.status} -> {status}"
+                )
             task.status = status
             task.history.append(StatusEntry(status=status, message=message))
         return task
@@ -263,6 +272,21 @@ class A2ATaskStore:
 # FastAPI Router
 # ------------------------------------------------------------------
 
+# Maximum tasks in the in-memory store (DoS protection).
+_MAX_TASKS = 10_000
+
+# Valid state transitions per A2A v0.3.0 spec.
+_VALID_TRANSITIONS: Dict[TaskStatus, set] = {
+    TaskStatus.SUBMITTED: {TaskStatus.WORKING, TaskStatus.REJECTED, TaskStatus.CANCELED, TaskStatus.FAILED},
+    TaskStatus.WORKING: {TaskStatus.COMPLETED, TaskStatus.INPUT_REQUIRED, TaskStatus.CANCELED, TaskStatus.FAILED},
+    TaskStatus.INPUT_REQUIRED: {TaskStatus.WORKING, TaskStatus.CANCELED, TaskStatus.FAILED},
+    TaskStatus.COMPLETED: set(),
+    TaskStatus.FAILED: set(),
+    TaskStatus.CANCELED: set(),
+    TaskStatus.REJECTED: set(),
+}
+
+
 router = APIRouter(tags=["a2a"])
 _store = A2ATaskStore()
 _agent_card = A2AAgentCard()
@@ -273,6 +297,12 @@ def set_event_bus(bus: Any) -> None:
     """Inject a ROAR EventBus for real-time A2A SSE streaming."""
     global _event_bus
     _event_bus = bus
+
+
+def reset_store(store: Optional[A2ATaskStore] = None) -> None:
+    """Replace the module-level task store (for testing or reinitialization)."""
+    global _store
+    _store = store or A2ATaskStore()
 
 
 @router.get("/.well-known/agent.json")
@@ -297,11 +327,15 @@ async def send_task(request: SendTaskRequest) -> A2ATask:
     if request.task_id:
         task = _store.get(request.task_id)
         if not task:
-            raise HTTPException(404, f"Task '{request.task_id}' not found")
+            raise HTTPException(404, "Task not found")
         _store.append_message(request.task_id, request.message)
         if task.status == TaskStatus.INPUT_REQUIRED:
             _store.update_status(request.task_id, TaskStatus.WORKING)
         return task
+
+    # Enforce task count limit (DoS protection)
+    if len(_store.list_tasks()) >= _MAX_TASKS:
+        raise HTTPException(507, "Task store capacity reached")
 
     task = A2ATask(
         from_agent=request.from_agent,
@@ -328,7 +362,7 @@ async def send_task_subscribe(request: SendTaskRequest) -> StreamingResponse:
     if request.task_id:
         task = _store.get(request.task_id)
         if not task:
-            raise HTTPException(404, f"Task '{request.task_id}' not found")
+            raise HTTPException(404, "Task not found")
         _store.append_message(request.task_id, request.message)
         if task.status == TaskStatus.INPUT_REQUIRED:
             _store.update_status(request.task_id, TaskStatus.WORKING)
@@ -378,7 +412,7 @@ async def get_task(task_id: str) -> A2ATask:
     """Get a task by ID including messages, artifacts, and history."""
     task = _store.get(task_id)
     if not task:
-        raise HTTPException(404, f"Task '{task_id}' not found")
+        raise HTTPException(404, "Task not found")
     return task
 
 
@@ -391,7 +425,7 @@ async def subscribe_task(task_id: str) -> StreamingResponse:
     """
     task = _store.get(task_id)
     if not task:
-        raise HTTPException(404, f"Task '{task_id}' not found")
+        raise HTTPException(404, "Task not found")
 
     async def _event_stream() -> Any:
         import json
@@ -431,13 +465,13 @@ async def cancel_task(task_id: str) -> Dict[str, str]:
     """
     task = _store.get(task_id)
     if not task:
-        raise HTTPException(404, f"Task '{task_id}' not found")
+        raise HTTPException(404, "Task not found")
 
     if task.status not in (TaskStatus.SUBMITTED, TaskStatus.WORKING):
         raise HTTPException(
             409,
-            f"Cannot cancel task in '{task.status}' status — "
-            f"only 'submitted' or 'working' tasks can be canceled",
+            "Cannot cancel task in current status — "
+            "only 'submitted' or 'working' tasks can be canceled",
         )
 
     _store.update_status(task_id, TaskStatus.CANCELED)

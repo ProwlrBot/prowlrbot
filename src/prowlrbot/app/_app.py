@@ -261,7 +261,9 @@ app.include_router(
 # --- A2A Protocol (agent-to-agent discovery + tasks) ---
 from ..protocols.a2a_server import router as a2a_router
 
-app.include_router(a2a_router)  # Mounted at root for /.well-known/agent.json
+# A2A endpoints are auth-protected (except /.well-known/agent.json which is
+# public for agent discovery per A2A spec).
+app.include_router(a2a_router, dependencies=[Depends(auth_dep)])
 
 # --- ROAR Protocol (unified agent communication) ---
 from ..protocols.roar import AgentIdentity

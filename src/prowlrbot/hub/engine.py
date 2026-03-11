@@ -16,7 +16,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from .db import init_db
@@ -67,7 +67,7 @@ class WarRoomEngine:
                 self._on_event(
                     {
                         "type": event_type,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                         **payload,
                     }
                 )
@@ -729,7 +729,7 @@ class WarRoomEngine:
 
     def purge_old_events(self, retention_days: int = 30) -> int:
         """Delete events older than retention_days. Returns count deleted."""
-        cutoff = (datetime.utcnow() - timedelta(days=retention_days)).isoformat()
+        cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=retention_days)).isoformat()
         result = self._conn.execute(
             "DELETE FROM events WHERE timestamp < ?",
             (cutoff,),

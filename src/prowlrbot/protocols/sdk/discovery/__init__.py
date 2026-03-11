@@ -12,8 +12,12 @@ Ref: IETF BANDAID draft for DNS-based agent discovery.
 
 from .cache import DiscoveryCache
 from .hub import HubClient
+from .hub_server import create_hub_router
+from .sqlite_directory import SQLiteAgentDirectory
 
 __all__ = [
     "DiscoveryCache",
     "HubClient",
+    "SQLiteAgentDirectory",
+    "create_hub_router",
 ]

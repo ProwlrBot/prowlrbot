@@ -11,7 +11,7 @@ import re
 import sqlite3
 import threading
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 # Max items returned by any list query
@@ -114,7 +114,7 @@ class LearningDB:
     ) -> str:
         """Store a new learning. Returns the learning_id."""
         learning_id = str(uuid.uuid4())
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(tz=timezone.utc).isoformat()
         with self._lock:
             self._conn.execute(
                 """INSERT INTO learnings
@@ -190,7 +190,7 @@ class LearningDB:
         with self._lock:
             self._conn.execute(
                 "UPDATE learnings SET times_used = times_used + 1, updated_at = ? WHERE learning_id = ?",
-                (datetime.utcnow().isoformat(), learning_id),
+                (datetime.now(tz=timezone.utc).isoformat(), learning_id),
             )
             self._conn.commit()
 
@@ -209,7 +209,7 @@ class LearningDB:
         with self._lock:
             self._conn.execute(
                 "INSERT INTO sessions (session_id, agent_id, started_at) VALUES (?, ?, ?)",
-                (session_id, agent_id, datetime.utcnow().isoformat()),
+                (session_id, agent_id, datetime.now(tz=timezone.utc).isoformat()),
             )
             self._conn.commit()
         return session_id
@@ -222,7 +222,7 @@ class LearningDB:
             self._conn.execute(
                 "UPDATE sessions SET ended_at = ?, summary = ?, learnings_captured = ? WHERE session_id = ?",
                 (
-                    datetime.utcnow().isoformat(),
+                    datetime.now(tz=timezone.utc).isoformat(),
                     summary,
                     learnings_captured,
                     session_id,

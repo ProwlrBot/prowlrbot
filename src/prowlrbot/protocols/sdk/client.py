@@ -73,7 +73,12 @@ class ROARClient:
     ) -> None:
         self._identity = identity
         self._directory_url = directory_url
-        self._signing_secret = signing_secret or uuid.uuid4().hex
+        self._signing_secret = signing_secret
+        if not signing_secret:
+            logger.warning(
+                "ROARClient created without signing_secret — messages will not be signed. "
+                "Set a shared secret for production use."
+            )
         self._directory = AgentDirectory()
         self._card: Optional[AgentCard] = None
 
@@ -333,22 +338,14 @@ class ROARClient:
     def _sign_message(self, msg: ROARMessage) -> ROARMessage:
         """Sign a message with HMAC-SHA256 using the client's secret.
 
+        If no signing secret is configured, returns the message unsigned.
+
         Args:
             msg: The message to sign.
 
         Returns:
-            The same message instance, now with ``auth`` populated.
+            The same message instance, now with ``auth`` populated (if secret is set).
         """
-        body = json.dumps(
-            {"id": msg.id, "intent": msg.intent, "payload": msg.payload},
-            sort_keys=True,
-        )
-        sig = hmac.new(
-            self._signing_secret.encode(), body.encode(), hashlib.sha256
-        ).hexdigest()
-        msg.auth = {
-            "signature": f"hmac-sha256:{sig}",
-            "signer": self._identity.did,
-            "timestamp": time.time(),
-        }
-        return msg
+        if not self._signing_secret:
+            return msg
+        return msg.sign(self._signing_secret)

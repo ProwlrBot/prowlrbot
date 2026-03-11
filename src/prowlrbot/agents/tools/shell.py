@@ -18,12 +18,46 @@ from prowlrbot.constant import WORKING_DIR
 
 @dataclass
 class ShellPolicy:
-    """Policy for shell command validation."""
+    """Policy for shell command validation.
+
+    Uses a layered approach:
+    1. Reject any command containing shell metacharacters that enable
+       injection ($(...), backticks, process substitution, etc.)
+    2. Reject commands matching known dangerous patterns (denylist)
+    3. Only allow commands whose base executable is in the allowlist
+    """
+
+    allowed_commands: List[str] = field(
+        default_factory=lambda: [
+            # Navigation & inspection
+            "ls", "pwd", "cat", "head", "tail", "wc", "file", "stat",
+            "find", "grep", "rg", "awk", "sed", "sort", "uniq", "diff",
+            "tree", "which", "whereis", "echo", "printf", "date", "env",
+            # Development
+            "python", "python3", "pip", "pip3", "node", "npm", "npx",
+            "git", "gh", "make", "cmake", "cargo", "go", "rustc",
+            "pytest", "black", "ruff", "mypy", "flake8", "isort",
+            "pre-commit", "tox",
+            # Network (read-only)
+            "curl", "wget", "ping", "dig", "nslookup", "host",
+            # File manipulation (safe)
+            "cp", "mv", "mkdir", "touch", "ln", "tar", "zip", "unzip",
+            "gzip", "gunzip", "xz",
+            # System info
+            "uname", "whoami", "hostname", "df", "du", "free", "top",
+            "ps", "uptime", "id", "groups",
+            # Text processing
+            "jq", "yq", "cut", "tr", "tee", "xargs", "less", "more",
+            # Docker (read-mostly)
+            "docker", "docker-compose",
+            # ProwlrBot
+            "prowlr",
+        ]
+    )
 
     blocked_patterns: List[str] = field(
         default_factory=lambda: [
-            r"\brm\b.*-[rR].*-[fF]",  # rm -rf variants
-            r"\brm\b.*-[fF].*-[rR]",  # rm -fr variants
+            r"\brm\b.*-[rRfF]",  # rm with force/recursive flags
             r"\brm\b\s+-rf\b",  # rm -rf
             r"\bdd\b.*\bof=/dev/",  # dd to device
             r"\bmkfs\b",  # format filesystem
@@ -31,13 +65,27 @@ class ShellPolicy:
             r"\bchmod\b.*\+s\b",  # setuid
             r"\bchown\b.*root",  # chown to root
             r">\s*/dev/[sh]d",  # write to disk device
-            r"\bcurl\b.*\|\s*\bbash\b",  # curl | bash
-            r"\bwget\b.*\|\s*\bbash\b",  # wget | bash
-            r"\bcurl\b.*\|\s*\bsh\b",  # curl | sh
-            r"\bwget\b.*\|\s*\bsh\b",  # wget | sh
             r"\b(sudo|su)\b",  # privilege escalation
             r"\bkill\s+-9\s+1\b",  # kill init
             r":()\{.*\|.*&.*\};:",  # fork bomb
+            r"\bnc\b.*-[lep]",  # netcat listeners/reverse shells
+            r"\bpython[23]?\b.*-c\b",  # python -c (inline code execution)
+            r"\bperl\b.*-e\b",  # perl -e
+            r"\bruby\b.*-e\b",  # ruby -e
+            r"\beval\b",  # eval
+            r"\bexec\b",  # exec
+            r"\bsource\b",  # source
+        ]
+    )
+
+    # Shell metacharacters that enable injection bypasses
+    _INJECTION_PATTERNS: List[str] = field(
+        default_factory=lambda: [
+            r"\$\(",  # $(command substitution)
+            r"`",  # backtick substitution
+            r"\$\{",  # ${variable expansion}
+            r"<\(",  # <(process substitution)
+            r"\$'",  # $'...' ANSI-C quoting (hex/octal escapes)
         ]
     )
 
@@ -46,14 +94,37 @@ class ShellPolicy:
 
         Returns (allowed, reason).
         """
+        # Layer 1: Reject injection metacharacters
+        for pattern in self._INJECTION_PATTERNS:
+            if re.search(pattern, command):
+                return False, "Command blocked: contains shell injection metacharacters"
+
+        # Layer 2: Check denylist patterns
         for pattern in self.blocked_patterns:
             if re.search(pattern, command, re.IGNORECASE):
                 return False, "Command blocked: matches safety pattern"
 
-        # Also check individual segments for pipe/semicolon chains
-        segments = re.split(r"[;|&]", command)
+        # Layer 3: Check allowlist — every segment's base command must be allowed
+        # Split on pipes, semicolons, and && / ||
+        segments = re.split(r"\s*[;|]\s*|\s*&&\s*|\s*\|\|\s*", command)
         for segment in segments:
             segment = segment.strip()
+            if not segment:
+                continue
+
+            # Extract the base command (first word, ignoring env vars like FOO=bar)
+            parts = segment.split()
+            base_cmd = None
+            for part in parts:
+                if "=" in part and not part.startswith("-"):
+                    continue  # Skip env var assignments
+                base_cmd = Path(part).name  # Handle /usr/bin/python -> python
+                break
+
+            if base_cmd and base_cmd not in self.allowed_commands:
+                return False, f"Command blocked: '{base_cmd}' is not in the allowed commands list"
+
+            # Also check denylist on each segment
             for pattern in self.blocked_patterns:
                 if re.search(pattern, segment, re.IGNORECASE):
                     return False, "Command blocked: matches safety pattern"

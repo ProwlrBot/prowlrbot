@@ -35,7 +35,7 @@ class AgentIdentity(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         if not self.did:
-            uid = uuid.uuid4().hex[:8]
+            uid = uuid.uuid4().hex[:16]
             slug = self.display_name.lower().replace(" ", "-")[:20] or "agent"
             self.did = f"did:roar:{self.agent_type}:{slug}-{uid}"
 
@@ -158,29 +158,58 @@ class ROARMessage(BaseModel):
 
     model_config = {"populate_by_name": True}
 
-    def sign(self, secret: str) -> "ROARMessage":
-        """Add HMAC-SHA256 signature."""
-        body = json.dumps(
-            {"id": self.id, "intent": self.intent, "payload": self.payload},
+    def _signing_body(self) -> str:
+        """Build the canonical JSON body for HMAC signing.
+
+        Covers ALL security-relevant fields: id, from, to, intent,
+        payload, context, and the auth timestamp (set before signing).
+        """
+        return json.dumps(
+            {
+                "id": self.id,
+                "from": self.from_identity.did,
+                "to": self.to_identity.did,
+                "intent": self.intent,
+                "payload": self.payload,
+                "context": self.context,
+                "timestamp": self.auth.get("timestamp", self.timestamp),
+            },
             sort_keys=True,
         )
+
+    def sign(self, secret: str) -> "ROARMessage":
+        """Add HMAC-SHA256 signature covering all message fields."""
+        now = time.time()
+        self.auth = {"timestamp": now}
+        body = self._signing_body()
         sig = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
-        self.auth = {
-            "signature": f"hmac-sha256:{sig}",
-            "timestamp": time.time(),
-        }
+        self.auth["signature"] = f"hmac-sha256:{sig}"
         return self
 
-    def verify(self, secret: str) -> bool:
-        """Verify HMAC signature."""
+    def verify(self, secret: str, max_age_seconds: float = 300.0) -> bool:
+        """Verify HMAC signature with replay protection.
+
+        Args:
+            secret: The shared signing secret.
+            max_age_seconds: Maximum age of the message in seconds (default 5 min).
+                Set to 0 to disable timestamp checking.
+
+        Returns:
+            True if signature is valid and message is within the time window.
+        """
         sig_value = self.auth.get("signature", "")
         if not sig_value.startswith("hmac-sha256:"):
             return False
+
+        # Check timestamp freshness (replay protection)
+        if max_age_seconds > 0:
+            msg_time = self.auth.get("timestamp", 0)
+            age = abs(time.time() - msg_time)
+            if age > max_age_seconds:
+                return False
+
         expected_sig = sig_value.split(":", 1)[1]
-        body = json.dumps(
-            {"id": self.id, "intent": self.intent, "payload": self.payload},
-            sort_keys=True,
-        )
+        body = self._signing_body()
         actual_sig = hmac.new(
             secret.encode(), body.encode(), hashlib.sha256
         ).hexdigest()

@@ -11,8 +11,14 @@ Usage:
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
+
+# Maximum input line length (1 MB) to prevent memory exhaustion.
+_MAX_LINE_LENGTH = 1_048_576
 
 
 class ACPServer:
@@ -25,7 +31,18 @@ class ACPServer:
 
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Route a JSON-RPC request to the appropriate handler."""
+        # Validate JSON-RPC 2.0 structure
+        if request.get("jsonrpc") != "2.0":
+            return self._error_response(
+                request.get("id"), -32600, "Invalid Request: missing or invalid jsonrpc version"
+            )
+
         method = request.get("method", "")
+        if not isinstance(method, str) or not method:
+            return self._error_response(
+                request.get("id"), -32600, "Invalid Request: missing or invalid method"
+            )
+
         params = request.get("params", {})
         req_id = request.get("id")
 
@@ -39,13 +56,14 @@ class ACPServer:
 
         handler = handlers.get(method)
         if handler is None:
-            return self._error_response(req_id, -32601, f"Method not found: {method}")
+            return self._error_response(req_id, -32601, "Method not found")
 
         try:
             result = await handler(params)
             return {"jsonrpc": "2.0", "id": req_id, "result": result}
         except Exception as exc:
-            return self._error_response(req_id, -32603, str(exc))
+            logger.exception("ACP handler error for method %s", method)
+            return self._error_response(req_id, -32603, "Internal error")
 
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle ACP initialize handshake."""
@@ -79,7 +97,7 @@ class ACPServer:
         if self._runner is None:
             return {
                 "session_id": self._session_id,
-                "response": f"[ProwlrBot ACP] No runner configured. Received: {prompt[:100]}",
+                "response": "No runner configured.",
                 "status": "no_runner",
             }
 
@@ -90,10 +108,11 @@ class ACPServer:
                 "response": result.get("response", ""),
                 "status": "ok",
             }
-        except Exception as exc:
+        except Exception:
+            logger.exception("ACP prompt processing error")
             return {
                 "session_id": self._session_id,
-                "response": str(exc),
+                "response": "Internal processing error.",
                 "status": "error",
             }
 
@@ -124,12 +143,23 @@ class ACPServer:
             line = await loop.run_in_executor(None, sys.stdin.readline)
             if not line:
                 break
+
+            # Enforce max line length (DoS protection)
+            if len(line) > _MAX_LINE_LENGTH:
+                error = self._error_response(None, -32600, "Request too large")
+                sys.stdout.write(json.dumps(error) + "\n")
+                sys.stdout.flush()
+                continue
+
             line = line.strip()
             if not line:
                 continue
             try:
                 request = json.loads(line)
             except json.JSONDecodeError:
+                error = self._error_response(None, -32700, "Parse error")
+                sys.stdout.write(json.dumps(error) + "\n")
+                sys.stdout.flush()
                 continue
             response = await self.handle_request(request)
             sys.stdout.write(json.dumps(response) + "\n")

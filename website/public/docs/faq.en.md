@@ -12,15 +12,15 @@ Please check the [Comparison](/docs/comparison) page for detailed feature compar
 ### How to install ProwlrBot
 
 ProwlrBot supports multiple installation methods. See
-[Quick Start](https://prowlrbot.dev/docs/quickstart) for details:
+[Quick Start](./quickstart) for details:
 
 1. One-line installer (sets up Python automatically)
 
 ```
 # macOS / Linux:
-curl -fsSL https://prowlrbot.dev/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/prowlrbot/prowlrbot/main/scripts/install.sh | bash
 # Windows (PowerShell):
-irm https://prowlrbot.dev/install.ps1 | iex
+irm https://raw.githubusercontent.com/prowlrbot/prowlrbot/main/scripts/install.ps1 | iex
 # For latest instructions, refer to docs and prefer pip if needed.
 ```
 
@@ -87,7 +87,7 @@ prowlr app
 
 The default Console URL is `http://127.0.0.1:8088/`. After quick init, you can
 open Console and customize settings. See
-[Quick Start](https://prowlrbot.dev/docs/quickstart).
+[Quick Start](./quickstart).
 
 ### Open-source repository
 
@@ -102,7 +102,7 @@ You can check version changes in ProwlrBot GitHub
 ### How to configure models
 
 In Console, go to **Settings -> Models**. See
-[Console -> Models](https://prowlrbot.dev/docs/console#models) for
+[Console -> Models](./console#models) for
 details.
 
 - Cloud models: fill provider API key (ModelScope, DashScope, or custom), then
@@ -112,18 +112,18 @@ details.
 
 You can also use `prowlr models` CLI commands for configuration, download, and
 switching. See
-[CLI -> Models and Environment Variables -> prowlr models](https://prowlrbot.dev/docs/cli#prowlr-models).
+[CLI -> Models and Environment Variables -> prowlr models](./cli#prowlr-models).
 
 ### How to manage Skills
 
 Go to **Agent -> Skills** in Console. You can enable/disable Skills, create
 custom Skills, and import Skills from Skills Hub. See
-[Skills](https://prowlrbot.dev/docs/skills).
+[Skills](./skills).
 
 ### How to configure MCP
 
 Go to **Agent -> MCP** in Console. You can enable/disable/delete/create MCP
-clients there. See [MCP](https://prowlrbot.dev/docs/mcp).
+clients there. See [MCP](./mcp).
 
 ### Common error
 

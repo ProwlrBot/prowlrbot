@@ -50,7 +50,7 @@ class ROARServer:
     def __init__(
         self,
         identity: AgentIdentity,
-        host: str = "0.0.0.0",
+        host: str = "127.0.0.1",
         port: int = 8089,
         *,
         description: str = "",

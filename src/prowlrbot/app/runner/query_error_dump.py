@@ -8,7 +8,7 @@ import logging
 import os
 import tempfile
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..channels.schema import DEFAULT_CHANNEL
@@ -81,7 +81,7 @@ def write_query_error_dump(
             "request_info": request_info,
             "request": request_full,
             "agent_state": agent_state,
-            "ts_utc": datetime.utcnow().isoformat() + "Z",
+            "ts_utc": datetime.now(tz=timezone.utc).isoformat() + "Z",
         }
         fd, path = tempfile.mkstemp(
             prefix="prowlrbot_query_error_",

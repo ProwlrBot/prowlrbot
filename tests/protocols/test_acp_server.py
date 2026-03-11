@@ -130,4 +130,4 @@ class TestACPPrompt:
         )
         result = resp["result"]
         assert result["status"] == "error"
-        assert "Model unavailable" in result["response"]
+        assert result["response"] == "Internal processing error."
