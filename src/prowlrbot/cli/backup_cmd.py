@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """CLI commands for backup and restore."""
+
 from __future__ import annotations
 
 import tarfile
@@ -86,11 +87,11 @@ def backup_restore(backup_file: str, force: bool) -> None:
         for member in tar.getmembers():
             if member.name.startswith("prowlrbot/"):
                 # Strip the prowlrbot/ prefix and extract to WORKING_DIR
-                member.name = member.name[len("prowlrbot/"):]
+                member.name = member.name[len("prowlrbot/") :]
                 tar.extract(member, path=str(WORKING_DIR))
                 click.echo(f"  > {member.name}")
             elif member.name.startswith("prowlrbot.secret/"):
-                member.name = member.name[len("prowlrbot.secret/"):]
+                member.name = member.name[len("prowlrbot.secret/") :]
                 tar.extract(member, path=str(SECRET_DIR))
                 click.echo(f"  > [secret] {member.name}")
 

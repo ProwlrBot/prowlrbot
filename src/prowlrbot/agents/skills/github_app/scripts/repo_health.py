@@ -18,14 +18,15 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
-
 # ---------------------------------------------------------------------------
 # Data structures
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BranchInfo:
     """Info about a git branch."""
+
     name: str
     last_commit_date: datetime | None = None
     is_merged: bool = False
@@ -34,6 +35,7 @@ class BranchInfo:
 @dataclass
 class HealthReport:
     """Repository health metrics."""
+
     repo_path: str
     checked_at: str = ""
 
@@ -69,6 +71,7 @@ class HealthReport:
 # Git command helpers
 # ---------------------------------------------------------------------------
 
+
 def _run_git(repo: str, args: list[str], default: str = "") -> str:
     """Run a git command and return stdout. Returns default on failure."""
     cmd = ["git", "-C", repo] + args
@@ -98,6 +101,7 @@ def _run_git_lines(repo: str, args: list[str]) -> list[str]:
 # Health check logic
 # ---------------------------------------------------------------------------
 
+
 def check_health(repo: str, stale_days: int = 30) -> HealthReport:
     """Run all health checks against a git repository."""
     report = HealthReport(
@@ -125,9 +129,15 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
     report.commits_last_7_days = int(commits_7) if commits_7.isdigit() else 0
 
     # Unique authors in last 30 days
-    authors_output = _run_git(repo, [
-        "log", f"--since={since_30}", "--format=%aN", "HEAD",
-    ])
+    authors_output = _run_git(
+        repo,
+        [
+            "log",
+            f"--since={since_30}",
+            "--format=%aN",
+            "HEAD",
+        ],
+    )
     if authors_output:
         unique_authors = set(authors_output.split("\n"))
         report.unique_authors_30_days = len(unique_authors)
@@ -137,9 +147,15 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
     report.total_branches = len(branches)
 
     # Default branch detection
-    default_branch = _run_git(repo, [
-        "symbolic-ref", "--short", "refs/remotes/origin/HEAD",
-    ], default="")
+    default_branch = _run_git(
+        repo,
+        [
+            "symbolic-ref",
+            "--short",
+            "refs/remotes/origin/HEAD",
+        ],
+        default="",
+    )
     if default_branch:
         default_branch = default_branch.replace("origin/", "")
     else:
@@ -151,25 +167,37 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
         else:
             default_branch = branches[0] if branches else "main"
 
-    stale_cutoff = (datetime.now(timezone.utc) - timedelta(days=stale_days))
+    stale_cutoff = datetime.now(timezone.utc) - timedelta(days=stale_days)
 
     for branch in branches:
         if branch == default_branch:
             continue
 
         # Check if merged into default branch
-        merged_branches = _run_git_lines(repo, [
-            "branch", "--merged", default_branch, "--format=%(refname:short)",
-        ])
+        merged_branches = _run_git_lines(
+            repo,
+            [
+                "branch",
+                "--merged",
+                default_branch,
+                "--format=%(refname:short)",
+            ],
+        )
         is_merged = branch in merged_branches
 
         if is_merged:
             report.merged_not_deleted.append(branch)
 
         # Check last commit date
-        date_str = _run_git(repo, [
-            "log", "-1", "--format=%aI", branch,
-        ])
+        date_str = _run_git(
+            repo,
+            [
+                "log",
+                "-1",
+                "--format=%aI",
+                branch,
+            ],
+        )
         if date_str:
             try:
                 last_date = datetime.fromisoformat(date_str)
@@ -192,9 +220,15 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
     report.total_tags = len(tags)
     if tags:
         report.latest_tag = tags[0]
-        tag_date = _run_git(repo, [
-            "log", "-1", "--format=%aI", tags[0],
-        ])
+        tag_date = _run_git(
+            repo,
+            [
+                "log",
+                "-1",
+                "--format=%aI",
+                tags[0],
+            ],
+        )
         report.latest_tag_date = tag_date if tag_date else "unknown"
 
     # --- File metrics ---
@@ -212,7 +246,9 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
 
     # --- Generate warnings ---
     if report.commits_last_30_days == 0:
-        report.warnings.append("No commits in the last 30 days — repository may be inactive.")
+        report.warnings.append(
+            "No commits in the last 30 days — repository may be inactive."
+        )
 
     if len(report.merged_not_deleted) > 5:
         report.warnings.append(
@@ -236,6 +272,7 @@ def check_health(repo: str, stale_days: int = 30) -> HealthReport:
 # ---------------------------------------------------------------------------
 # Output formatting
 # ---------------------------------------------------------------------------
+
 
 def format_markdown(report: HealthReport) -> str:
     """Format health report as markdown."""
@@ -300,7 +337,9 @@ def format_markdown(report: HealthReport) -> str:
     lines.append("| Metric | Value |")
     lines.append("|--------|-------|")
     lines.append(f"| Total tags | {report.total_tags} |")
-    lines.append(f"| Latest tag | `{report.latest_tag}`{' (' + report.latest_tag_date + ')' if report.latest_tag_date else ''} |")
+    lines.append(
+        f"| Latest tag | `{report.latest_tag}`{' (' + report.latest_tag_date + ')' if report.latest_tag_date else ''} |"
+    )
     lines.append("")
 
     # Repository size
@@ -355,24 +394,28 @@ def format_json(report: HealthReport) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Check repository health and output a structured report.",
     )
     parser.add_argument(
-        "--repo", "-r",
+        "--repo",
+        "-r",
         type=str,
         default=".",
         help="Path to the git repository (default: current directory).",
     )
     parser.add_argument(
-        "--days", "-d",
+        "--days",
+        "-d",
         type=int,
         default=30,
         help="Number of days after which a branch is considered stale (default: 30).",
     )
     parser.add_argument(
-        "--format", "-f",
+        "--format",
+        "-f",
         type=str,
         choices=["markdown", "json"],
         default="markdown",

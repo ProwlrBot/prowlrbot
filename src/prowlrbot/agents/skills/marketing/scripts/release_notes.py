@@ -12,7 +12,6 @@ import sys
 from collections import defaultdict
 from typing import Optional
 
-
 COMMIT_TYPE_LABELS = {
     "feat": "New Features",
     "fix": "Bug Fixes",
@@ -61,9 +60,7 @@ def get_tags(cwd: str) -> list[str]:
     return output.splitlines()
 
 
-def get_commits_between(
-    from_ref: str, to_ref: str, cwd: str
-) -> list[dict[str, str]]:
+def get_commits_between(from_ref: str, to_ref: str, cwd: str) -> list[dict[str, str]]:
     """Get commits between two refs as a list of dicts."""
     log_format = FIELD_SEP.join(["%H", "%an", "%ae", "%as", "%s"])
     output = run_git(
@@ -249,7 +246,9 @@ def generate_release_notes(
     tags = get_tags(repo_path)
 
     if not tags:
-        return "No git tags found. Create tags with `git tag v1.0.0` to use release notes."
+        return (
+            "No git tags found. Create tags with `git tag v1.0.0` to use release notes."
+        )
 
     if to_tag is None:
         to_tag = tags[0]

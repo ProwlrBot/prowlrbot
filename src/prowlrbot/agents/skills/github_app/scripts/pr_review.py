@@ -17,7 +17,6 @@ import sys
 from dataclasses import dataclass, field
 from typing import TextIO
 
-
 # ---------------------------------------------------------------------------
 # Patterns to flag
 # ---------------------------------------------------------------------------
@@ -37,20 +36,57 @@ TODO_PATTERN = re.compile(r"\b(TODO|FIXME|HACK|XXX|NOCOMMIT)\b", re.IGNORECASE)
 
 SENSITIVE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("API key", re.compile(r"(?i)(api[_-]?key|apikey)\s*[:=]\s*['\"][A-Za-z0-9]")),
-    ("Secret/Token", re.compile(r"(?i)(secret|token|password|passwd)\s*[:=]\s*['\"][A-Za-z0-9]")),
+    (
+        "Secret/Token",
+        re.compile(r"(?i)(secret|token|password|passwd)\s*[:=]\s*['\"][A-Za-z0-9]"),
+    ),
     ("AWS key", re.compile(r"AKIA[0-9A-Z]{16}")),
     ("Private key", re.compile(r"-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----")),
 ]
 
 BINARY_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".svg",
-    ".woff", ".woff2", ".ttf", ".eot", ".otf",
-    ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".7z",
-    ".exe", ".dll", ".so", ".dylib", ".bin",
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".pptx",
-    ".pyc", ".pyo", ".class", ".o", ".obj",
-    ".mp3", ".mp4", ".wav", ".avi", ".mov",
-    ".sqlite", ".db",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".bmp",
+    ".ico",
+    ".svg",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".otf",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".rar",
+    ".7z",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".bin",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".pptx",
+    ".pyc",
+    ".pyo",
+    ".class",
+    ".o",
+    ".obj",
+    ".mp3",
+    ".mp4",
+    ".wav",
+    ".avi",
+    ".mov",
+    ".sqlite",
+    ".db",
 }
 
 LARGE_CHANGE_THRESHOLD = 500  # lines added+deleted in a single file
@@ -60,9 +96,11 @@ LARGE_CHANGE_THRESHOLD = 500  # lines added+deleted in a single file
 # Data structures
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FileDiff:
     """Represents the diff for a single file."""
+
     filename: str
     old_filename: str | None = None
     is_new: bool = False
@@ -77,6 +115,7 @@ class FileDiff:
 @dataclass
 class Issue:
     """A flagged issue found during review."""
+
     severity: str  # "warning" | "info" | "error"
     category: str
     filename: str
@@ -87,6 +126,7 @@ class Issue:
 # ---------------------------------------------------------------------------
 # Diff parsing
 # ---------------------------------------------------------------------------
+
 
 def parse_diff(stream: TextIO) -> list[FileDiff]:
     """Parse a unified diff into a list of FileDiff objects."""
@@ -124,11 +164,11 @@ def parse_diff(stream: TextIO) -> list[FileDiff]:
         # Rename detection
         if line.startswith("rename from "):
             current.is_rename = True
-            current.old_filename = line[len("rename from "):]
+            current.old_filename = line[len("rename from ") :]
             continue
         if line.startswith("rename to "):
             current.is_rename = True
-            current.filename = line[len("rename to "):]
+            current.filename = line[len("rename to ") :]
             continue
 
         # Hunk header — extract new-file line number
@@ -161,6 +201,7 @@ def parse_diff(stream: TextIO) -> list[FileDiff]:
 # Analysis
 # ---------------------------------------------------------------------------
 
+
 def _get_extension(filename: str) -> str:
     """Get the lowercased file extension."""
     dot = filename.rfind(".")
@@ -178,63 +219,73 @@ def analyze(files: list[FileDiff]) -> list[Issue]:
 
         # Binary file check
         if f.is_binary or ext in BINARY_EXTENSIONS:
-            issues.append(Issue(
-                severity="warning",
-                category="Binary file",
-                filename=f.filename,
-                line=None,
-                message=f"Binary file detected in diff. Consider using Git LFS or adding to .gitignore.",
-            ))
+            issues.append(
+                Issue(
+                    severity="warning",
+                    category="Binary file",
+                    filename=f.filename,
+                    line=None,
+                    message=f"Binary file detected in diff. Consider using Git LFS or adding to .gitignore.",
+                )
+            )
             continue
 
         # Large change check
         total_changes = f.additions + f.deletions
         if total_changes > LARGE_CHANGE_THRESHOLD:
-            issues.append(Issue(
-                severity="warning",
-                category="Large change",
-                filename=f.filename,
-                line=None,
-                message=(
-                    f"Large change: {f.additions} additions, {f.deletions} deletions "
-                    f"({total_changes} total). Consider breaking into smaller PRs."
-                ),
-            ))
+            issues.append(
+                Issue(
+                    severity="warning",
+                    category="Large change",
+                    filename=f.filename,
+                    line=None,
+                    message=(
+                        f"Large change: {f.additions} additions, {f.deletions} deletions "
+                        f"({total_changes} total). Consider breaking into smaller PRs."
+                    ),
+                )
+            )
 
         # Scan added lines for patterns
         for line_num, content in f.added_lines:
             # Debug statements
             for name, pattern in DEBUG_PATTERNS:
                 if pattern.search(content):
-                    issues.append(Issue(
-                        severity="warning",
-                        category="Debug statement",
-                        filename=f.filename,
-                        line=line_num,
-                        message=f"Debug statement `{name}` found — remove before merging.",
-                    ))
+                    issues.append(
+                        Issue(
+                            severity="warning",
+                            category="Debug statement",
+                            filename=f.filename,
+                            line=line_num,
+                            message=f"Debug statement `{name}` found — remove before merging.",
+                        )
+                    )
 
             # TODO/FIXME markers
             match = TODO_PATTERN.search(content)
             if match:
-                issues.append(Issue(
-                    severity="info",
-                    category="TODO marker",
-                    filename=f.filename,
-                    line=line_num,
-                    message=f"`{match.group(0)}` comment found: `{content.strip()}`",
-                ))
+                issues.append(
+                    Issue(
+                        severity="info",
+                        category="TODO marker",
+                        filename=f.filename,
+                        line=line_num,
+                        message=f"`{match.group(0)}` comment found: `{content.strip()}`",
+                    )
+                )
 
             # Sensitive data
             for name, pattern in SENSITIVE_PATTERNS:
                 if pattern.search(content):
-                    issues.append(Issue(
-                        severity="error",
-                        category="Sensitive data",
-                        filename=f.filename,
-                        line=line_num,
-                        message=f"Possible {name} detected — do not commit secrets to the repository.",
-                    ))
+                    issues.append(
+                        Issue(
+                            severity="error",
+                            category="Sensitive data",
+                            filename=f.filename,
+                            line=line_num,
+                            message=f"Possible {name} detected — do not commit secrets to the repository.",
+                        )
+                    )
 
     return issues
 
@@ -323,12 +374,14 @@ def generate_report(files: list[FileDiff], issues: list[Issue]) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Review a PR diff and output a structured markdown report.",
     )
     parser.add_argument(
-        "--file", "-f",
+        "--file",
+        "-f",
         type=str,
         default=None,
         help="Path to a diff/patch file. If omitted, reads from stdin.",

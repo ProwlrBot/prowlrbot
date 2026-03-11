@@ -20,24 +20,26 @@ from prowlrbot.constant import WORKING_DIR
 class ShellPolicy:
     """Policy for shell command validation."""
 
-    blocked_patterns: List[str] = field(default_factory=lambda: [
-        r"\brm\b.*-[rR].*-[fF]",       # rm -rf variants
-        r"\brm\b.*-[fF].*-[rR]",       # rm -fr variants
-        r"\brm\b\s+-rf\b",             # rm -rf
-        r"\bdd\b.*\bof=/dev/",          # dd to device
-        r"\bmkfs\b",                     # format filesystem
-        r"\bchmod\b.*\b777\b",          # chmod 777
-        r"\bchmod\b.*\+s\b",           # setuid
-        r"\bchown\b.*root",             # chown to root
-        r">\s*/dev/[sh]d",              # write to disk device
-        r"\bcurl\b.*\|\s*\bbash\b",    # curl | bash
-        r"\bwget\b.*\|\s*\bbash\b",   # wget | bash
-        r"\bcurl\b.*\|\s*\bsh\b",     # curl | sh
-        r"\bwget\b.*\|\s*\bsh\b",     # wget | sh
-        r"\b(sudo|su)\b",              # privilege escalation
-        r"\bkill\s+-9\s+1\b",         # kill init
-        r":()\{.*\|.*&.*\};:",         # fork bomb
-    ])
+    blocked_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"\brm\b.*-[rR].*-[fF]",  # rm -rf variants
+            r"\brm\b.*-[fF].*-[rR]",  # rm -fr variants
+            r"\brm\b\s+-rf\b",  # rm -rf
+            r"\bdd\b.*\bof=/dev/",  # dd to device
+            r"\bmkfs\b",  # format filesystem
+            r"\bchmod\b.*\b777\b",  # chmod 777
+            r"\bchmod\b.*\+s\b",  # setuid
+            r"\bchown\b.*root",  # chown to root
+            r">\s*/dev/[sh]d",  # write to disk device
+            r"\bcurl\b.*\|\s*\bbash\b",  # curl | bash
+            r"\bwget\b.*\|\s*\bbash\b",  # wget | bash
+            r"\bcurl\b.*\|\s*\bsh\b",  # curl | sh
+            r"\bwget\b.*\|\s*\bsh\b",  # wget | sh
+            r"\b(sudo|su)\b",  # privilege escalation
+            r"\bkill\s+-9\s+1\b",  # kill init
+            r":()\{.*\|.*&.*\};:",  # fork bomb
+        ]
+    )
 
     def check(self, command: str) -> Tuple[bool, str]:
         """Check if a command is allowed.

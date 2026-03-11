@@ -301,9 +301,7 @@ class InputSanitizer:
 
     # -- internal helpers --------------------------------------------------
 
-    def _scan_injection_patterns(
-        self, text: str
-    ) -> tuple[str, list[str]]:
+    def _scan_injection_patterns(self, text: str) -> tuple[str, list[str]]:
         warnings: list[str] = []
         for pattern, label in _INJECTION_PATTERNS:
             matches = pattern.findall(text)
@@ -336,9 +334,7 @@ class InputSanitizer:
             else:
                 chars.append(ch)
         if replaced:
-            warnings.append(
-                f"Normalized {replaced} homoglyph character(s) to ASCII"
-            )
+            warnings.append(f"Normalized {replaced} homoglyph character(s) to ASCII")
             text = "".join(chars)
 
         # Apply NFC normalization to collapse combining sequences.
@@ -428,9 +424,7 @@ _REDACTED_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"key-[A-Za-z0-9]{32}"), "mailgun-key"),
     # Private keys in PEM format
     (
-        re.compile(
-            r"-----BEGIN\s+(RSA\s+|EC\s+|DSA\s+|OPENSSH\s+)?PRIVATE\s+KEY-----"
-        ),
+        re.compile(r"-----BEGIN\s+(RSA\s+|EC\s+|DSA\s+|OPENSSH\s+)?PRIVATE\s+KEY-----"),
         "private-key",
     ),
     # Bearer tokens in output
@@ -442,9 +436,7 @@ _REDACTED_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(?<![A-Fa-f0-9])[A-Fa-f0-9]{64}(?![A-Fa-f0-9])"), "hex-secret"),
     # JWT tokens
     (
-        re.compile(
-            r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"
-        ),
+        re.compile(r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
         "jwt-token",
     ),
     # HuggingFace

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Pydantic models for the webhook builder system."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone

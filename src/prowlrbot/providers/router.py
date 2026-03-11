@@ -60,9 +60,7 @@ class SmartRouter:
 
     def select(self) -> Optional[ProviderDefinition]:
         """Select the highest-scoring healthy provider."""
-        healthy = [
-            p for p in self.providers if self.health_status.get(p.id, False)
-        ]
+        healthy = [p for p in self.providers if self.health_status.get(p.id, False)]
         if not healthy:
             return None
         ranked = sorted(healthy, key=lambda p: self.score(p), reverse=True)
@@ -76,7 +74,5 @@ class SmartRouter:
 
     def get_fallback_chain(self) -> List[ProviderDefinition]:
         """Return healthy providers ordered by descending score."""
-        healthy = [
-            p for p in self.providers if self.health_status.get(p.id, False)
-        ]
+        healthy = [p for p in self.providers if self.health_status.get(p.id, False)]
         return sorted(healthy, key=lambda p: self.score(p), reverse=True)

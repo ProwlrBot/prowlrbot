@@ -19,9 +19,7 @@ _active_backend: Optional[LocalBackend] = None
 _active_model_id: Optional[str] = None
 
 
-def get_active_local_model() -> (
-    Optional[tuple[Optional[str], LocalBackend]] | None
-):
+def get_active_local_model() -> Optional[tuple[Optional[str], LocalBackend]] | None:
     """Return (model_id, backend) if a local model is currently loaded."""
     with _lock:
         if _active_backend is not None and _active_backend.is_loaded:

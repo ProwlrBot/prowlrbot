@@ -3,6 +3,7 @@
 
 Single-machine, no cross-process lock. Atomic write via tmp-then-replace.
 """
+
 from __future__ import annotations
 
 import json
@@ -87,9 +88,7 @@ class WebhookStore:
                 )
                 wf.rules[idx] = rule
                 await self._save(wf)
-                logger.info(
-                    "webhook rule updated: %s (%s)", rule.id, rule.name
-                )
+                logger.info("webhook rule updated: %s (%s)", rule.id, rule.name)
                 return rule
         return None
 

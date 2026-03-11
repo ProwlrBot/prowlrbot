@@ -217,9 +217,7 @@ class FeishuChannel(BaseChannel):
         )
         # Prefer real open_id from meta for user_id so to_handle is
         # feishu:sw:{session_id}; fallback to sender_id for display.
-        user_id = (
-            meta.get("feishu_sender_id") or payload.get("user_id") or sender_id
-        )
+        user_id = meta.get("feishu_sender_id") or payload.get("user_id") or sender_id
         request = self.build_agent_request_from_user_content(
             channel_id=channel_id,
             sender_id=user_id,
@@ -288,8 +286,7 @@ class FeishuChannel(BaseChannel):
         if (
             self._tenant_access_token
             and now
-            < self._tenant_access_token_expire_at
-            - FEISHU_TOKEN_REFRESH_BEFORE_SECONDS
+            < self._tenant_access_token_expire_at - FEISHU_TOKEN_REFRESH_BEFORE_SECONDS
         ):
             return self._tenant_access_token
 
@@ -315,8 +312,7 @@ class FeishuChannel(BaseChannel):
                 data = await resp.json(content_type=None)
                 if resp.status >= 400:
                     raise RuntimeError(
-                        f"Feishu token failed status={resp.status} "
-                        f"body={data}",
+                        f"Feishu token failed status={resp.status} " f"body={data}",
                     )
             if data.get("code") != 0:
                 raise RuntimeError(
@@ -373,8 +369,7 @@ class FeishuChannel(BaseChannel):
                     data = {}
             if data.get("code") != 0:
                 logger.info(
-                    "feishu get user name api error: open_id=%s code=%s "
-                    "msg=%s",
+                    "feishu get user name api error: open_id=%s code=%s " "msg=%s",
                     open_id[:20],
                     data.get("code"),
                     data.get("msg", ""),
@@ -472,11 +467,7 @@ class FeishuChannel(BaseChannel):
 
     async def _on_message(self, data: "P2ImMessageReceiveV1") -> None:
         """Handle one Feishu message: dedup, parse, download media, enqueue."""
-        if (
-            not FEISHU_AVAILABLE
-            or not data
-            or not getattr(data, "event", None)
-        ):
+        if not FEISHU_AVAILABLE or not data or not getattr(data, "event", None):
             return
         try:
             event = data.event
@@ -505,9 +496,7 @@ class FeishuChannel(BaseChannel):
                 sender_id = f"unknown_{message_id[:8]}"
 
             nickname = (
-                getattr(sender, "name", None)
-                or getattr(sender, "nickname", None)
-                or ""
+                getattr(sender, "name", None) or getattr(sender, "nickname", None) or ""
             )
             nickname = nickname.strip() if isinstance(nickname, str) else ""
             if not nickname:
@@ -727,8 +716,7 @@ class FeishuChannel(BaseChannel):
                 ".",
             )
             safe_key = (
-                "".join(c for c in image_key if c.isalnum() or c in "-_.")
-                or "img"
+                "".join(c for c in image_key if c.isalnum() or c in "-_.") or "img"
             )
             self._media_dir.mkdir(parents=True, exist_ok=True)
             path = self._media_dir / f"{message_id}_{safe_key}.{ext}"
@@ -772,9 +760,7 @@ class FeishuChannel(BaseChannel):
                 )
             filename = filename_hint
             if "filename=" in disposition:
-                part = (
-                    disposition.split("filename=", 1)[-1].strip().strip("'\"")
-                )
+                part = disposition.split("filename=", 1)[-1].strip().strip("'\"")
                 if part:
                     part = Path(part).name
                     if part.strip():
@@ -789,8 +775,7 @@ class FeishuChannel(BaseChannel):
             if hint_ext and Path(filename).suffix in ("", ".bin", ".file"):
                 filename = (Path(filename).stem or "file") + hint_ext
             safe_key = (
-                "".join(c for c in file_key if c.isalnum() or c in "-_.")
-                or "file"
+                "".join(c for c in file_key if c.isalnum() or c in "-_.") or "file"
             )
             self._media_dir.mkdir(parents=True, exist_ok=True)
             path = self._media_dir / f"{message_id}_{safe_key}_{filename}"
@@ -877,11 +862,7 @@ class FeishuChannel(BaseChannel):
             self._receive_id_store[session_id] = (receive_id_type, receive_id)
             # Also key by open_id so cron can resolve when session_id is full
             # open_id or when lookup uses open_id as key
-            if (
-                receive_id_type == "open_id"
-                and receive_id
-                and receive_id != session_id
-            ):
+            if receive_id_type == "open_id" and receive_id and receive_id != session_id:
                 self._receive_id_store[receive_id] = (
                     receive_id_type,
                     receive_id,
@@ -1137,11 +1118,7 @@ class FeishuChannel(BaseChannel):
         else:
             b64 = None
         if b64:
-            raw = (
-                b64.split("base64,", 1)[-1].strip()
-                if isinstance(b64, str)
-                else b64
-            )
+            raw = b64.split("base64,", 1)[-1].strip() if isinstance(b64, str) else b64
             try:
                 data = base64.b64decode(raw)
                 return (data, filename)
@@ -1224,19 +1201,11 @@ class FeishuChannel(BaseChannel):
         url = (url or "").strip() if isinstance(url, str) else ""
         filename = getattr(part, "filename", None) or "file.bin"
         b64 = None
-        if (
-            isinstance(url, str)
-            and url.startswith("data:")
-            and "base64," in url
-        ):
+        if isinstance(url, str) and url.startswith("data:") and "base64," in url:
             b64 = url
             url = ""
         if b64:
-            raw = (
-                b64.split("base64,", 1)[-1].strip()
-                if isinstance(b64, str)
-                else b64
-            )
+            raw = b64.split("base64,", 1)[-1].strip() if isinstance(b64, str) else b64
             try:
                 data = base64.b64decode(raw)
             except Exception as e:
@@ -1324,8 +1293,7 @@ class FeishuChannel(BaseChannel):
         route = self._route_from_handle(to_handle)
         session_key = route.get("session_key")
         logger.info(
-            "feishu _get_receive_for_send: to_handle=%s route=%s "
-            "session_key=%s",
+            "feishu _get_receive_for_send: to_handle=%s route=%s " "session_key=%s",
             (to_handle or "")[:60],
             list(route.keys()) if route else [],
             (session_key or "")[:40] if session_key else None,
@@ -1375,8 +1343,7 @@ class FeishuChannel(BaseChannel):
         recv = await self._load_receive_id(to_handle)
         if recv is None:
             logger.warning(
-                "feishu _get_receive_for_send: _load_receive_id(%s) returned "
-                "None",
+                "feishu _get_receive_for_send: _load_receive_id(%s) returned " "None",
                 (to_handle or "")[:40],
             )
         return recv

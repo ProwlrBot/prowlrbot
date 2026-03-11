@@ -164,9 +164,7 @@ def _build_client_info(key: str, client: MCPClientConfig) -> MCPClientInfo:
     """Build MCPClientInfo from config with masked env values."""
     # Mask environment variable values for security
     masked_env = (
-        {k: _mask_env_value(v) for k, v in client.env.items()}
-        if client.env
-        else {}
+        {k: _mask_env_value(v) for k, v in client.env.items()} if client.env else {}
     )
     masked_headers = (
         {k: _mask_env_value(v) for k, v in client.headers.items()}
@@ -198,8 +196,7 @@ async def list_mcp_clients() -> List[MCPClientInfo]:
     """Get list of all configured MCP clients."""
     config = load_config()
     return [
-        _build_client_info(key, client)
-        for key, client in config.mcp.clients.items()
+        _build_client_info(key, client) for key, client in config.mcp.clients.items()
     ]
 
 
@@ -234,8 +231,7 @@ async def create_mcp_client(
     if client_key in config.mcp.clients:
         raise HTTPException(
             400,
-            detail=f"MCP client '{client_key}' already exists. Use PUT to "
-            f"update.",
+            detail=f"MCP client '{client_key}' already exists. Use PUT to " f"update.",
         )
 
     # Create new client config

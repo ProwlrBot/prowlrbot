@@ -112,7 +112,15 @@ class AnalyticsTracker:
             """INSERT INTO usage_stats
                (session_id, model, input_tokens, output_tokens, cost_usd, latency_ms, timestamp)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (session_id, model, input_tokens, output_tokens, cost_usd, latency_ms, time.time()),
+            (
+                session_id,
+                model,
+                input_tokens,
+                output_tokens,
+                cost_usd,
+                latency_ms,
+                time.time(),
+            ),
         )
         self._conn.commit()
         return cursor.lastrowid
@@ -172,7 +180,9 @@ class AnalyticsTracker:
             period_end=row["period_end"] or now,
         )
 
-    def _build_model_breakdown(self, cutoff: Optional[float] = None) -> Dict[str, ModelStats]:
+    def _build_model_breakdown(
+        self, cutoff: Optional[float] = None
+    ) -> Dict[str, ModelStats]:
         """Build per-model statistics."""
         if cutoff is not None:
             rows = self._conn.execute(

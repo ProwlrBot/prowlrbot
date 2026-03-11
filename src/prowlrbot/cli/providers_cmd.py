@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """CLI commands for managing LLM providers."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -84,8 +85,7 @@ def configure_provider_api_key_interactive(
     # (e.g. Azure OpenAI requires user to provide their endpoint).
     if defn.is_custom or not defn.default_base_url:
         azure_hint = (
-            "Azure endpoint "
-            "(e.g. https://<resource>.openai.azure.com/openai/v1)"
+            "Azure endpoint " "(e.g. https://<resource>.openai.azure.com/openai/v1)"
         )
         url_hint = (
             azure_hint
@@ -101,9 +101,7 @@ def configure_provider_api_key_interactive(
             click.echo(click.style("Error: base_url is required.", fg="red"))
             raise SystemExit(1)
 
-    hint = (
-        f"prefix: {defn.api_key_prefix}" if defn.api_key_prefix else "optional"
-    )
+    hint = f"prefix: {defn.api_key_prefix}" if defn.api_key_prefix else "optional"
     api_key = click.prompt(
         f"API key ({hint})",
         default=current_key or "",
@@ -135,9 +133,7 @@ def _add_models_interactive(provider_id: str) -> None:
         return
 
     settings = data.providers.get(provider_id)
-    extra = (
-        list(settings.extra_models) if settings and not defn.is_custom else []
-    )
+    extra = list(settings.extra_models) if settings and not defn.is_custom else []
     all_models = list(defn.models) + extra
 
     if all_models:
@@ -198,9 +194,7 @@ def _select_llm_model(defn, pid, current_slot, data, *, use_defaults):
     cur = current_slot.model if current_slot.provider_id == pid else ""
 
     settings = data.providers.get(pid)
-    extra = (
-        list(settings.extra_models) if settings and not defn.is_custom else []
-    )
+    extra = list(settings.extra_models) if settings and not defn.is_custom else []
     all_models = list(defn.models) + extra
 
     if use_defaults:
@@ -252,11 +246,7 @@ def configure_llm_slot_interactive(*, use_defaults: bool = False) -> None:
 
     ids = [d.id for d in eligible]
     if use_defaults:
-        pid = (
-            current_slot.provider_id
-            if current_slot.provider_id in ids
-            else ids[0]
-        )
+        pid = current_slot.provider_id if current_slot.provider_id in ids else ids[0]
     else:
         labels = [f"{d.name} ({d.id})" for d in eligible]
         default_label = (
@@ -331,13 +321,7 @@ def list_cmd() -> None:
         cur_url, cur_key = data.get_credentials(defn.id)
         settings = data.providers.get(defn.id)
 
-        tag = (
-            " [custom]"
-            if defn.is_custom
-            else " [local]"
-            if defn.is_local
-            else ""
-        )
+        tag = " [custom]" if defn.is_custom else " [local]" if defn.is_local else ""
         click.echo(f"\n{'─' * 44}")
         click.echo(f"  {defn.name} ({defn.id}){tag}")
         click.echo(f"{'─' * 44}")
@@ -355,8 +339,7 @@ def list_cmd() -> None:
             if defn.is_custom or not defn.default_base_url:
                 click.echo(f"  {'base_url':16s}: {cur_url or '(not set)'}")
             click.echo(
-                f"  {'api_key':16s}: "
-                f"{mask_api_key(cur_key) or '(not set)'}",
+                f"  {'api_key':16s}: " f"{mask_api_key(cur_key) or '(not set)'}",
             )
             if defn.api_key_prefix:
                 click.echo(
@@ -364,9 +347,7 @@ def list_cmd() -> None:
                 )
 
             extra = (
-                list(settings.extra_models)
-                if settings and not defn.is_custom
-                else []
+                list(settings.extra_models) if settings and not defn.is_custom else []
             )
             all_models = list(defn.models) + extra
             if all_models:

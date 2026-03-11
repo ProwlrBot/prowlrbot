@@ -4,6 +4,7 @@
 Bridge between channels and AgentApp process: factory to build
 ProcessHandler from runner. Shared helpers for channels (e.g. file URL).
 """
+
 from __future__ import annotations
 
 import os
@@ -34,23 +35,14 @@ def file_url_to_local_path(url: str) -> Optional[str]:
         path = url2pathname(parsed.path)
         if not path and parsed.netloc:
             path = url2pathname(parsed.netloc.replace("\\", "/"))
-        elif (
-            path
-            and parsed.netloc
-            and len(parsed.netloc) == 1
-            and os.name == "nt"
-        ):
+        elif path and parsed.netloc and len(parsed.netloc) == 1 and os.name == "nt":
             path = f"{parsed.netloc}:{path}"
         return path if path else None
     if parsed.scheme in ("http", "https"):
         return None
     if not parsed.scheme:
         return s
-    if (
-        os.name == "nt"
-        and len(parsed.scheme) == 1
-        and parsed.path.startswith("\\")
-    ):
+    if os.name == "nt" and len(parsed.scheme) == 1 and parsed.path.startswith("\\"):
         return s
     return None
 

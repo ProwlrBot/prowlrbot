@@ -126,8 +126,7 @@ class MlxBackend(LocalBackend):
             # structured output, so we rely on the model
             # following instructions.
             prompt += (
-                f"\nRespond with a JSON object matching this schema: "
-                f"{schema}\n"
+                f"\nRespond with a JSON object matching this schema: " f"{schema}\n"
             )
 
         # Accumulate all tokens via stream_generate

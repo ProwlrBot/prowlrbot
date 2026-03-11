@@ -4,6 +4,7 @@
 Provides configurable privacy controls including data retention,
 anonymization, and user data export for GDPR compliance.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -133,9 +134,7 @@ class PrivacyManager:
             cursor = conn.cursor()
 
             # Discover which tables actually exist in this database.
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            )
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             existing_tables = {row[0] for row in cursor.fetchall()}
 
             for table, ts_col in tables:
@@ -197,9 +196,7 @@ class PrivacyManager:
                 result[key] = self.anonymize_data(value)
             elif isinstance(value, list):
                 result[key] = [
-                    self.anonymize_data(item)
-                    if isinstance(item, dict)
-                    else item
+                    self.anonymize_data(item) if isinstance(item, dict) else item
                     for item in value
                 ]
             elif isinstance(value, str) and self._is_pii_field(key):
@@ -258,9 +255,7 @@ class PrivacyManager:
                 conn = sqlite3.connect(str(db_file))
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                )
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
                 tables = [row[0] for row in cursor.fetchall()]
 
                 db_records: dict[str, list[dict[str, Any]]] = {}
@@ -313,13 +308,9 @@ class PrivacyManager:
             else:
                 # Recurse into nested structures.
                 for value in data.values():
-                    matches.extend(
-                        PrivacyManager._extract_user_records(value, user_id)
-                    )
+                    matches.extend(PrivacyManager._extract_user_records(value, user_id))
         elif isinstance(data, list):
             for item in data:
-                matches.extend(
-                    PrivacyManager._extract_user_records(item, user_id)
-                )
+                matches.extend(PrivacyManager._extract_user_records(item, user_id))
 
         return matches

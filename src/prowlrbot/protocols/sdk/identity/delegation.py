@@ -16,6 +16,7 @@ with optional time limits and scope constraints.
 
 Ref: ROAR Design Doc §4 Identity Enhancement
 """
+
 from __future__ import annotations
 
 import time
@@ -249,10 +250,7 @@ class CapabilityDelegation:
 
     def cleanup_expired(self) -> int:
         """Remove expired and revoked tokens. Returns count removed."""
-        to_remove = [
-            tid for tid, token in self._tokens.items()
-            if not token.valid
-        ]
+        to_remove = [tid for tid, token in self._tokens.items() if not token.valid]
         for tid in to_remove:
             token = self._tokens.pop(tid)
             grantee_list = self._by_grantee.get(token.grantee, [])

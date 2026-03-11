@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """FastAPI router for the ProwlrBot Marketplace."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -68,9 +69,7 @@ async def update_listing(listing_id: str, updates: dict) -> MarketplaceListing:
     return listing
 
 
-@router.get(
-    "/listings/author/{author_id}", response_model=list[MarketplaceListing]
-)
+@router.get("/listings/author/{author_id}", response_model=list[MarketplaceListing])
 async def list_by_author(author_id: str) -> list[MarketplaceListing]:
     """Get all listings by a specific author."""
     return _get_store().list_by_author(author_id)
@@ -81,9 +80,7 @@ async def list_by_author(author_id: str) -> list[MarketplaceListing]:
 # ------------------------------------------------------------------
 
 
-@router.post(
-    "/listings/{listing_id}/reviews", response_model=ReviewEntry
-)
+@router.post("/listings/{listing_id}/reviews", response_model=ReviewEntry)
 async def add_review(listing_id: str, review: ReviewEntry) -> ReviewEntry:
     """Add a review to a listing."""
     listing = _get_store().get_listing(listing_id)
@@ -93,9 +90,7 @@ async def add_review(listing_id: str, review: ReviewEntry) -> ReviewEntry:
     return _get_store().add_review(review)
 
 
-@router.get(
-    "/listings/{listing_id}/reviews", response_model=list[ReviewEntry]
-)
+@router.get("/listings/{listing_id}/reviews", response_model=list[ReviewEntry])
 async def get_reviews(listing_id: str, limit: int = 50) -> list[ReviewEntry]:
     """Get reviews for a listing."""
     return _get_store().get_reviews(listing_id, limit=min(limit, 200))
@@ -106,12 +101,8 @@ async def get_reviews(listing_id: str, limit: int = 50) -> list[ReviewEntry]:
 # ------------------------------------------------------------------
 
 
-@router.post(
-    "/listings/{listing_id}/install", response_model=InstallRecord
-)
-async def record_install(
-    listing_id: str, record: InstallRecord
-) -> InstallRecord:
+@router.post("/listings/{listing_id}/install", response_model=InstallRecord)
+async def record_install(listing_id: str, record: InstallRecord) -> InstallRecord:
     """Record an installation of a listing."""
     listing = _get_store().get_listing(listing_id)
     if listing is None:

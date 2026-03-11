@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """CLI channel: list and interactively configure channels in config.json."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -531,9 +532,7 @@ def get_channel_configurators() -> dict:
     """Return channel configurators (built-in + plugin get_configurator)."""
     available = get_available_channels()
     registry = get_channel_registry()
-    out = {
-        k: v for k, v in _ALL_CHANNEL_CONFIGURATORS.items() if k in available
-    }
+    out = {k: v for k, v in _ALL_CHANNEL_CONFIGURATORS.items() if k in available}
 
     def _default_plugin_configure(current):
         """Minimal configurator: enabled + bot_prefix."""
@@ -736,9 +735,7 @@ def list_cmd() -> None:
         click.echo(f"{'─' * 40}")
 
         for field_name, value in _channel_config_fields(ch):
-            display = (
-                _mask(str(value)) if field_name in _SECRET_FIELDS else value
-            )
+            display = _mask(str(value)) if field_name in _SECRET_FIELDS else value
             click.echo(f"  {field_name:20s}: {display}")
 
     click.echo()
@@ -753,8 +750,7 @@ def _install_channel_to_dir(
     CUSTOM_CHANNELS_DIR.mkdir(parents=True, exist_ok=True)
     if not key.isidentifier():
         click.echo(
-            f"Key must be a valid Python identifier (e.g. my_channel), "
-            f"got: {key}",
+            f"Key must be a valid Python identifier (e.g. my_channel), " f"got: {key}",
             err=True,
         )
         raise SystemExit(1)
@@ -809,8 +805,7 @@ def _install_channel_to_dir(
         encoding="utf-8",
     )
     click.echo(
-        f"✓ Created {dest_file}. Edit and add config with "
-        "`prowlr channels config`.",
+        f"✓ Created {dest_file}. Edit and add config with " "`prowlr channels config`.",
     )
 
 

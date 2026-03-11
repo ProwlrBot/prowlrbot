@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for external agent management."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -52,6 +53,7 @@ async def check_health(agent_id: str) -> ExternalAgentStatus:
 
 
 # --- Tasks ---
+
 
 class TaskRequest(BaseModel):
     agent_id: str

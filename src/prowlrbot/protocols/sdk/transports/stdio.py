@@ -10,6 +10,7 @@ is wire-compatible with MCP stdio (newline-delimited JSON).
 Security: Uses create_subprocess_exec (not shell=True) to prevent injection.
 Commands are split into argv list, never passed through a shell.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -85,9 +86,7 @@ async def stdio_send(
         raise ConnectionError("No valid JSON response from stdio subprocess")
 
     except asyncio.TimeoutError:
-        raise ConnectionError(
-            f"stdio subprocess timed out after {timeout}s"
-        ) from None
+        raise ConnectionError(f"stdio subprocess timed out after {timeout}s") from None
 
 
 class StdioConnection:

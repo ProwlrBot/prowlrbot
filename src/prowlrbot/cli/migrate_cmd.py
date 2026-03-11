@@ -53,10 +53,7 @@ def migrate_up(target: int | None) -> None:
 
     applied = manager.migrate_up(target_version=target)
     for m in applied:
-        click.echo(
-            click.style(f"  v{m.version}", fg="green")
-            + f"  {m.name}"
-        )
+        click.echo(click.style(f"  v{m.version}", fg="green") + f"  {m.name}")
 
     click.echo(
         click.style(
@@ -93,10 +90,7 @@ def migrate_down(target: int) -> None:
 
     rolled_back = manager.migrate_down(target_version=target)
     for m in rolled_back:
-        click.echo(
-            click.style(f"  v{m.version}", fg="red")
-            + f"  {m.name}"
-        )
+        click.echo(click.style(f"  v{m.version}", fg="red") + f"  {m.name}")
 
     click.echo(
         click.style(
@@ -113,9 +107,7 @@ def migrate_status() -> None:
     manager = _get_manager()
     info = manager.status()
 
-    click.echo(
-        click.style("Migration Status", fg="cyan", bold=True)
-    )
+    click.echo(click.style("Migration Status", fg="cyan", bold=True))
     click.echo(f"  Database:        {WORKING_DIR / DB_NAME}")
     click.echo(f"  Current version: v{info['current_version']}")
     click.echo(f"  Pending:         {info['pending_count']}")
@@ -139,12 +131,8 @@ def migrate_history() -> None:
         click.echo("No migrations have been applied yet.")
         return
 
-    click.echo(
-        click.style("Applied Migrations", fg="cyan", bold=True)
-    )
-    click.echo(
-        f"  {'Version':<10} {'Name':<25} {'Applied At'}"
-    )
+    click.echo(click.style("Applied Migrations", fg="cyan", bold=True))
+    click.echo(f"  {'Version':<10} {'Name':<25} {'Applied At'}")
     click.echo(f"  {'-------':<10} {'----':<25} {'----------'}")
 
     for m in history:

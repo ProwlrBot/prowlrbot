@@ -6,6 +6,7 @@ endpoints. It follows the W3C DID Core specification (v1.0).
 
 Ref: https://www.w3.org/TR/did-core/
 """
+
 from __future__ import annotations
 
 import time

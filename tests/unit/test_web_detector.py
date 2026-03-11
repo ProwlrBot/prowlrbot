@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlrbot.monitor.detectors.web."""
+
 import pytest
 import httpx
 
@@ -80,9 +81,7 @@ class TestWebDetector:
 
     async def test_detect_without_selector(self):
         html = "<html><body>Full page</body></html>"
-        transport = httpx.MockTransport(
-            lambda req: httpx.Response(200, text=html)
-        )
+        transport = httpx.MockTransport(lambda req: httpx.Response(200, text=html))
         client = httpx.AsyncClient(transport=transport)
         detector = WebDetector(url="https://example.com", client=client)
         result = await detector.detect(last_content=None)
@@ -91,9 +90,7 @@ class TestWebDetector:
         await client.aclose()
 
     async def test_detect_http_error(self):
-        transport = httpx.MockTransport(
-            lambda req: httpx.Response(500, text="error")
-        )
+        transport = httpx.MockTransport(lambda req: httpx.Response(500, text="error"))
         client = httpx.AsyncClient(transport=transport)
         detector = WebDetector(url="https://example.com", client=client)
         result = await detector.detect(last_content=None)

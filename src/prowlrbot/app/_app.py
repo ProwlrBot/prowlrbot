@@ -18,7 +18,12 @@ from ..config import (  # pylint: disable=no-name-in-module
     ConfigWatcher,
 )
 from ..config.utils import get_jobs_path, get_chats_path, get_config_path
-from ..constant import DOCS_ENABLED, LOG_LEVEL_ENV, CORS_ORIGINS, PROWLRBOT_API_TOKEN_HASH
+from ..constant import (
+    DOCS_ENABLED,
+    LOG_LEVEL_ENV,
+    CORS_ORIGINS,
+    PROWLRBOT_API_TOKEN_HASH,
+)
 from ..__version__ import __version__
 from ..utils.logging import setup_logger
 from .channels import ChannelManager  # pylint: disable=no-name-in-module

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ROAR Protocol Phase 6 — Protocol Adapters."""
+
 from __future__ import annotations
 
 import unittest
@@ -47,7 +48,11 @@ class TestProtocolDetection(unittest.TestCase):
         assert detect_protocol(msg) == ProtocolType.MCP
 
     def test_detect_a2a_result(self):
-        msg = {"jsonrpc": "2.0", "id": 1, "result": {"id": "t-1", "status": {"state": "working"}}}
+        msg = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {"id": "t-1", "status": {"state": "working"}},
+        }
         assert detect_protocol(msg) == ProtocolType.A2A
 
 
@@ -201,7 +206,10 @@ class TestA2AAdapter(unittest.TestCase):
             identity=identity,
             description="Test agent",
             skills=["code-review", "testing"],
-            endpoints={"http": "http://localhost:8089", "websocket": "ws://localhost:8089/ws"},
+            endpoints={
+                "http": "http://localhost:8089",
+                "websocket": "ws://localhost:8089/ws",
+            },
         )
         a2a = A2AFullAdapter.roar_card_to_a2a(card)
         assert a2a["name"] == "My Agent"

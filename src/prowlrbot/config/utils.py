@@ -42,8 +42,7 @@ def _discover_system_chromium_path() -> Optional[str]:
             ),
             Path("/Applications/Chromium.app/Contents/MacOS/Chromium"),
             Path(
-                "/Applications/Microsoft Edge.app/Contents/MacOS/"
-                "Microsoft Edge",
+                "/Applications/Microsoft Edge.app/Contents/MacOS/" "Microsoft Edge",
             ),
         ]
     else:
@@ -127,9 +126,7 @@ def _get_darwin_default_browser() -> Tuple[Optional[str], Optional[str]]:
     """
     result: Tuple[Optional[str], Optional[str]] = (None, None)
     pref = "~/Library/Preferences"
-    plist_name = (
-        "com.apple.LaunchServices.com.apple.launchservices.secure.plist"
-    )
+    plist_name = "com.apple.LaunchServices.com.apple.launchservices.secure.plist"
     plist_path = Path(os.path.expanduser(pref)) / plist_name
     if not plist_path.is_file():
         return result

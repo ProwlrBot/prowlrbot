@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 """CLI init: interactively create working_dir config.json and HEARTBEAT.md."""
+
 from __future__ import annotations
 
 import click
@@ -182,9 +183,7 @@ def init_cmd(force: bool, use_defaults: bool, accept_security: bool) -> None:
             target=target or "main",
             active_hours=active_hours,
         )
-        existing = (
-            load_config(config_path) if config_path.is_file() else Config()
-        )
+        existing = load_config(config_path) if config_path.is_file() else Config()
         existing.agents.defaults.heartbeat = hb
 
         # --- show_tool_details ---
@@ -207,8 +206,7 @@ def init_cmd(force: bool, use_defaults: bool, accept_security: bool) -> None:
 
         # --- channels (interactive when not --defaults) ---
         if not use_defaults and prompt_confirm(
-            "Configure channels? "
-            "(iMessage/Discord/DingTalk/Feishu/QQ/Console)",
+            "Configure channels? " "(iMessage/Discord/DingTalk/Feishu/QQ/Console)",
             default=False,
         ):
             configure_channels_interactive(existing)

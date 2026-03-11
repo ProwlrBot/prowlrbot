@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Click commands for monitor management."""
+
 from __future__ import annotations
 
 import asyncio
@@ -43,18 +44,30 @@ def list_monitors():
         return
     for m in monitors:
         status = "enabled" if m.get("enabled", True) else "disabled"
-        click.echo(f"  {m['name']}  [{m.get('type', 'web')}]  {m.get('url', '')}  ({status}, every {m.get('interval', '5m')})")
+        click.echo(
+            f"  {m['name']}  [{m.get('type', 'web')}]  {m.get('url', '')}  ({status}, every {m.get('interval', '5m')})"
+        )
 
 
 @monitor_group.command("add")
 @click.option("--name", required=True, help="Unique monitor name")
 @click.option("--url", required=True, help="URL to monitor")
 @click.option("--interval", default="5m", help="Check interval (e.g. 30s, 5m, 1h)")
-@click.option("--type", "monitor_type", default="web", type=click.Choice(["web", "api"]), help="Monitor type")
+@click.option(
+    "--type",
+    "monitor_type",
+    default="web",
+    type=click.Choice(["web", "api"]),
+    help="Monitor type",
+)
 @click.option("--css-selector", default=None, help="CSS selector to extract (web only)")
 @click.option("--json-path", default=None, help="JSON path to extract (api only)")
-@click.option("--expected-status", default=200, type=int, help="Expected HTTP status (api only)")
-def add_monitor(name, url, interval, monitor_type, css_selector, json_path, expected_status):
+@click.option(
+    "--expected-status", default=200, type=int, help="Expected HTTP status (api only)"
+)
+def add_monitor(
+    name, url, interval, monitor_type, css_selector, json_path, expected_status
+):
     """Add a new monitor."""
     from prowlrbot.monitor.config import parse_interval
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Agent template store with built-in and custom templates."""
+
 from __future__ import annotations
 
 import json
@@ -240,15 +241,23 @@ class TemplateStore:
             "is_builtin, author, downloads, rating, created_at) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
-                template.id, template.name, template.description,
-                template.category, template.soul, template.profile,
-                json.dumps(template.skills), json.dumps(template.tools),
-                template.avatar_base, template.avatar_color,
+                template.id,
+                template.name,
+                template.description,
+                template.category,
+                template.soul,
+                template.profile,
+                json.dumps(template.skills),
+                json.dumps(template.tools),
+                template.avatar_base,
+                template.avatar_color,
                 template.autonomy_level,
                 json.dumps(template.config_overrides),
                 1 if template.is_builtin else 0,
-                template.author, template.downloads,
-                template.rating, template.created_at,
+                template.author,
+                template.downloads,
+                template.rating,
+                template.created_at,
             ),
         )
         self._conn.commit()
@@ -256,16 +265,24 @@ class TemplateStore:
     @staticmethod
     def _row_to_template(row: sqlite3.Row) -> AgentTemplate:
         return AgentTemplate(
-            id=row["id"], name=row["name"], description=row["description"],
+            id=row["id"],
+            name=row["name"],
+            description=row["description"],
             category=TemplateCategory(row["category"]),
-            soul=row["soul"], profile=row["profile"],
+            soul=row["soul"],
+            profile=row["profile"],
             skills=json.loads(row["skills"]) if row["skills"] else [],
             tools=json.loads(row["tools"]) if row["tools"] else [],
-            avatar_base=row["avatar_base"], avatar_color=row["avatar_color"],
+            avatar_base=row["avatar_base"],
+            avatar_color=row["avatar_color"],
             autonomy_level=row["autonomy_level"],
-            config_overrides=json.loads(row["config_overrides"]) if row["config_overrides"] else {},
-            is_builtin=bool(row["is_builtin"]), author=row["author"],
-            downloads=row["downloads"], rating=row["rating"],
+            config_overrides=(
+                json.loads(row["config_overrides"]) if row["config_overrides"] else {}
+            ),
+            is_builtin=bool(row["is_builtin"]),
+            author=row["author"],
+            downloads=row["downloads"],
+            rating=row["rating"],
             created_at=row["created_at"],
         )
 

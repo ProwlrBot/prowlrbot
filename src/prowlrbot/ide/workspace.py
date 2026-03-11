@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """IDE workspace manager — file operations and session management."""
+
 from __future__ import annotations
 
 import difflib
@@ -71,8 +72,9 @@ class IDEWorkspace:
         if not root_path.exists():
             return FileEntry(path=root, name=root_path.name, is_directory=True)
 
-        return self._scan_dir(root_path, depth=0, max_depth=max_depth,
-                              include_hidden=include_hidden)
+        return self._scan_dir(
+            root_path, depth=0, max_depth=max_depth, include_hidden=include_hidden
+        )
 
     def read_file(self, path: str) -> FileContent:
         """Read a file's content."""
@@ -117,12 +119,14 @@ class IDEWorkspace:
         matcher = difflib.SequenceMatcher(None, orig_lines, mod_lines)
         for tag, i1, i2, j1, j2 in matcher.get_opcodes():
             if tag != "equal":
-                hunks.append(DiffHunk(
-                    start_line=i1 + 1,
-                    end_line=i2,
-                    original_lines=list(orig_lines[i1:i2]),
-                    modified_lines=list(mod_lines[j1:j2]),
-                ))
+                hunks.append(
+                    DiffHunk(
+                        start_line=i1 + 1,
+                        end_line=i2,
+                        original_lines=list(orig_lines[i1:i2]),
+                        modified_lines=list(mod_lines[j1:j2]),
+                    )
+                )
 
         return FileDiff(
             path=path,
@@ -169,9 +173,14 @@ class IDEWorkspace:
         self._conn.execute(
             "INSERT INTO ide_sessions (id, workspace_root, open_files, active_file, "
             "created_at, updated_at) VALUES (?,?,?,?,?,?)",
-            (session.id, session.workspace_root,
-             json.dumps(session.open_files), session.active_file,
-             session.created_at, session.updated_at),
+            (
+                session.id,
+                session.workspace_root,
+                json.dumps(session.open_files),
+                session.active_file,
+                session.created_at,
+                session.updated_at,
+            ),
         )
         self._conn.commit()
         return session
@@ -183,14 +192,18 @@ class IDEWorkspace:
         if not row:
             return None
         return IDESession(
-            id=row["id"], workspace_root=row["workspace_root"],
+            id=row["id"],
+            workspace_root=row["workspace_root"],
             open_files=json.loads(row["open_files"]),
             active_file=row["active_file"],
-            created_at=row["created_at"], updated_at=row["updated_at"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
         )
 
     def update_session(
-        self, session_id: str, open_files: Optional[List[str]] = None,
+        self,
+        session_id: str,
+        open_files: Optional[List[str]] = None,
         active_file: Optional[str] = None,
     ) -> Optional[IDESession]:
         session = self.get_session(session_id)
@@ -204,8 +217,12 @@ class IDEWorkspace:
         self._conn.execute(
             "UPDATE ide_sessions SET open_files = ?, active_file = ?, updated_at = ? "
             "WHERE id = ?",
-            (json.dumps(session.open_files), session.active_file,
-             session.updated_at, session_id),
+            (
+                json.dumps(session.open_files),
+                session.active_file,
+                session.updated_at,
+                session_id,
+            ),
         )
         self._conn.commit()
         return session
@@ -217,15 +234,25 @@ class IDEWorkspace:
             "INSERT INTO edit_history (id, session_id, path, operation, "
             "line_start, line_end, content, agent_id, created_at) "
             "VALUES (?,?,?,?,?,?,?,?,?)",
-            (edit.id, session_id, edit.path, edit.operation,
-             edit.line_start, edit.line_end, edit.content,
-             edit.agent_id, edit.created_at),
+            (
+                edit.id,
+                session_id,
+                edit.path,
+                edit.operation,
+                edit.line_start,
+                edit.line_end,
+                edit.content,
+                edit.agent_id,
+                edit.created_at,
+            ),
         )
         self._conn.commit()
         return edit
 
     def get_edit_history(
-        self, session_id: Optional[str] = None, path: Optional[str] = None,
+        self,
+        session_id: Optional[str] = None,
+        path: Optional[str] = None,
         limit: int = 100,
     ) -> List[EditOperation]:
         query = "SELECT * FROM edit_history WHERE 1=1"
@@ -241,9 +268,13 @@ class IDEWorkspace:
         rows = self._conn.execute(query, params).fetchall()
         return [
             EditOperation(
-                id=r["id"], path=r["path"], operation=r["operation"],
-                line_start=r["line_start"], line_end=r["line_end"],
-                content=r["content"], agent_id=r["agent_id"],
+                id=r["id"],
+                path=r["path"],
+                operation=r["operation"],
+                line_start=r["line_start"],
+                line_end=r["line_end"],
+                content=r["content"],
+                agent_id=r["agent_id"],
                 created_at=r["created_at"],
             )
             for r in rows

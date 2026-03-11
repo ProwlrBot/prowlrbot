@@ -8,6 +8,7 @@ DID Method Tiers:
   - did:key  — Ephemeral, cryptographic (for cross-org trust without registry)
   - did:web  — Persistent, DNS-bound (for production agents with stable identity)
 """
+
 from .did_document import DIDDocument
 from .did_key import DIDKeyMethod
 from .did_web import DIDWebMethod

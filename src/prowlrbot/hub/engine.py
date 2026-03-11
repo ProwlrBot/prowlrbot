@@ -5,6 +5,7 @@ All business logic for the war room: room management, agent lifecycle,
 atomic task claiming, file locking, and event logging. This module
 has ZERO UI or transport assumptions — it only talks to SQLite.
 """
+
 from __future__ import annotations
 
 import json
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 # --- Result types ---
+
 
 @dataclass
 class ClaimResult:
@@ -62,7 +64,13 @@ class WarRoomEngine:
         """Notify listeners of an engine event."""
         if self._on_event:
             try:
-                self._on_event({"type": event_type, "timestamp": datetime.utcnow().isoformat(), **payload})
+                self._on_event(
+                    {
+                        "type": event_type,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        **payload,
+                    }
+                )
             except Exception:
                 pass  # Don't let notification errors break the engine
 
@@ -85,16 +93,25 @@ class WarRoomEngine:
         )
         self._conn.commit()
         self._emit_event(room_id, "room.created", payload={"name": name, "mode": mode})
-        return {"room_id": room_id, "name": name, "mode": mode, "host_node_id": host_node_id}
+        return {
+            "room_id": room_id,
+            "name": name,
+            "mode": mode,
+            "host_node_id": host_node_id,
+        }
 
     def get_room(self, room_id: str) -> Optional[Dict[str, Any]]:
         """Get room details."""
-        row = self._conn.execute("SELECT * FROM rooms WHERE room_id=?", (room_id,)).fetchone()
+        row = self._conn.execute(
+            "SELECT * FROM rooms WHERE room_id=?", (room_id,)
+        ).fetchone()
         return dict(row) if row else None
 
     def get_or_create_default_room(self) -> Dict[str, Any]:
         """Get the first room, or create a default one."""
-        row = self._conn.execute("SELECT * FROM rooms ORDER BY created_at ASC LIMIT 1").fetchone()
+        row = self._conn.execute(
+            "SELECT * FROM rooms ORDER BY created_at ASC LIMIT 1"
+        ).fetchone()
         if row:
             return dict(row)
         return self.create_room("default", mode="local")
@@ -116,7 +133,9 @@ class WarRoomEngine:
             node_id = f"node-{platform.node()}-{uuid.uuid4().hex[:8]}"
 
         # Ensure node exists
-        existing = self._conn.execute("SELECT node_id FROM nodes WHERE node_id=?", (node_id,)).fetchone()
+        existing = self._conn.execute(
+            "SELECT node_id FROM nodes WHERE node_id=?", (node_id,)
+        ).fetchone()
         if not existing:
             self._conn.execute(
                 "INSERT INTO nodes (node_id, hostname, platform) VALUES (?, ?, ?)",
@@ -130,8 +149,12 @@ class WarRoomEngine:
             (agent_id, session_id, name, node_id, room_id, caps),
         )
         self._conn.commit()
-        self._emit_event(room_id, "agent.connected", agent_id=agent_id,
-                         payload={"name": name, "capabilities": capabilities or []})
+        self._emit_event(
+            room_id,
+            "agent.connected",
+            agent_id=agent_id,
+            payload={"name": name, "capabilities": capabilities or []},
+        )
         self._notify("agent.connected", {"agent_id": agent_id, "name": name})
 
         return {
@@ -166,7 +189,9 @@ class WarRoomEngine:
 
     def disconnect_agent(self, agent_id: str) -> None:
         """Mark an agent as disconnected and release its resources."""
-        agent = self._conn.execute("SELECT * FROM agents WHERE agent_id=?", (agent_id,)).fetchone()
+        agent = self._conn.execute(
+            "SELECT * FROM agents WHERE agent_id=?", (agent_id,)
+        ).fetchone()
         if not agent:
             return
 
@@ -191,7 +216,10 @@ class WarRoomEngine:
     def sweep_dead_agents(self, ttl_minutes: int = 5) -> int:
         """Disconnect agents that haven't sent a heartbeat within TTL."""
         from datetime import timezone
-        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=ttl_minutes)).strftime("%Y-%m-%d %H:%M:%S")
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=ttl_minutes)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         stale = self._conn.execute(
             "SELECT agent_id FROM agents WHERE last_heartbeat < ? AND status != 'disconnected'",
             (cutoff,),
@@ -225,7 +253,10 @@ class WarRoomEngine:
                 file_scopes, parent_task_id, blocked_by, priority, branch)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                task_id, room_id, title, description,
+                task_id,
+                room_id,
+                title,
+                description,
                 json.dumps(required_capabilities or []),
                 json.dumps(file_scopes or []),
                 parent_task_id or None,
@@ -235,8 +266,12 @@ class WarRoomEngine:
             ),
         )
         self._conn.commit()
-        self._emit_event(room_id, "task.created", task_id=task_id,
-                         payload={"title": title, "priority": priority})
+        self._emit_event(
+            room_id,
+            "task.created",
+            task_id=task_id,
+            payload={"title": title, "priority": priority},
+        )
         return {
             "task_id": task_id,
             "title": title,
@@ -334,11 +369,13 @@ class WarRoomEngine:
                         (fp, room_id, branch, branch),
                     ).fetchone()
                     if lock:
-                        conflicts.append({
-                            "file": fp,
-                            "owner_agent_id": lock["agent_id"],
-                            "lock_token": lock["lock_token"],
-                        })
+                        conflicts.append(
+                            {
+                                "file": fp,
+                                "owner_agent_id": lock["agent_id"],
+                                "lock_token": lock["lock_token"],
+                            }
+                        )
 
                 if conflicts:
                     return ClaimResult(
@@ -370,7 +407,10 @@ class WarRoomEngine:
                 )
 
             self._emit_event(
-                room_id, "task.claimed", agent_id=agent_id, task_id=task_id,
+                room_id,
+                "task.claimed",
+                agent_id=agent_id,
+                task_id=task_id,
                 payload={"lock_token": lock_token, "file_scopes": file_scopes},
             )
             self._notify("task.claimed", {"task_id": task_id, "agent_id": agent_id})
@@ -394,10 +434,15 @@ class WarRoomEngine:
         )
         self._conn.commit()
 
-        task = self._conn.execute("SELECT room_id FROM tasks WHERE task_id=?", (task_id,)).fetchone()
+        task = self._conn.execute(
+            "SELECT room_id FROM tasks WHERE task_id=?", (task_id,)
+        ).fetchone()
         if task:
             self._emit_event(
-                task["room_id"], "task.updated", agent_id=agent_id, task_id=task_id,
+                task["room_id"],
+                "task.updated",
+                agent_id=agent_id,
+                task_id=task_id,
                 payload={"status": status, "note": progress_note},
             )
         return True
@@ -437,7 +482,10 @@ class WarRoomEngine:
             )
 
         self._emit_event(
-            room_id, "task.completed", agent_id=agent_id, task_id=task_id,
+            room_id,
+            "task.completed",
+            agent_id=agent_id,
+            task_id=task_id,
             payload={"summary": summary},
         )
         self._notify("task.completed", {"task_id": task_id, "agent_id": agent_id})
@@ -474,7 +522,10 @@ class WarRoomEngine:
             )
 
         self._emit_event(
-            room_id, "task.failed", agent_id=agent_id, task_id=task_id,
+            room_id,
+            "task.failed",
+            agent_id=agent_id,
+            task_id=task_id,
             payload={"reason": reason},
         )
         self._notify("task.failed", {"task_id": task_id, "agent_id": agent_id})
@@ -501,7 +552,8 @@ class WarRoomEngine:
 
                 if existing and existing["agent_id"] != agent_id:
                     return LockResult(
-                        success=False, reason="already_locked",
+                        success=False,
+                        reason="already_locked",
                         owner=existing["agent_id"],
                     )
 
@@ -512,9 +564,15 @@ class WarRoomEngine:
                        VALUES (?, ?, ?, ?, ?)""",
                     (file_path, room_id, agent_id, lock_token, branch),
                 )
-            self._emit_event(room_id, "lock.acquired", agent_id=agent_id,
-                             payload={"file": file_path, "branch": branch})
-            self._notify("lock.acquired", {"file_path": file_path, "agent_id": agent_id})
+            self._emit_event(
+                room_id,
+                "lock.acquired",
+                agent_id=agent_id,
+                payload={"file": file_path, "branch": branch},
+            )
+            self._notify(
+                "lock.acquired", {"file_path": file_path, "agent_id": agent_id}
+            )
             return LockResult(success=True, lock_token=lock_token)
         except sqlite3.IntegrityError:
             return LockResult(success=False, reason="conflict")
@@ -532,9 +590,12 @@ class WarRoomEngine:
         )
         self._conn.commit()
         if result.rowcount > 0:
-            self._emit_event(room_id, "lock.released", agent_id=agent_id,
-                             payload={"file": file_path})
-            self._notify("lock.released", {"file_path": file_path, "agent_id": agent_id})
+            self._emit_event(
+                room_id, "lock.released", agent_id=agent_id, payload={"file": file_path}
+            )
+            self._notify(
+                "lock.released", {"file_path": file_path, "agent_id": agent_id}
+            )
             return True
         return False
 
@@ -556,13 +617,15 @@ class WarRoomEngine:
                 (fp, room_id, branch, branch),
             ).fetchone()
             if lock:
-                conflicts.append({
-                    "file": fp,
-                    "agent_id": lock["agent_id"],
-                    "agent_name": lock["agent_name"],
-                    "task_id": lock["task_id"],
-                    "branch": lock["branch"],
-                })
+                conflicts.append(
+                    {
+                        "file": fp,
+                        "agent_id": lock["agent_id"],
+                        "agent_name": lock["agent_name"],
+                        "task_id": lock["task_id"],
+                        "branch": lock["branch"],
+                    }
+                )
         return conflicts
 
     # -- Shared Context --
@@ -632,7 +695,9 @@ class WarRoomEngine:
     ) -> None:
         """Broadcast a status message to the room."""
         self._emit_event(
-            room_id, "agent.broadcast", agent_id=agent_id,
+            room_id,
+            "agent.broadcast",
+            agent_id=agent_id,
             payload={"message": message},
         )
         self._notify("agent.broadcast", {"agent_id": agent_id, "message": message})
@@ -651,8 +716,14 @@ class WarRoomEngine:
         event_id = f"evt-{uuid.uuid4().hex[:12]}"
         self._conn.execute(
             "INSERT INTO events (event_id, type, room_id, agent_id, task_id, payload) VALUES (?, ?, ?, ?, ?, ?)",
-            (event_id, event_type, room_id, agent_id or None, task_id or None,
-             json.dumps(payload or {})),
+            (
+                event_id,
+                event_type,
+                room_id,
+                agent_id or None,
+                task_id or None,
+                json.dumps(payload or {}),
+            ),
         )
         self._conn.commit()
 

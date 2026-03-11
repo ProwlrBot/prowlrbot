@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Notification center — stores and manages notifications."""
+
 from __future__ import annotations
 
 import json
@@ -99,12 +100,19 @@ class NotificationCenter:
             "read, dismissed, action_url, metadata, created_at, read_at) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
-                notification.id, notification.title, notification.message,
-                notification.notification_type, notification.priority,
-                notification.source, notification.agent_id,
-                0, 0, notification.action_url,
+                notification.id,
+                notification.title,
+                notification.message,
+                notification.notification_type,
+                notification.priority,
+                notification.source,
+                notification.agent_id,
+                0,
+                0,
+                notification.action_url,
                 json.dumps(notification.metadata),
-                notification.created_at, 0,
+                notification.created_at,
+                0,
             ),
         )
         self._conn.commit()
@@ -188,8 +196,10 @@ class NotificationCenter:
             by_priority[row["priority"]] = row["c"]
 
         return NotificationStats(
-            total=total, unread=unread,
-            by_type=by_type, by_priority=by_priority,
+            total=total,
+            unread=unread,
+            by_type=by_type,
+            by_priority=by_priority,
         )
 
     def cleanup(self, older_than_days: int = 30) -> int:
@@ -205,14 +215,19 @@ class NotificationCenter:
     @staticmethod
     def _row_to_notification(row: sqlite3.Row) -> Notification:
         return Notification(
-            id=row["id"], title=row["title"], message=row["message"],
+            id=row["id"],
+            title=row["title"],
+            message=row["message"],
             notification_type=NotificationType(row["notification_type"]),
             priority=NotificationPriority(row["priority"]),
-            source=row["source"], agent_id=row["agent_id"],
-            read=bool(row["read"]), dismissed=bool(row["dismissed"]),
+            source=row["source"],
+            agent_id=row["agent_id"],
+            read=bool(row["read"]),
+            dismissed=bool(row["dismissed"]),
             action_url=row["action_url"],
             metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-            created_at=row["created_at"], read_at=row["read_at"],
+            created_at=row["created_at"],
+            read_at=row["read_at"],
         )
 
     def close(self) -> None:

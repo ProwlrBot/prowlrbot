@@ -53,9 +53,7 @@ def build_env_context(
             "the file, then use edit_file to make partial updates or appends.",
         )
 
-    return (
-        "====================\n" + "\n".join(parts) + "\n===================="
-    )
+    return "====================\n" + "\n".join(parts) + "\n===================="
 
 
 # pylint: disable=too-many-branches,too-many-statements

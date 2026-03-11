@@ -4,7 +4,12 @@
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.testclient import TestClient
 
-from prowlrbot.app.auth import AuthConfig, AuthDependency, generate_api_token, hash_token
+from prowlrbot.app.auth import (
+    AuthConfig,
+    AuthDependency,
+    generate_api_token,
+    hash_token,
+)
 
 
 def _create_test_app(auth_config: AuthConfig) -> FastAPI:

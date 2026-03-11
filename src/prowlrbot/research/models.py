@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AutoResearch data models."""
+
 from __future__ import annotations
 
 import uuid

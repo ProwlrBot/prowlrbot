@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Security tests for ProwlrHub HTTP bridge — auth, path validation, input limits."""
+
 import os
 import pytest
 from fastapi.testclient import TestClient
@@ -103,39 +104,57 @@ class TestPathTraversal:
 
     def test_absolute_path_rejected(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "/etc/passwd"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "/etc/passwd"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 400
 
     def test_traversal_path_rejected(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "../../etc/passwd"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "../../etc/passwd"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 400
 
     def test_null_byte_rejected(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "src/foo\x00.py"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "src/foo\x00.py"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 400
 
     def test_normal_path_accepted(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "src/main.py"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "src/main.py"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 200
         assert resp.json()["success"] is True
 
     def test_nested_path_accepted(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "src/hub/engine.py"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "src/hub/engine.py"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 200
 
     def test_backslash_absolute_rejected(self, client):
         agent_id, sid = self._register_agent(client)
-        resp = client.post(f"/lock/{agent_id}", json={"path": "\\windows\\system32"},
-                           headers=self._session_headers(sid))
+        resp = client.post(
+            f"/lock/{agent_id}",
+            json={"path": "\\windows\\system32"},
+            headers=self._session_headers(sid),
+        )
         assert resp.status_code == 400
 
 
@@ -231,7 +250,9 @@ class TestCORS:
                 "Access-Control-Request-Method": "GET",
             },
         )
-        assert resp.headers.get("access-control-allow-origin") == "http://localhost:8088"
+        assert (
+            resp.headers.get("access-control-allow-origin") == "http://localhost:8088"
+        )
 
     def test_cors_disallowed_origin(self, client):
         resp = client.options(

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for the notification center."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -32,8 +33,11 @@ async def list_notifications(
     offset: int = 0,
 ) -> List[Notification]:
     return _center.list_notifications(
-        unread_only=unread_only, notification_type=notification_type,
-        source=source, limit=limit, offset=offset,
+        unread_only=unread_only,
+        notification_type=notification_type,
+        source=source,
+        limit=limit,
+        offset=offset,
     )
 
 

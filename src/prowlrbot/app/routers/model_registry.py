@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API routes for the model registry."""
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -55,9 +56,7 @@ class UpdateModelRequest(BaseModel):
 
 
 class CompareRequest(BaseModel):
-    model_ids: list[str] = Field(
-        ..., description="List of model IDs to compare"
-    )
+    model_ids: list[str] = Field(..., description="List of model IDs to compare")
 
 
 # -- Endpoints --
@@ -107,9 +106,7 @@ async def get_model(
     registry = _get_registry()
     entry = registry.get(model_id)
     if entry is None:
-        raise HTTPException(
-            status_code=404, detail=f"Model '{model_id}' not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found")
     return entry
 
 
@@ -125,14 +122,10 @@ async def update_model(
     registry = _get_registry()
     kwargs = {k: v for k, v in body.model_dump().items() if v is not None}
     if not kwargs:
-        raise HTTPException(
-            status_code=400, detail="No fields to update"
-        )
+        raise HTTPException(status_code=400, detail="No fields to update")
     entry = registry.update(model_id, **kwargs)
     if entry is None:
-        raise HTTPException(
-            status_code=404, detail=f"Model '{model_id}' not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found")
     return entry
 
 
@@ -146,9 +139,7 @@ async def delete_model(
     registry = _get_registry()
     deleted = registry.delete(model_id)
     if not deleted:
-        raise HTTPException(
-            status_code=404, detail=f"Model '{model_id}' not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found")
     return {"deleted": True}
 
 

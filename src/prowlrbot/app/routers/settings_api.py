@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unified settings API — aggregated settings, theme, system info."""
+
 from __future__ import annotations
 
 import json
@@ -57,9 +58,7 @@ def _load_settings() -> Dict[str, Any]:
 def _save_settings(data: Dict[str, Any]) -> None:
     """Persist the general settings file."""
     _SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _SETTINGS_FILE.write_text(
-        json.dumps(data, indent=2), encoding="utf-8"
-    )
+    _SETTINGS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
 # ------------------------------------------------------------------

@@ -7,6 +7,7 @@ bounded queue; backpressure is applied when queues fill up.
 This is the default streaming backend. For production use with
 multiple processes, swap in the NATS backend.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -159,9 +160,7 @@ class EventBus:
             A Subscription that can be iterated or polled.
         """
         sub_id = f"sub-{uuid.uuid4().hex[:12]}"
-        queue: asyncio.Queue = asyncio.Queue(
-            maxsize=buffer_size or self._max_buffer
-        )
+        queue: asyncio.Queue = asyncio.Queue(maxsize=buffer_size or self._max_buffer)
         sub = Subscription(
             sub_id=sub_id,
             filter_spec=filter_spec or StreamFilter(),

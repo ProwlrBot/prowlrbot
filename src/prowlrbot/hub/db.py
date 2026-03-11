@@ -5,6 +5,7 @@ All war room state lives in a single SQLite file. Multiple Claude Code
 instances connect via separate MCP server processes, all sharing the
 same database. SQLite's WAL mode + transactions provide atomic claiming.
 """
+
 from __future__ import annotations
 
 import os

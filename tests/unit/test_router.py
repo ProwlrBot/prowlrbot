@@ -5,8 +5,12 @@ from prowlrbot.providers.router import SmartRouter
 from prowlrbot.providers.models import ProviderDefinition
 
 
-def _make(id: str, cost_tier: str = "standard", env_var: str = "X") -> ProviderDefinition:
-    return ProviderDefinition(id=id, name=id.title(), cost_tier=cost_tier, env_var=env_var)
+def _make(
+    id: str, cost_tier: str = "standard", env_var: str = "X"
+) -> ProviderDefinition:
+    return ProviderDefinition(
+        id=id, name=id.title(), cost_tier=cost_tier, env_var=env_var
+    )
 
 
 def test_router_selects_best_scored_provider():

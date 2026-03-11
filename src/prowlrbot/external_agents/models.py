@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """External agent data models."""
+
 from __future__ import annotations
 
 import uuid

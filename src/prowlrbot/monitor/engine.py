@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """Core MonitorEngine — schedule and execute monitors."""
+
 from __future__ import annotations
 
 import asyncio
 import logging
 from typing import Dict, List, Optional
 
-from prowlrbot.monitor.config import AnyMonitorConfig, WebMonitorConfig, APIMonitorConfig
+from prowlrbot.monitor.config import (
+    AnyMonitorConfig,
+    WebMonitorConfig,
+    APIMonitorConfig,
+)
 from prowlrbot.monitor.detectors.base import BaseDetector, DetectionResult
 from prowlrbot.monitor.detectors.web import WebDetector
 from prowlrbot.monitor.detectors.api import APIDetector

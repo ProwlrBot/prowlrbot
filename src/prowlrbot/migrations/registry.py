@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Built-in migration definitions for ProwlrBot."""
+
 from __future__ import annotations
 
 from .manager import MigrationManager

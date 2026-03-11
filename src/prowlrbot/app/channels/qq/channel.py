@@ -662,14 +662,10 @@ class QQChannel(BaseChannel):
                             )
                         else:
                             intents = (
-                                INTENT_PUBLIC_GUILD_MESSAGES
-                                | INTENT_GUILD_MEMBERS
+                                INTENT_PUBLIC_GUILD_MESSAGES | INTENT_GUILD_MEMBERS
                             )
                             if identify_fail_count < 3:
-                                intents |= (
-                                    INTENT_DIRECT_MESSAGE
-                                    | INTENT_GROUP_AND_C2C
-                                )
+                                intents |= INTENT_DIRECT_MESSAGE | INTENT_GROUP_AND_C2C
                             current_ws.send(
                                 json.dumps(
                                     {
@@ -701,11 +697,7 @@ class QQChannel(BaseChannel):
                                 self.bot_prefix,
                             ):
                                 continue
-                            sender = (
-                                author.get("user_openid")
-                                or author.get("id")
-                                or ""
-                            )
+                            sender = author.get("user_openid") or author.get("id") or ""
                             if not sender:
                                 continue
                             msg_id = (d or {}).get("id", "")
@@ -749,11 +741,7 @@ class QQChannel(BaseChannel):
                                 self.bot_prefix,
                             ):
                                 continue
-                            sender = (
-                                author.get("id")
-                                or author.get("username")
-                                or ""
-                            )
+                            sender = author.get("id") or author.get("username") or ""
                             if not sender:
                                 continue
                             channel_id = (d or {}).get("channel_id", "")
@@ -802,11 +790,7 @@ class QQChannel(BaseChannel):
                                 self.bot_prefix,
                             ):
                                 continue
-                            sender = (
-                                author.get("id")
-                                or author.get("username")
-                                or ""
-                            )
+                            sender = author.get("id") or author.get("username") or ""
                             if not sender:
                                 continue
                             channel_id = (d or {}).get("channel_id", "")
@@ -854,9 +838,7 @@ class QQChannel(BaseChannel):
                             ):
                                 continue
                             sender = (
-                                author.get("member_openid")
-                                or author.get("id")
-                                or ""
+                                author.get("member_openid") or author.get("id") or ""
                             )
                             if not sender:
                                 continue
@@ -924,8 +906,7 @@ class QQChannel(BaseChannel):
             last_connect_time_val = last_connect_time
             if (
                 last_connect_time_val
-                and (time.time() - last_connect_time_val)
-                < QUICK_DISCONNECT_THRESHOLD
+                and (time.time() - last_connect_time_val) < QUICK_DISCONNECT_THRESHOLD
             ):
                 quick_disconnect_count += 1
                 if quick_disconnect_count >= MAX_QUICK_DISCONNECT_COUNT:

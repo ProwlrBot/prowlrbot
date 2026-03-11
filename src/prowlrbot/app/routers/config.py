@@ -28,9 +28,7 @@ async def list_channels() -> dict:
     """List all channel configs (filtered by available channels)."""
     config = load_config()
     available = get_available_channels()
-    return {
-        k: v for k, v in config.channels.model_dump().items() if k in available
-    }
+    return {k: v for k, v in config.channels.model_dump().items() if k in available}
 
 
 @router.get(

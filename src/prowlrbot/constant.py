@@ -3,9 +3,7 @@ import os
 from pathlib import Path
 
 WORKING_DIR = (
-    Path(os.environ.get("PROWLRBOT_WORKING_DIR", "~/.prowlrbot"))
-    .expanduser()
-    .resolve()
+    Path(os.environ.get("PROWLRBOT_WORKING_DIR", "~/.prowlrbot")).expanduser().resolve()
 )
 SECRET_DIR = (
     Path(

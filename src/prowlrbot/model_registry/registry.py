@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """SQLite-backed model registry."""
+
 from __future__ import annotations
 
 import json
@@ -26,8 +27,7 @@ class ModelRegistry:
         self._init_db()
 
     def _init_db(self) -> None:
-        self._conn.execute(
-            """
+        self._conn.execute("""
             CREATE TABLE IF NOT EXISTS models (
                 id                TEXT PRIMARY KEY,
                 name              TEXT NOT NULL,
@@ -43,8 +43,7 @@ class ModelRegistry:
                 added_at          REAL NOT NULL DEFAULT 0.0,
                 last_used         REAL NOT NULL DEFAULT 0.0
             )
-            """
-        )
+            """)
         self._conn.commit()
 
     # -- helpers --
@@ -55,9 +54,7 @@ class ModelRegistry:
             name=row["name"],
             provider=row["provider"],
             model_type=ModelType(row["model_type"]),
-            capabilities=[
-                ModelCapability(c) for c in json.loads(row["capabilities"])
-            ],
+            capabilities=[ModelCapability(c) for c in json.loads(row["capabilities"])],
             context_window=row["context_window"],
             max_output_tokens=row["max_output_tokens"],
             cost_per_1k_input=row["cost_per_1k_input"],
@@ -111,9 +108,7 @@ class ModelRegistry:
             return None
         return self._row_to_entry(row)
 
-    def get_by_name(
-        self, name: str, provider: str
-    ) -> Optional[ModelEntry]:
+    def get_by_name(self, name: str, provider: str) -> Optional[ModelEntry]:
         """Get a model by name and provider."""
         row = self._conn.execute(
             "SELECT * FROM models WHERE name = ? AND provider = ?",
@@ -144,9 +139,7 @@ class ModelRegistry:
         entries = [self._row_to_entry(r) for r in rows]
 
         if capability is not None:
-            entries = [
-                e for e in entries if capability in e.capabilities
-            ]
+            entries = [e for e in entries if capability in e.capabilities]
 
         return entries
 
@@ -185,9 +178,7 @@ class ModelRegistry:
                 )
             elif key == "model_type":
                 sets.append("model_type = ?")
-                params.append(
-                    value.value if isinstance(value, ModelType) else value
-                )
+                params.append(value.value if isinstance(value, ModelType) else value)
             elif key == "metadata":
                 sets.append("metadata = ?")
                 params.append(json.dumps(value))
@@ -211,9 +202,7 @@ class ModelRegistry:
 
     def delete(self, model_id: str) -> bool:
         """Delete a model by id. Returns True if a row was deleted."""
-        cur = self._conn.execute(
-            "DELETE FROM models WHERE id = ?", (model_id,)
-        )
+        cur = self._conn.execute("DELETE FROM models WHERE id = ?", (model_id,))
         self._conn.commit()
         return cur.rowcount > 0
 
@@ -235,18 +224,10 @@ class ModelRegistry:
 
         matrix: dict = {}
         if models:
-            matrix["context_window"] = {
-                m.id: m.context_window for m in models
-            }
-            matrix["max_output_tokens"] = {
-                m.id: m.max_output_tokens for m in models
-            }
-            matrix["cost_per_1k_input"] = {
-                m.id: m.cost_per_1k_input for m in models
-            }
-            matrix["cost_per_1k_output"] = {
-                m.id: m.cost_per_1k_output for m in models
-            }
+            matrix["context_window"] = {m.id: m.context_window for m in models}
+            matrix["max_output_tokens"] = {m.id: m.max_output_tokens for m in models}
+            matrix["cost_per_1k_input"] = {m.id: m.cost_per_1k_input for m in models}
+            matrix["cost_per_1k_output"] = {m.id: m.cost_per_1k_output for m in models}
             matrix["capabilities"] = {
                 m.id: [c.value for c in m.capabilities] for m in models
             }
@@ -276,15 +257,9 @@ class ModelRegistry:
             return self.list_models(capability=ModelCapability.vision)
 
         if task == "code":
-            all_text = self.list_models(
-                capability=ModelCapability.text_generation
-            )
+            all_text = self.list_models(capability=ModelCapability.text_generation)
             # Sort so that code-type models come first
-            all_text.sort(
-                key=lambda m: (
-                    0 if m.model_type == ModelType.code else 1
-                )
-            )
+            all_text.sort(key=lambda m: (0 if m.model_type == ModelType.code else 1))
             return all_text
 
         # Default / "chat"

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Health dashboard endpoint — self-monitoring for ProwlrBot."""
+
 from __future__ import annotations
 
 import time
@@ -28,14 +29,18 @@ async def health_check(request: Request) -> Dict[str, Any]:
     channel_manager = getattr(request.app.state, "channel_manager", None)
     if channel_manager:
         for name, ch in getattr(channel_manager, "_channels", {}).items():
-            channels[name] = "connected" if getattr(ch, "_running", False) else "stopped"
+            channels[name] = (
+                "connected" if getattr(ch, "_running", False) else "stopped"
+            )
 
     # Cron status
     cron_info: Dict[str, Any] = {"active_jobs": 0}
     cron_manager = getattr(request.app.state, "cron_manager", None)
     if cron_manager:
         try:
-            jobs = cron_manager.list_jobs() if hasattr(cron_manager, "list_jobs") else []
+            jobs = (
+                cron_manager.list_jobs() if hasattr(cron_manager, "list_jobs") else []
+            )
             cron_info["active_jobs"] = len(jobs) if jobs else 0
         except Exception:
             pass

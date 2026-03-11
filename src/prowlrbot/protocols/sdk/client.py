@@ -4,6 +4,7 @@
 Supports local (in-memory) and remote (HTTP, WebSocket, stdio) message dispatch.
 Transport selection is automatic based on the target agent's registered endpoints.
 """
+
 from __future__ import annotations
 
 import hashlib

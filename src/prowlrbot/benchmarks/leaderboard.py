@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Model leaderboard — track and compare AI model performance."""
+
 from __future__ import annotations
 
 import json
@@ -152,7 +153,11 @@ class ModelLeaderboard:
                     avg_score=round(float(row["avg_score"]), 1),
                     total_runs=int(row["total_runs"]),
                     avg_latency_ms=int(row["avg_latency"]),
-                    avg_cost_per_1k=round(float(row["avg_cost"]) * 1000, 4) if row["avg_cost"] else 0.0,
+                    avg_cost_per_1k=(
+                        round(float(row["avg_cost"]) * 1000, 4)
+                        if row["avg_cost"]
+                        else 0.0
+                    ),
                     best_category=best["benchmark"] if best else "",
                     last_run=float(row["last_run"]),
                 )
@@ -196,12 +201,20 @@ class ModelLeaderboard:
         self._conn.execute(
             "INSERT OR REPLACE INTO benchmark_suites (id, name, description, tasks, created_at) "
             "VALUES (?, ?, ?, ?, ?)",
-            (suite.id, suite.name, suite.description, json.dumps(suite.tasks), suite.created_at),
+            (
+                suite.id,
+                suite.name,
+                suite.description,
+                json.dumps(suite.tasks),
+                suite.created_at,
+            ),
         )
         self._conn.commit()
 
     def list_suites(self) -> List[BenchmarkSuite]:
-        rows = self._conn.execute("SELECT * FROM benchmark_suites ORDER BY created_at DESC").fetchall()
+        rows = self._conn.execute(
+            "SELECT * FROM benchmark_suites ORDER BY created_at DESC"
+        ).fetchall()
         return [
             BenchmarkSuite(
                 id=row["id"],

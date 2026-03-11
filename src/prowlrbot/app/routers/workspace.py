@@ -140,9 +140,7 @@ async def upload_workspace(  # pylint: disable=too-many-branches
     ):
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Expected a zip file, got content-type: {file.content_type}"
-            ),
+            detail=(f"Expected a zip file, got content-type: {file.content_type}"),
         )
 
     data = await file.read()

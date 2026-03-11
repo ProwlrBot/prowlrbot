@@ -4,6 +4,7 @@
 When PROWLR_HUB_URL is set, the MCP server uses this client instead of
 direct SQLite access. This enables WSL ↔ Mac war room coordination.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,7 +30,9 @@ class RemoteWarRoom:
         self._base_url = base_url.rstrip("/")
         self._agent_id: Optional[str] = None
         self._session_id: Optional[str] = None
-        self._auth_token: Optional[str] = os.environ.get("PROWLR_HUB_SECRET", "") or None
+        self._auth_token: Optional[str] = (
+            os.environ.get("PROWLR_HUB_SECRET", "") or None
+        )
 
     def _request(self, method: str, path: str, data: Optional[Dict] = None) -> Dict:
         """Make an HTTP request to the bridge."""
@@ -81,29 +84,51 @@ class RemoteWarRoom:
         result = self._get(f"/board{params}")
         return result.get("tasks", [])
 
-    def claim_task(self, title: str = "", task_id: str = "",
-                   file_scopes: List[str] = None, description: str = "",
-                   priority: str = "normal") -> Dict:
-        return self._post(f"/claim/{self._agent_id}", {
-            "title": title, "task_id": task_id,
-            "file_scopes": file_scopes or [], "description": description,
-            "priority": priority,
-        })
+    def claim_task(
+        self,
+        title: str = "",
+        task_id: str = "",
+        file_scopes: List[str] = None,
+        description: str = "",
+        priority: str = "normal",
+    ) -> Dict:
+        return self._post(
+            f"/claim/{self._agent_id}",
+            {
+                "title": title,
+                "task_id": task_id,
+                "file_scopes": file_scopes or [],
+                "description": description,
+                "priority": priority,
+            },
+        )
 
     def update_task(self, task_id: str, progress_note: str) -> Dict:
-        return self._post(f"/update/{self._agent_id}", {
-            "task_id": task_id, "progress_note": progress_note,
-        })
+        return self._post(
+            f"/update/{self._agent_id}",
+            {
+                "task_id": task_id,
+                "progress_note": progress_note,
+            },
+        )
 
     def complete_task(self, task_id: str, summary: str = "") -> Dict:
-        return self._post(f"/complete/{self._agent_id}", {
-            "task_id": task_id, "summary": summary,
-        })
+        return self._post(
+            f"/complete/{self._agent_id}",
+            {
+                "task_id": task_id,
+                "summary": summary,
+            },
+        )
 
     def fail_task(self, task_id: str, reason: str = "") -> Dict:
-        return self._post(f"/fail/{self._agent_id}", {
-            "task_id": task_id, "reason": reason,
-        })
+        return self._post(
+            f"/fail/{self._agent_id}",
+            {
+                "task_id": task_id,
+                "reason": reason,
+            },
+        )
 
     # --- File locking ---
 

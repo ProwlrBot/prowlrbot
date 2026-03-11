@@ -10,7 +10,6 @@ from agentscope.tool import ToolResponse
 
 from ...constant import WORKING_DIR
 
-
 # Directories that are always blocked
 _BLOCKED_PREFIXES = [
     Path.home() / ".ssh",

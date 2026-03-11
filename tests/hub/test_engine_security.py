@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Security-focused tests for WarRoomEngine — atomicity, retention, error handling."""
+
 import sqlite3
 import threading
 import pytest
@@ -21,12 +22,16 @@ def room(engine):
 
 @pytest.fixture
 def agent(engine, room):
-    return engine.register_agent("agent-alpha", room["room_id"], capabilities=["python"])
+    return engine.register_agent(
+        "agent-alpha", room["room_id"], capabilities=["python"]
+    )
 
 
 @pytest.fixture
 def agent_beta(engine, room):
-    return engine.register_agent("agent-beta", room["room_id"], capabilities=["frontend"])
+    return engine.register_agent(
+        "agent-beta", room["room_id"], capabilities=["frontend"]
+    )
 
 
 # --- Lock Atomicity (FINDING-09) ---
@@ -37,7 +42,9 @@ class TestLockAtomicity:
         """Verify lock_file is atomic — only one agent gets the lock."""
         result1 = engine.lock_file("src/race.py", agent["agent_id"], room["room_id"])
         assert result1.success is True
-        result2 = engine.lock_file("src/race.py", agent_beta["agent_id"], room["room_id"])
+        result2 = engine.lock_file(
+            "src/race.py", agent_beta["agent_id"], room["room_id"]
+        )
         assert result2.success is False
         assert result2.reason == "already_locked"
         assert result2.owner == agent["agent_id"]
@@ -45,8 +52,7 @@ class TestLockAtomicity:
     def test_concurrent_lock_attempts(self, engine, room):
         """Two agents trying to lock same file concurrently — exactly one wins."""
         agents = [
-            engine.register_agent(f"racer-{i}", room["room_id"])
-            for i in range(5)
+            engine.register_agent(f"racer-{i}", room["room_id"]) for i in range(5)
         ]
         results = []
         lock = threading.Lock()
@@ -75,17 +81,20 @@ class TestLockAtomicity:
 
     def test_concurrent_claim_task(self, engine, room):
         """Two agents claiming the same task — exactly one wins."""
-        task = engine.create_task(room["room_id"], "contested task", file_scopes=["src/x.py"])
+        task = engine.create_task(
+            room["room_id"], "contested task", file_scopes=["src/x.py"]
+        )
         agents = [
-            engine.register_agent(f"claimer-{i}", room["room_id"])
-            for i in range(5)
+            engine.register_agent(f"claimer-{i}", room["room_id"]) for i in range(5)
         ]
         results = []
         lock = threading.Lock()
 
         def try_claim(agent_data):
             try:
-                result = engine.claim_task(task["task_id"], agent_data["agent_id"], room["room_id"])
+                result = engine.claim_task(
+                    task["task_id"], agent_data["agent_id"], room["room_id"]
+                )
                 with lock:
                     results.append(result)
             except Exception:
@@ -138,9 +147,13 @@ class TestEventRetention:
 class TestErrorMessageSafety:
     def test_claim_conflict_no_schema_leak(self, engine, room, agent, agent_beta):
         """IntegrityError should not leak table/column names."""
-        task = engine.create_task(room["room_id"], "test task", file_scopes=["src/t.py"])
+        task = engine.create_task(
+            room["room_id"], "test task", file_scopes=["src/t.py"]
+        )
         engine.claim_task(task["task_id"], agent["agent_id"], room["room_id"])
-        result = engine.claim_task(task["task_id"], agent_beta["agent_id"], room["room_id"])
+        result = engine.claim_task(
+            task["task_id"], agent_beta["agent_id"], room["room_id"]
+        )
         assert result.success is False
         # The reason should NOT contain SQL table/column names
         assert "file_locks" not in result.reason
@@ -188,6 +201,7 @@ class TestEventCallback:
 
     def test_callback_exception_doesnt_break_engine(self, engine, room, agent):
         """A failing callback should not prevent the operation from completing."""
+
         def bad_callback(e):
             raise RuntimeError("Callback crashed!")
 

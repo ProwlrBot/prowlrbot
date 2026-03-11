@@ -12,6 +12,7 @@ maximizing throughput when capacity is available.
 
 Ref: Jacobson, V. (1988). "Congestion Avoidance and Control". SIGCOMM.
 """
+
 from __future__ import annotations
 
 import time
@@ -81,9 +82,7 @@ class AIMDController:
 
     def _decrease(self) -> None:
         """Multiplicative decrease — exponential backoff."""
-        self.rate = max(
-            self.rate * self.multiplicative_decrease, self.min_rate
-        )
+        self.rate = max(self.rate * self.multiplicative_decrease, self.min_rate)
         self._last_adjustment = time.time()
 
     def reset(self) -> None:

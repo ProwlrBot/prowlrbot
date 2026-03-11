@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Pydantic models for the ProwlrBot Marketplace."""
+
 from __future__ import annotations
 
 import uuid

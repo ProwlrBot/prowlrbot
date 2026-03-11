@@ -7,6 +7,7 @@ Each transport implements the same async interface:
 
 Transport selection is based on ConnectionConfig.transport.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -14,6 +14,7 @@ Usage::
     app = FastAPI()
     app.include_router(create_roar_router(server))
 """
+
 from __future__ import annotations
 
 import json
@@ -85,14 +86,14 @@ def create_roar_router(server: Any) -> APIRouter:
                     data = json.loads(raw)
                     incoming = ROARMessage.model_validate(data)
                     response = await server.handle_message(incoming)
-                    await ws.send_text(
-                        json.dumps(response.model_dump(by_alias=True))
-                    )
+                    await ws.send_text(json.dumps(response.model_dump(by_alias=True)))
                 except Exception as exc:
-                    error_msg = json.dumps({
-                        "error": "processing_error",
-                        "detail": str(exc),
-                    })
+                    error_msg = json.dumps(
+                        {
+                            "error": "processing_error",
+                            "detail": str(exc),
+                        }
+                    )
                     await ws.send_text(error_msg)
         except WebSocketDisconnect:
             logger.info("ROAR WebSocket disconnected")
@@ -122,18 +123,20 @@ def create_roar_router(server: Any) -> APIRouter:
         )
 
         async def generate():
-            yield "event: connected\ndata: {\"status\": \"streaming\"}\n\n"
+            yield 'event: connected\ndata: {"status": "streaming"}\n\n'
 
             sub = server.event_bus.subscribe(filter_spec)
             try:
                 async for event in sub:
-                    data = json.dumps({
-                        "type": event.type,
-                        "source": event.source,
-                        "session_id": event.session_id,
-                        "data": event.data,
-                        "timestamp": event.timestamp,
-                    })
+                    data = json.dumps(
+                        {
+                            "type": event.type,
+                            "source": event.source,
+                            "session_id": event.session_id,
+                            "data": event.data,
+                            "timestamp": event.timestamp,
+                        }
+                    )
                     yield f"event: {event.type}\ndata: {data}\n\n"
             finally:
                 sub.close()

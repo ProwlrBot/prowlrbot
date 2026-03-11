@@ -172,9 +172,7 @@ class TimelineManager:
         self._conn.commit()
         return entry
 
-    def list_events(
-        self, session_id: str, limit: int = 200
-    ) -> List[TimelineEntry]:
+    def list_events(self, session_id: str, limit: int = 200) -> List[TimelineEntry]:
         """List timeline events for a session, newest first."""
         rows = self._conn.execute(
             "SELECT * FROM timeline_entries WHERE session_id = ? "

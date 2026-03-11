@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Abstract base notifier."""
+
 from __future__ import annotations
 
 import abc

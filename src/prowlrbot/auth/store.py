@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """SQLite-backed user store for authentication."""
+
 from __future__ import annotations
 
 import hashlib

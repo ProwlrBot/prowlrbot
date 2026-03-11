@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Skills hub client and install helpers."""
+
 from __future__ import annotations
 
 import json
@@ -161,10 +162,7 @@ def _http_get(
                     body = e.read().decode("utf-8", errors="ignore")
                 except Exception:
                     body = ""
-                if (
-                    "rate limit" in body.lower()
-                    or "rate limit" in str(e).lower()
-                ):
+                if "rate limit" in body.lower() or "rate limit" in str(e).lower():
                     raise RuntimeError(
                         "GitHub API rate limit exceeded while fetching "
                         "skills.sh skill files. Set GITHUB_TOKEN "
@@ -189,8 +187,7 @@ def _http_get(
             if attempt < attempts:
                 delay = _compute_backoff_seconds(attempt)
                 logger.warning(
-                    "Hub URL error on %s (attempt %d/%d), "
-                    "retrying in %.2fs: %s",
+                    "Hub URL error on %s (attempt %d/%d), " "retrying in %.2fs: %s",
                     full_url,
                     attempt,
                     attempts,
@@ -310,9 +307,7 @@ def _bundle_has_content(payload: Any) -> bool:
     if not isinstance(payload, dict):
         return False
     content = (
-        payload.get("content")
-        or payload.get("skill_md")
-        or payload.get("skillMd")
+        payload.get("content") or payload.get("skill_md") or payload.get("skillMd")
     )
     if isinstance(content, str) and content.strip():
         return True
@@ -382,9 +377,7 @@ def _hydrate_clawhub_payload(
         )
         version_data = _http_json_get(version_url)
         version_obj = (
-            version_data.get("version")
-            if isinstance(version_data, dict)
-            else None
+            version_data.get("version") if isinstance(version_data, dict) else None
         )
 
     if not isinstance(version_obj, dict):
@@ -762,9 +755,7 @@ def _github_collect_tree_files(
             if entry_type != "file":
                 continue
             rel = _relative_from_root(entry_path, root)
-            if not (
-                rel.startswith("references/") or rel.startswith("scripts/")
-            ):
+            if not (rel.startswith("references/") or rel.startswith("scripts/")):
                 continue
             files[rel] = _github_read_file(entry)
             visited += 1
@@ -894,9 +885,7 @@ def _fetch_bundle_from_repo_and_skill_hint(
     requested_version: str,
 ) -> tuple[Any, str]:
     branch_candidates = (
-        [requested_version.strip()]
-        if requested_version.strip()
-        else ["main", "master"]
+        [requested_version.strip()] if requested_version.strip() else ["main", "master"]
     )
     skill = skill_hint.strip()
 

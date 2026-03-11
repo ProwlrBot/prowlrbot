@@ -34,9 +34,15 @@ class TeamMember(BaseModel):
 
     agent_id: str = Field(description="ID of the agent")
     role: TeamRole = Field(default=TeamRole.SPECIALIST, description="Member role")
-    personality: str = Field(default="", description="Personality overlay for this team context")
-    skills: List[str] = Field(default_factory=list, description="Skills this member contributes")
-    model_preference: str = Field(default="", description="Preferred model ID for this member")
+    personality: str = Field(
+        default="", description="Personality overlay for this team context"
+    )
+    skills: List[str] = Field(
+        default_factory=list, description="Skills this member contributes"
+    )
+    model_preference: str = Field(
+        default="", description="Preferred model ID for this member"
+    )
 
 
 class AgentTeam(BaseModel):
@@ -50,7 +56,8 @@ class AgentTeam(BaseModel):
         default=CoordinationMode.HIERARCHICAL, description="Coordination strategy"
     )
     fallback_strategy: str = Field(
-        default="escalate", description="What to do when the team fails: escalate, retry, degrade"
+        default="escalate",
+        description="What to do when the team fails: escalate, retry, degrade",
     )
     created_at: float = Field(default_factory=time.time, description="Unix timestamp")
 
@@ -123,7 +130,14 @@ class TeamStore:
             self._conn.execute(
                 "INSERT INTO team_members (team_id, agent_id, role, personality, skills, model_preference) "
                 "VALUES (?, ?, ?, ?, ?, ?)",
-                (team_id, m.agent_id, str(m.role), m.personality, json.dumps(m.skills), m.model_preference),
+                (
+                    team_id,
+                    m.agent_id,
+                    str(m.role),
+                    m.personality,
+                    json.dumps(m.skills),
+                    m.model_preference,
+                ),
             )
 
     def create_team(self, team: AgentTeam) -> AgentTeam:
@@ -133,7 +147,14 @@ class TeamStore:
         self._conn.execute(
             "INSERT INTO teams (id, name, description, coordination, fallback_strategy, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?)",
-            (team.id, team.name, team.description, str(team.coordination), team.fallback_strategy, team.created_at),
+            (
+                team.id,
+                team.name,
+                team.description,
+                str(team.coordination),
+                team.fallback_strategy,
+                team.created_at,
+            ),
         )
         self._upsert_members(team.id, team.members)
         self._conn.commit()
@@ -141,7 +162,9 @@ class TeamStore:
 
     def get_team(self, team_id: str) -> Optional[AgentTeam]:
         """Get a team by ID, or None if not found."""
-        row = self._conn.execute("SELECT * FROM teams WHERE id = ?", (team_id,)).fetchone()
+        row = self._conn.execute(
+            "SELECT * FROM teams WHERE id = ?", (team_id,)
+        ).fetchone()
         if not row:
             return None
         members = self._fetch_members(team_id)
@@ -149,17 +172,27 @@ class TeamStore:
 
     def list_teams(self) -> List[AgentTeam]:
         """List all teams ordered by creation time."""
-        rows = self._conn.execute("SELECT * FROM teams ORDER BY created_at DESC").fetchall()
+        rows = self._conn.execute(
+            "SELECT * FROM teams ORDER BY created_at DESC"
+        ).fetchall()
         return [self._row_to_team(r, self._fetch_members(r["id"])) for r in rows]
 
     def update_team(self, team_id: str, team: AgentTeam) -> bool:
         """Update an existing team. Returns False if not found."""
-        existing = self._conn.execute("SELECT id FROM teams WHERE id = ?", (team_id,)).fetchone()
+        existing = self._conn.execute(
+            "SELECT id FROM teams WHERE id = ?", (team_id,)
+        ).fetchone()
         if not existing:
             return False
         self._conn.execute(
             "UPDATE teams SET name = ?, description = ?, coordination = ?, fallback_strategy = ? WHERE id = ?",
-            (team.name, team.description, str(team.coordination), team.fallback_strategy, team_id),
+            (
+                team.name,
+                team.description,
+                str(team.coordination),
+                team.fallback_strategy,
+                team_id,
+            ),
         )
         self._upsert_members(team_id, team.members)
         self._conn.commit()
@@ -167,7 +200,9 @@ class TeamStore:
 
     def delete_team(self, team_id: str) -> bool:
         """Delete a team. Returns False if not found."""
-        existing = self._conn.execute("SELECT id FROM teams WHERE id = ?", (team_id,)).fetchone()
+        existing = self._conn.execute(
+            "SELECT id FROM teams WHERE id = ?", (team_id,)
+        ).fetchone()
         if not existing:
             return False
         self._conn.execute("DELETE FROM team_members WHERE team_id = ?", (team_id,))
@@ -177,13 +212,22 @@ class TeamStore:
 
     def add_member(self, team_id: str, member: TeamMember) -> bool:
         """Add a member to a team. Returns False if team not found."""
-        existing = self._conn.execute("SELECT id FROM teams WHERE id = ?", (team_id,)).fetchone()
+        existing = self._conn.execute(
+            "SELECT id FROM teams WHERE id = ?", (team_id,)
+        ).fetchone()
         if not existing:
             return False
         self._conn.execute(
             "INSERT OR REPLACE INTO team_members (team_id, agent_id, role, personality, skills, model_preference) "
             "VALUES (?, ?, ?, ?, ?, ?)",
-            (team_id, member.agent_id, str(member.role), member.personality, json.dumps(member.skills), member.model_preference),
+            (
+                team_id,
+                member.agent_id,
+                str(member.role),
+                member.personality,
+                json.dumps(member.skills),
+                member.model_preference,
+            ),
         )
         self._conn.commit()
         return True

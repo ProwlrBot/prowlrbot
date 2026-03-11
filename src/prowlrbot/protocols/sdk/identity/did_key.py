@@ -9,6 +9,7 @@ Format: did:key:z<base58-multicodec-ed25519-pubkey>
 
 Ref: https://w3c-ccg.github.io/did-method-key/
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

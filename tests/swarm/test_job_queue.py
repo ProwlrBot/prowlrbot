@@ -1,4 +1,5 @@
 """Tests for job queue client."""
+
 import json
 import os
 import sys
@@ -76,10 +77,9 @@ class TestJobQueue:
     def test_get_result_immediate(self, mock_redis_class, mock_redis):
         """Test getting result immediately."""
         mock_redis_class.return_value = mock_redis
-        mock_redis.get.return_value = json.dumps({
-            "status": "success",
-            "result": {"data": "test"}
-        })
+        mock_redis.get.return_value = json.dumps(
+            {"status": "success", "result": {"data": "test"}}
+        )
 
         queue = JobQueue()
         queue.connect()
@@ -112,7 +112,7 @@ class TestJobSerialization:
             "job_id": str(uuid.uuid4()),
             "capability": "test:capability",
             "parameters": {"key": "value"},
-            "enqueued_at": 1234567890.0
+            "enqueued_at": 1234567890.0,
         }
 
         serialized = json.dumps(job)

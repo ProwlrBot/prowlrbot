@@ -21,11 +21,13 @@ SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 # Paths that are exempt from CSRF checks (e.g. login/register — no cookie
 # exists yet, and health probes should never be blocked).
-EXEMPT_PATHS = frozenset({
-    "/api/auth/login",
-    "/api/auth/register",
-    "/api/health",
-})
+EXEMPT_PATHS = frozenset(
+    {
+        "/api/auth/login",
+        "/api/auth/register",
+        "/api/health",
+    }
+)
 
 
 class CSRFProtection:

@@ -18,10 +18,19 @@ class InputSanitizer:
 
     INJECTION_PATTERNS = [
         # Role switching attempts
-        (r"(?i)ignore\s+(all\s+)?previous\s+instructions", "Possible role-switching injection"),
-        (r"(?i)forget\s+(all\s+)?your\s+(previous\s+)?instructions", "Possible role-switching injection"),
+        (
+            r"(?i)ignore\s+(all\s+)?previous\s+instructions",
+            "Possible role-switching injection",
+        ),
+        (
+            r"(?i)forget\s+(all\s+)?your\s+(previous\s+)?instructions",
+            "Possible role-switching injection",
+        ),
         (r"(?i)you\s+are\s+now\s+a\s+different", "Possible role-switching injection"),
-        (r"(?i)disregard\s+(all\s+)?(prior|previous|above)", "Possible role-switching injection"),
+        (
+            r"(?i)disregard\s+(all\s+)?(prior|previous|above)",
+            "Possible role-switching injection",
+        ),
         # System prompt override
         (r"(?i)^system\s*:\s*you\s+are\s+now", "Possible system prompt override"),
         (r"(?i)^system\s*:\s*ignore", "Possible system prompt override"),
@@ -49,7 +58,10 @@ class OutputFilter:
         (r"sk-[a-zA-Z0-9\-_]{20,}", "sk-***"),
         (r"gsk_[a-zA-Z0-9]{20,}", "gsk_***"),
         # Bearer tokens (JWT-like)
-        (r"Bearer\s+eyJ[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+", "Bearer [REDACTED]"),
+        (
+            r"Bearer\s+eyJ[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+",
+            "Bearer [REDACTED]",
+        ),
         # Generic key=value secrets
         (r"(?i)(api[_-]?key|secret|token|password)\s*=\s*\S+", r"\1=[REDACTED]"),
     ]

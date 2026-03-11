@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Custom memory implementation with bugfixes and extensions."""
+
 import logging
 
 from agentscope.agent._react_agent import _MemoryMark
@@ -57,9 +58,7 @@ class ProwlrBotInMemoryMemory(InMemoryMemory):
 
         # Filter messages based on mark
         filtered_content = [
-            (msg, marks)
-            for msg, marks in self.content
-            if mark is None or mark in marks
+            (msg, marks) for msg, marks in self.content if mark is None or mark in marks
         ]
 
         # Further filter messages based on exclude_mark

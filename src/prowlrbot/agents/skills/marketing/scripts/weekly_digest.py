@@ -12,7 +12,6 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from typing import Optional
 
-
 FIELD_SEP = "---FIELD-SEP---"
 COMMIT_SEP = "---COMMIT-SEP---"
 
@@ -53,9 +52,7 @@ def get_week_bounds(week_start: Optional[str] = None) -> tuple[str, str]:
     return monday.strftime("%Y-%m-%d"), sunday.strftime("%Y-%m-%d")
 
 
-def get_commits_for_week(
-    cwd: str, since: str, until: str
-) -> list[dict[str, str]]:
+def get_commits_for_week(cwd: str, since: str, until: str) -> list[dict[str, str]]:
     """Get all commits within a date range."""
     # Add one day to 'until' so git log includes commits on Sunday
     until_dt = datetime.strptime(until, "%Y-%m-%d") + timedelta(days=1)

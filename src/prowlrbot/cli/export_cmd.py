@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """CLI commands for data export and privacy controls."""
+
 from __future__ import annotations
 
 import json
@@ -38,11 +39,19 @@ def export_all(output: str | None, fmt: str) -> None:
     timestamp = time.strftime("%Y-%m-%dT%H-%M-%S")
 
     if fmt == "json":
-        out_path = Path(output) if output else Path.home() / f"prowlrbot-export-{timestamp}.json"
+        out_path = (
+            Path(output)
+            if output
+            else Path.home() / f"prowlrbot-export-{timestamp}.json"
+        )
         data = _collect_export_data()
         out_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
     else:
-        out_path = Path(output) if output else Path.home() / f"prowlrbot-export-{timestamp}.tar.gz"
+        out_path = (
+            Path(output)
+            if output
+            else Path.home() / f"prowlrbot-export-{timestamp}.tar.gz"
+        )
         with tarfile.open(str(out_path), "w:gz") as tar:
             if WORKING_DIR.is_dir():
                 tar.add(str(WORKING_DIR), arcname="prowlrbot")
@@ -61,7 +70,9 @@ def export_chats(output: str | None) -> None:
         return
 
     timestamp = time.strftime("%Y-%m-%dT%H-%M-%S")
-    out_path = Path(output) if output else Path.home() / f"prowlrbot-chats-{timestamp}.json"
+    out_path = (
+        Path(output) if output else Path.home() / f"prowlrbot-chats-{timestamp}.json"
+    )
 
     chats = []
     for f in chats_dir.glob("*.json"):
@@ -90,7 +101,9 @@ def export_config() -> None:
 
 @export_group.command("retention")
 @click.option("--days", type=int, default=30, help="Delete data older than N days.")
-@click.option("--dry-run", is_flag=True, help="Show what would be deleted without deleting.")
+@click.option(
+    "--dry-run", is_flag=True, help="Show what would be deleted without deleting."
+)
 def apply_retention(days: int, dry_run: bool) -> None:
     """Apply data retention policy — delete data older than N days."""
     import time as _time

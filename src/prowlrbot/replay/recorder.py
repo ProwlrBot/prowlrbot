@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Session replay recorder and player."""
+
 from __future__ import annotations
 
 import json
@@ -109,8 +110,15 @@ class SessionRecorder:
             "INSERT INTO replay_sessions "
             "(id, session_id, agent_id, title, duration_ms, event_count, created_at) "
             "VALUES (?,?,?,?,?,?,?)",
-            (replay.id, replay.session_id, replay.agent_id,
-             replay.title, 0, 0, replay.created_at),
+            (
+                replay.id,
+                replay.session_id,
+                replay.agent_id,
+                replay.title,
+                0,
+                0,
+                replay.created_at,
+            ),
         )
         self._conn.commit()
         self._active_sessions[replay.id] = now
@@ -142,9 +150,16 @@ class SessionRecorder:
             "INSERT INTO replay_events "
             "(id, replay_session_id, event_type, timestamp, offset_ms, "
             "content, metadata, agent_id) VALUES (?,?,?,?,?,?,?,?)",
-            (event.id, replay_session_id, event.event_type,
-             event.timestamp, event.offset_ms, event.content,
-             json.dumps(event.metadata), event.agent_id),
+            (
+                event.id,
+                replay_session_id,
+                event.event_type,
+                event.timestamp,
+                event.offset_ms,
+                event.content,
+                json.dumps(event.metadata),
+                event.agent_id,
+            ),
         )
         self._conn.execute(
             "UPDATE replay_sessions SET event_count = event_count + 1, "
@@ -166,13 +181,18 @@ class SessionRecorder:
         if not row:
             return None
         return ReplaySession(
-            id=row["id"], session_id=row["session_id"],
-            agent_id=row["agent_id"], title=row["title"],
-            duration_ms=row["duration_ms"], event_count=row["event_count"],
+            id=row["id"],
+            session_id=row["session_id"],
+            agent_id=row["agent_id"],
+            title=row["title"],
+            duration_ms=row["duration_ms"],
+            event_count=row["event_count"],
             created_at=row["created_at"],
         )
 
-    def get_session_detail(self, replay_session_id: str) -> Optional[ReplaySessionDetail]:
+    def get_session_detail(
+        self, replay_session_id: str
+    ) -> Optional[ReplaySessionDetail]:
         """Get session with all events for playback."""
         session = self.get_session(replay_session_id)
         if not session:
@@ -186,8 +206,10 @@ class SessionRecorder:
 
         events = [
             ReplayEvent(
-                id=r["id"], event_type=EventType(r["event_type"]),
-                timestamp=r["timestamp"], offset_ms=r["offset_ms"],
+                id=r["id"],
+                event_type=EventType(r["event_type"]),
+                timestamp=r["timestamp"],
+                offset_ms=r["offset_ms"],
                 content=r["content"],
                 metadata=json.loads(r["metadata"]) if r["metadata"] else {},
                 agent_id=r["agent_id"],
@@ -214,8 +236,10 @@ class SessionRecorder:
         rows = self._conn.execute(query, params).fetchall()
         return [
             ReplayEvent(
-                id=r["id"], event_type=EventType(r["event_type"]),
-                timestamp=r["timestamp"], offset_ms=r["offset_ms"],
+                id=r["id"],
+                event_type=EventType(r["event_type"]),
+                timestamp=r["timestamp"],
+                offset_ms=r["offset_ms"],
                 content=r["content"],
                 metadata=json.loads(r["metadata"]) if r["metadata"] else {},
                 agent_id=r["agent_id"],
@@ -230,9 +254,12 @@ class SessionRecorder:
         ).fetchall()
         return [
             ReplaySession(
-                id=r["id"], session_id=r["session_id"],
-                agent_id=r["agent_id"], title=r["title"],
-                duration_ms=r["duration_ms"], event_count=r["event_count"],
+                id=r["id"],
+                session_id=r["session_id"],
+                agent_id=r["agent_id"],
+                title=r["title"],
+                duration_ms=r["duration_ms"],
+                event_count=r["event_count"],
                 created_at=r["created_at"],
             )
             for r in rows

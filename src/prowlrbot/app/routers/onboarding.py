@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for the onboarding wizard."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -49,7 +50,9 @@ async def skip_step(user_id: str, action: StepAction) -> OnboardingProgress:
 
 
 @router.put("/preferences/{user_id}", response_model=OnboardingProgress)
-async def set_preferences(user_id: str, preferences: Dict[str, Any]) -> OnboardingProgress:
+async def set_preferences(
+    user_id: str, preferences: Dict[str, Any]
+) -> OnboardingProgress:
     progress = _manager.set_preferences(user_id, preferences)
     if not progress:
         raise HTTPException(404, f"No onboarding progress for '{user_id}'")

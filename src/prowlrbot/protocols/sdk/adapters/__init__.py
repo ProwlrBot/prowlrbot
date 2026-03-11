@@ -11,6 +11,7 @@ message translation, plus protocol-specific helpers.
 
 Auto-detection sniffs incoming messages to route them to the right adapter.
 """
+
 from .mcp import MCPFullAdapter
 from .a2a import A2AFullAdapter
 from .detect import detect_protocol, ProtocolType

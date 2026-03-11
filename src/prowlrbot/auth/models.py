@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Data models for JWT authentication and RBAC."""
+
 from __future__ import annotations
 
 from enum import StrEnum

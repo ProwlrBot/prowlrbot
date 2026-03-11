@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """RAG engine — ingest, search, and retrieve context for LLM queries."""
+
 from __future__ import annotations
 
 import hashlib
@@ -155,10 +156,7 @@ class RAGEngine:
 
         parts: list[str] = []
         for idx, result in enumerate(results, 1):
-            header = (
-                f"[{idx}] {result.document.title} "
-                f"(score: {result.score:.2f})"
-            )
+            header = f"[{idx}] {result.document.title} " f"(score: {result.score:.2f})"
             parts.append(f"{header}\n{result.chunk.content}")
 
         return "\n\n---\n\n".join(parts)

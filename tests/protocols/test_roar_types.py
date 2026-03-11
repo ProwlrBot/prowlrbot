@@ -1,4 +1,5 @@
 """Tests for ROAR Protocol type conformance and cross-SDK compatibility."""
+
 import hashlib
 import hmac
 import json
@@ -38,9 +39,7 @@ class TestAgentIdentity:
     def test_agent_types(self):
         """All four agent types generate correct DID prefix."""
         for agent_type in ("agent", "tool", "human", "ide"):
-            identity = AgentIdentity(
-                display_name="test", agent_type=agent_type
-            )
+            identity = AgentIdentity(display_name="test", agent_type=agent_type)
             assert f"did:roar:{agent_type}:" in identity.did
 
     def test_public_key_optional(self):
@@ -68,7 +67,15 @@ class TestMessageIntent:
     """Test that MessageIntent has exactly 7 values matching the spec."""
 
     def test_all_intents(self):
-        expected = {"execute", "delegate", "update", "ask", "respond", "notify", "discover"}
+        expected = {
+            "execute",
+            "delegate",
+            "update",
+            "ask",
+            "respond",
+            "notify",
+            "discover",
+        }
         actual = {intent.value for intent in MessageIntent}
         assert actual == expected
 
@@ -120,7 +127,11 @@ class TestROARMessage:
         )
         # Manually compute what the canonical body should be
         expected_body = json.dumps(
-            {"id": msg.id, "intent": "execute", "payload": {"action": "test", "params": {"x": 1}}},
+            {
+                "id": msg.id,
+                "intent": "execute",
+                "payload": {"action": "test", "params": {"x": 1}},
+            },
             sort_keys=True,
         )
         # Sign and extract the hex
@@ -149,8 +160,14 @@ class TestStreamEventType:
 
     def test_all_event_types(self):
         expected = {
-            "tool_call", "mcp_request", "reasoning", "task_update",
-            "monitor_alert", "agent_status", "checkpoint", "world_update",
+            "tool_call",
+            "mcp_request",
+            "reasoning",
+            "task_update",
+            "monitor_alert",
+            "agent_status",
+            "checkpoint",
+            "world_update",
         }
         actual = {t.value for t in StreamEventType}
         assert actual == expected
@@ -188,7 +205,9 @@ class TestAgentDirectory:
 
     def test_register_and_lookup(self):
         directory = AgentDirectory()
-        identity = AgentIdentity(display_name="summarizer", capabilities=["text-summary"])
+        identity = AgentIdentity(
+            display_name="summarizer", capabilities=["text-summary"]
+        )
         card = AgentCard(
             identity=identity,
             description="Summarizes text",

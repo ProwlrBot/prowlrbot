@@ -11,6 +11,7 @@ Covers the A2A v0.3.0 task lifecycle:
 Ref: Google A2A Protocol (github.com/google/A2A)
 Ref: Now under Linux Foundation governance (22,397 stars as of March 2026)
 """
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -101,9 +102,8 @@ class A2AFullAdapter:
             "id": roar_message.id,
             "method": "tasks/send",
             "params": {
-                "id": task_id or roar_message.payload.get(
-                    "a2a_task_id", str(uuid.uuid4())
-                ),
+                "id": task_id
+                or roar_message.payload.get("a2a_task_id", str(uuid.uuid4())),
                 "message": {
                     "role": "user",
                     "parts": [
@@ -197,10 +197,7 @@ class A2AFullAdapter:
         Returns:
             A ROAR AgentCard.
         """
-        skills = [
-            s.get("name", s.get("id", ""))
-            for s in a2a_card.get("skills", [])
-        ]
+        skills = [s.get("name", s.get("id", "")) for s in a2a_card.get("skills", [])]
 
         identity = AgentIdentity(
             display_name=a2a_card.get("name", ""),
@@ -240,9 +237,7 @@ class A2AFullAdapter:
                 "pushNotifications": False,
                 "stateTransitionHistory": True,
             },
-            "skills": [
-                {"id": s, "name": s} for s in card.skills
-            ],
+            "skills": [{"id": s, "name": s} for s in card.skills],
         }
 
 
@@ -258,4 +253,5 @@ def _extract_text(payload: Dict[str, Any]) -> str:
             parts = msg.get("parts", [])
             return " ".join(p.get("text", "") for p in parts if "text" in p)
     import json
+
     return json.dumps(payload)

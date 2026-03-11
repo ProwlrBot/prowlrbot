@@ -9,7 +9,6 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-
 # Default Content-Security-Policy directives suitable for the ProwlrBot console
 # (React + Vite dev + Ant Design).
 DEFAULT_CSP_DIRECTIVES: dict[str, str] = {

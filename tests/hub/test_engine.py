@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ProwlrHub WarRoomEngine — atomic task claiming, file locking, shared context."""
+
 import os
 import tempfile
 import pytest
@@ -24,16 +25,21 @@ def room(engine):
 @pytest.fixture
 def agent(engine, room):
     """Register an agent in the room."""
-    return engine.register_agent("agent-alpha", room["room_id"], capabilities=["python", "testing"])
+    return engine.register_agent(
+        "agent-alpha", room["room_id"], capabilities=["python", "testing"]
+    )
 
 
 @pytest.fixture
 def agent_beta(engine, room):
     """Register a second agent."""
-    return engine.register_agent("agent-beta", room["room_id"], capabilities=["frontend"])
+    return engine.register_agent(
+        "agent-beta", room["room_id"], capabilities=["frontend"]
+    )
 
 
 # --- Room Management ---
+
 
 class TestRoomManagement:
     def test_create_room(self, engine):
@@ -59,9 +65,12 @@ class TestRoomManagement:
 
 # --- Agent Lifecycle ---
 
+
 class TestAgentLifecycle:
     def test_register_agent(self, engine, room):
-        agent = engine.register_agent("test-agent", room["room_id"], capabilities=["python"])
+        agent = engine.register_agent(
+            "test-agent", room["room_id"], capabilities=["python"]
+        )
         assert agent["agent_id"].startswith("agent-")
         assert agent["name"] == "test-agent"
         assert agent["capabilities"] == ["python"]
@@ -98,6 +107,7 @@ class TestAgentLifecycle:
 
 # --- Task Management ---
 
+
 class TestTaskManagement:
     def test_create_task(self, engine, room):
         task = engine.create_task(room["room_id"], "Build feature X", priority="high")
@@ -115,13 +125,17 @@ class TestTaskManagement:
         assert priorities == ["critical", "normal", "low"]
 
     def test_claim_task_success(self, engine, room, agent):
-        task = engine.create_task(room["room_id"], "claimable", file_scopes=["src/a.py"])
+        task = engine.create_task(
+            room["room_id"], "claimable", file_scopes=["src/a.py"]
+        )
         result = engine.claim_task(task["task_id"], agent["agent_id"], room["room_id"])
         assert result.success is True
         assert result.lock_token != ""
 
     def test_claim_task_already_taken(self, engine, room, agent, agent_beta):
-        task = engine.create_task(room["room_id"], "race condition", file_scopes=["src/b.py"])
+        task = engine.create_task(
+            room["room_id"], "race condition", file_scopes=["src/b.py"]
+        )
         r1 = engine.claim_task(task["task_id"], agent["agent_id"], room["room_id"])
         assert r1.success is True
         r2 = engine.claim_task(task["task_id"], agent_beta["agent_id"], room["room_id"])
@@ -140,7 +154,9 @@ class TestTaskManagement:
         assert r2.conflicts[0]["file"] == "src/shared.py"
 
     def test_complete_task_releases_locks(self, engine, room, agent):
-        task = engine.create_task(room["room_id"], "finish me", file_scopes=["src/c.py"])
+        task = engine.create_task(
+            room["room_id"], "finish me", file_scopes=["src/c.py"]
+        )
         engine.claim_task(task["task_id"], agent["agent_id"], room["room_id"])
         ok = engine.complete_task(task["task_id"], agent["agent_id"], "done!")
         assert ok is True
@@ -174,20 +190,27 @@ class TestTaskManagement:
 
     def test_blocked_tasks(self, engine, room):
         t1 = engine.create_task(room["room_id"], "prerequisite")
-        t2 = engine.create_task(room["room_id"], "depends on t1", blocked_by=[t1["task_id"]])
+        t2 = engine.create_task(
+            room["room_id"], "depends on t1", blocked_by=[t1["task_id"]]
+        )
         board = engine.get_mission_board(room["room_id"])
         blocked_task = [t for t in board if t["task_id"] == t2["task_id"]][0]
         assert blocked_task["is_blocked"] is True
 
     def test_capability_filter(self, engine, room):
-        engine.create_task(room["room_id"], "python only", required_capabilities=["python"])
-        engine.create_task(room["room_id"], "frontend only", required_capabilities=["frontend"])
+        engine.create_task(
+            room["room_id"], "python only", required_capabilities=["python"]
+        )
+        engine.create_task(
+            room["room_id"], "frontend only", required_capabilities=["frontend"]
+        )
         board = engine.get_mission_board(room["room_id"], agent_capabilities=["python"])
         assert len(board) == 1
         assert board[0]["title"] == "python only"
 
 
 # --- File Locking ---
+
 
 class TestFileLocking:
     def test_lock_file(self, engine, room, agent):
@@ -197,7 +220,9 @@ class TestFileLocking:
 
     def test_lock_file_conflict(self, engine, room, agent, agent_beta):
         engine.lock_file("src/conflict.py", agent["agent_id"], room["room_id"])
-        result = engine.lock_file("src/conflict.py", agent_beta["agent_id"], room["room_id"])
+        result = engine.lock_file(
+            "src/conflict.py", agent_beta["agent_id"], room["room_id"]
+        )
         assert result.success is False
         assert result.reason == "already_locked"
         assert result.owner == agent["agent_id"]
@@ -226,9 +251,12 @@ class TestFileLocking:
 
 # --- Shared Context ---
 
+
 class TestSharedContext:
     def test_set_and_get_context(self, engine, room, agent):
-        engine.set_context(room["room_id"], agent["agent_id"], "api-pattern", "REST over gRPC")
+        engine.set_context(
+            room["room_id"], agent["agent_id"], "api-pattern", "REST over gRPC"
+        )
         ctx = engine.get_context(room["room_id"], "api-pattern")
         assert len(ctx) == 1
         assert ctx[0]["value"] == "REST over gRPC"
@@ -248,6 +276,7 @@ class TestSharedContext:
 
 
 # --- Events ---
+
 
 class TestEvents:
     def test_events_logged(self, engine, room, agent):
@@ -271,6 +300,7 @@ class TestEvents:
 
 
 # --- Dead Agent Sweep ---
+
 
 class TestDeadAgentSweep:
     def test_sweep_no_dead_agents(self, engine, room, agent):

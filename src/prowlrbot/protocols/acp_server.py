@@ -7,6 +7,7 @@ ProwlrBot as its coding agent via JSON-RPC 2.0 over stdio.
 Usage:
     prowlr acp   # start ACP server on stdio
 """
+
 from __future__ import annotations
 
 import json
@@ -70,7 +71,10 @@ class ACPServer:
         """Process a prompt in the current session."""
         prompt = params.get("prompt", "")
         if not self._session_id:
-            return {"error": "No active session. Call session/new first.", "status": "error"}
+            return {
+                "error": "No active session. Call session/new first.",
+                "status": "error",
+            }
 
         if self._runner is None:
             return {

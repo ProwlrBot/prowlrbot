@@ -37,7 +37,9 @@ class AuditEntry(BaseModel):
 
     id: Optional[int] = None
     timestamp: float = Field(default_factory=time.time)
-    actor: str = Field(..., description="Who performed the action (user, agent, system)")
+    actor: str = Field(
+        ..., description="Who performed the action (user, agent, system)"
+    )
     action: str = Field(..., description="What was done (e.g. login, config_change)")
     target: str = Field(default="", description="The resource acted upon")
     details: Dict[str, Any] = Field(default_factory=dict)
@@ -236,7 +238,11 @@ class AuditLog:
         self._conn.commit()
         deleted = cursor.rowcount
         if deleted:
-            logger.info("audit cleanup: removed %d entries older than %d days", deleted, older_than_days)
+            logger.info(
+                "audit cleanup: removed %d entries older than %d days",
+                deleted,
+                older_than_days,
+            )
         return deleted
 
     # ------------------------------------------------------------------

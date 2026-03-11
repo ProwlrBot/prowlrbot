@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Gamification data models."""
+
 from __future__ import annotations
 
 from typing import List, Optional
@@ -96,14 +97,62 @@ class LeaderboardEntry(BaseModel):
 
 # Built-in achievement definitions
 ACHIEVEMENTS: list[Achievement] = [
-    Achievement(id="first_steps", name="First Steps", description="Send your first message to an agent", xp_reward=10, badge="🐾"),
-    Achievement(id="skill_crafter", name="Skill Crafter", description="Create your first custom skill", xp_reward=50, badge="🔧"),
-    Achievement(id="channel_surfer", name="Channel Surfer", description="Connect 3 different channels", xp_reward=100, badge="📡"),
-    Achievement(id="night_owl", name="Night Owl", description="Agent completes a task between 2am-5am", xp_reward=25, badge="🦉"),
-    Achievement(id="century_club", name="Century Club", description="Complete 100 tasks", xp_reward=200, badge="💯"),
-    Achievement(id="marathon", name="Marathon", description="10 consecutive days with agent activity", xp_reward=150, badge="🏃"),
-    Achievement(id="polyglot", name="Polyglot", description="Use 3 different AI models", xp_reward=75, badge="🌍"),
-    Achievement(id="monitor_master", name="Monitor Master", description="Set up 5 monitoring targets", xp_reward=100, badge="👁️"),
+    Achievement(
+        id="first_steps",
+        name="First Steps",
+        description="Send your first message to an agent",
+        xp_reward=10,
+        badge="🐾",
+    ),
+    Achievement(
+        id="skill_crafter",
+        name="Skill Crafter",
+        description="Create your first custom skill",
+        xp_reward=50,
+        badge="🔧",
+    ),
+    Achievement(
+        id="channel_surfer",
+        name="Channel Surfer",
+        description="Connect 3 different channels",
+        xp_reward=100,
+        badge="📡",
+    ),
+    Achievement(
+        id="night_owl",
+        name="Night Owl",
+        description="Agent completes a task between 2am-5am",
+        xp_reward=25,
+        badge="🦉",
+    ),
+    Achievement(
+        id="century_club",
+        name="Century Club",
+        description="Complete 100 tasks",
+        xp_reward=200,
+        badge="💯",
+    ),
+    Achievement(
+        id="marathon",
+        name="Marathon",
+        description="10 consecutive days with agent activity",
+        xp_reward=150,
+        badge="🏃",
+    ),
+    Achievement(
+        id="polyglot",
+        name="Polyglot",
+        description="Use 3 different AI models",
+        xp_reward=75,
+        badge="🌍",
+    ),
+    Achievement(
+        id="monitor_master",
+        name="Monitor Master",
+        description="Set up 5 monitoring targets",
+        xp_reward=100,
+        badge="👁️",
+    ),
 ]
 
 # XP award amounts by category

@@ -39,7 +39,6 @@ from .templates import router as templates_router
 from .privacy import router as privacy_router
 from .settings_api import router as settings_api_router
 
-
 router = APIRouter()
 
 router.include_router(agentverse_router)

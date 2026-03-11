@@ -953,17 +953,13 @@ async def _action_screenshot(
                 locator = root.locator("body").first
                 await locator.screenshot(
                     path=path,
-                    type=screenshot_type
-                    if screenshot_type == "jpeg"
-                    else "png",
+                    type=screenshot_type if screenshot_type == "jpeg" else "png",
                 )
             else:
                 await page.screenshot(
                     path=path,
                     full_page=full_page,
-                    type=screenshot_type
-                    if screenshot_type == "jpeg"
-                    else "png",
+                    type=screenshot_type if screenshot_type == "jpeg" else "png",
                 )
         return _tool_response(
             json.dumps(
@@ -1023,9 +1019,7 @@ async def _action_click(  # pylint: disable=too-many-branches
         if not isinstance(mods, list):
             mods = []
         kwargs = {
-            "button": button
-            if button in ("left", "right", "middle")
-            else "left",
+            "button": button if button in ("left", "right", "middle") else "left",
         }
         if mods:
             kwargs["modifiers"] = [
@@ -1290,9 +1284,7 @@ async def _action_snapshot(
             compact=False,
         )
         _state["refs"][page_id] = refs
-        _state["refs_frame"][page_id] = (
-            frame_selector.strip() if frame_selector else ""
-        )
+        _state["refs_frame"][page_id] = frame_selector.strip() if frame_selector else ""
         out = {
             "ok": True,
             "snapshot": snapshot,
@@ -1477,9 +1469,7 @@ async def _action_console_messages(
         )
     logs = _state["console_logs"].get(page_id, [])
     filtered = (
-        [m for m in logs if order.index(m["level"]) <= idx]
-        if level in order
-        else logs
+        [m for m in logs if order.index(m["level"]) <= idx] if level in order else logs
     )
     lines = [f"[{m['level']}] {m['text']}" for m in filtered]
     text = "\n".join(lines)
@@ -1901,9 +1891,7 @@ async def _action_drag(
             json.dumps(
                 {
                     "ok": False,
-                    "error": (
-                        "drag needs (start_ref,end_ref) or (start_sel,end_sel)"
-                    ),
+                    "error": ("drag needs (start_ref,end_ref) or (start_sel,end_sel)"),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -2118,9 +2106,7 @@ async def _action_tabs(  # pylint: disable=too-many-return-statements
         if not _state["context"]:
             ok = await _ensure_browser()
             if not ok:
-                err = (
-                    _state.get("_last_browser_error") or "Browser not started"
-                )
+                err = _state.get("_last_browser_error") or "Browser not started"
                 return _tool_response(
                     json.dumps(
                         {"ok": False, "error": err},

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API routes for the RAG (Retrieval-Augmented Generation) module."""
+
 from __future__ import annotations
 
 import logging
@@ -39,9 +40,7 @@ class IngestRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str = Field(..., description="Search query")
-    max_results: Optional[int] = Field(
-        None, description="Maximum results to return"
-    )
+    max_results: Optional[int] = Field(None, description="Maximum results to return")
 
 
 # ------------------------------------------------------------------

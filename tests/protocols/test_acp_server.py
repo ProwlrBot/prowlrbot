@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ACP JSON-RPC 2.0 server."""
+
 import pytest
 from prowlrbot.protocols.acp_server import ACPServer
 
@@ -50,8 +51,12 @@ class TestACPLifecycle:
 class TestACPPrompt:
     async def test_prompt_without_session_returns_error(self, server):
         resp = await server.handle_request(
-            {"jsonrpc": "2.0", "id": 1, "method": "session/prompt",
-             "params": {"prompt": "hello"}}
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "session/prompt",
+                "params": {"prompt": "hello"},
+            }
         )
         assert resp["result"].get("status") == "error"
 
@@ -64,8 +69,12 @@ class TestACPPrompt:
             {"jsonrpc": "2.0", "id": 2, "method": "session/new", "params": {}}
         )
         resp = await server.handle_request(
-            {"jsonrpc": "2.0", "id": 3, "method": "session/prompt",
-             "params": {"prompt": "What is 2+2?"}}
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {"prompt": "What is 2+2?"},
+            }
         )
         result = resp["result"]
         assert "session_id" in result
@@ -73,6 +82,7 @@ class TestACPPrompt:
 
     async def test_prompt_with_mock_runner(self):
         """With a mock runner, should return the runner's response."""
+
         class MockRunner:
             async def process_query(self, prompt):
                 return {"response": f"Mock answer to: {prompt}"}
@@ -85,8 +95,12 @@ class TestACPPrompt:
             {"jsonrpc": "2.0", "id": 2, "method": "session/new", "params": {}}
         )
         resp = await server.handle_request(
-            {"jsonrpc": "2.0", "id": 3, "method": "session/prompt",
-             "params": {"prompt": "What is 2+2?"}}
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {"prompt": "What is 2+2?"},
+            }
         )
         result = resp["result"]
         assert result["status"] == "ok"
@@ -94,6 +108,7 @@ class TestACPPrompt:
 
     async def test_prompt_runner_exception_returns_error(self):
         """If runner raises, should return error status."""
+
         class FailRunner:
             async def process_query(self, prompt):
                 raise RuntimeError("Model unavailable")
@@ -106,8 +121,12 @@ class TestACPPrompt:
             {"jsonrpc": "2.0", "id": 2, "method": "session/new", "params": {}}
         )
         resp = await server.handle_request(
-            {"jsonrpc": "2.0", "id": 3, "method": "session/prompt",
-             "params": {"prompt": "hello"}}
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {"prompt": "hello"},
+            }
         )
         result = resp["result"]
         assert result["status"] == "error"

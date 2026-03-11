@@ -1,4 +1,5 @@
 """Tests for HMAC authentication."""
+
 import hashlib
 import hmac
 import json
@@ -15,11 +16,7 @@ class TestHMACAuthentication:
         payload = {"job_id": "test-123", "capability": "test"}
         body = json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
-        signature = hmac.new(
-            secret.encode(),
-            body.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
 
         assert len(signature) == 64  # SHA256 hex length
         assert isinstance(signature, str)
@@ -30,18 +27,10 @@ class TestHMACAuthentication:
         payload = {"job_id": "test-123", "capability": "test"}
         body = json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
-        signature = hmac.new(
-            secret.encode(),
-            body.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
 
         # Verify
-        expected = hmac.new(
-            secret.encode(),
-            body.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        expected = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
 
         assert hmac.compare_digest(signature, expected)
 
@@ -61,20 +50,16 @@ class TestHMACAuthentication:
         payload = {"job_id": "test-123", "capability": "test"}
         body = json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
-        signature = hmac.new(
-            secret.encode(),
-            body.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
 
         # Modified payload
         modified_payload = {"job_id": "test-123", "capability": "modified"}
-        modified_body = json.dumps(modified_payload, sort_keys=True, separators=(",", ":"))
+        modified_body = json.dumps(
+            modified_payload, sort_keys=True, separators=(",", ":")
+        )
 
         expected = hmac.new(
-            secret.encode(),
-            modified_body.encode(),
-            hashlib.sha256
+            secret.encode(), modified_body.encode(), hashlib.sha256
         ).hexdigest()
 
         assert not hmac.compare_digest(signature, expected)

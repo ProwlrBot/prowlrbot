@@ -5,6 +5,7 @@ Wraps the base AgentDirectory with a time-to-live cache layer.
 Entries are automatically evicted after TTL expiration and when
 the cache exceeds its capacity.
 """
+
 from __future__ import annotations
 
 import time
@@ -134,8 +135,6 @@ class DiscoveryCache:
 
     def _evict_expired(self) -> None:
         """Remove expired entries."""
-        expired = [
-            did for did, ce in self._cache.items() if ce.expired
-        ]
+        expired = [did for did, ce in self._cache.items() if ce.expired]
         for did in expired:
             del self._cache[did]

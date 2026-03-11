@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Pydantic models for monitor configuration."""
+
 from __future__ import annotations
 
 import re

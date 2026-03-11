@@ -292,11 +292,7 @@ class LocalChatModel(ChatModelBase):
 
             # Fallback: if backend didn't return structured tool_calls but
             # the text contains <tool_call> tags, parse them from text.
-            if (
-                not backend_tool_calls
-                and text
-                and text_contains_tool_call_tag(text)
-            ):
+            if not backend_tool_calls and text and text_contains_tool_call_tag(text):
                 parsed = parse_tool_calls_from_text(text)
                 clean_text = parsed.text_before
                 if parsed.text_after:

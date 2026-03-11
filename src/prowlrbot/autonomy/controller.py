@@ -139,17 +139,13 @@ class AutonomyController:
 
     def list_policies(self) -> List[AutonomyPolicy]:
         """Return all stored autonomy policies."""
-        rows = self._conn.execute(
-            "SELECT * FROM policies ORDER BY agent_id"
-        ).fetchall()
+        rows = self._conn.execute("SELECT * FROM policies ORDER BY agent_id").fetchall()
         return [self._row_to_policy(r) for r in rows]
 
     def delete_policy(self, agent_id: str) -> bool:
         """Delete the policy for *agent_id*.  Returns ``True`` if a row
         was actually removed."""
-        cur = self._conn.execute(
-            "DELETE FROM policies WHERE agent_id = ?", (agent_id,)
-        )
+        cur = self._conn.execute("DELETE FROM policies WHERE agent_id = ?", (agent_id,))
         self._conn.commit()
         deleted = cur.rowcount > 0
         if deleted:

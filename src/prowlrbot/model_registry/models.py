@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Data models for the model registry."""
+
 from __future__ import annotations
 
 import uuid

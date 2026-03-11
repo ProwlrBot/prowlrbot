@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """End-to-end tests for ProwlrHub HTTP bridge + remote client."""
+
 from __future__ import annotations
 
 import os
@@ -38,6 +39,7 @@ class TestBridgeE2E(unittest.TestCase):
         )
 
         from prowlrbot.hub.remote_client import RemoteWarRoom
+
         cls._client = RemoteWarRoom(f"http://127.0.0.1:{cls.PORT}")
 
         for _ in range(40):
@@ -60,6 +62,7 @@ class TestBridgeE2E(unittest.TestCase):
         cls._proc.kill()
         cls._proc.wait(timeout=3)
         import shutil
+
         shutil.rmtree(cls._tmpdir, ignore_errors=True)
 
     def test_01_health(self):

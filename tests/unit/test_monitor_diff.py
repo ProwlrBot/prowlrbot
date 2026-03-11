@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlrbot.monitor.diff."""
+
 from prowlrbot.monitor.diff import diff_text, has_changed
 
 

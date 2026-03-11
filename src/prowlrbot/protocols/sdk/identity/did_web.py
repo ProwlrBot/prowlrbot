@@ -9,6 +9,7 @@ Resolves to: https://example.com/agents/planner/did.json
 
 Ref: https://w3c-ccg.github.io/did-method-web/
 """
+
 from __future__ import annotations
 
 import logging

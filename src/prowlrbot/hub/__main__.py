@@ -5,6 +5,7 @@
 Usage:
     python -m prowlrbot.hub
 """
+
 from .mcp_server import run_mcp_server
 
 if __name__ == "__main__":

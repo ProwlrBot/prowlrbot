@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ROAR Protocol Phase 4 — Identity Enhancement."""
+
 from __future__ import annotations
 
 import time
@@ -241,7 +242,9 @@ class TestCapabilityDelegation(unittest.TestCase):
             capabilities=["code-review"],
             autonomy_level=AutonomyLevel.DELEGATE,
         )
-        assert self.delegation.get_autonomy_level(self.agent_did) == AutonomyLevel.DELEGATE
+        assert (
+            self.delegation.get_autonomy_level(self.agent_did) == AutonomyLevel.DELEGATE
+        )
 
     def test_get_autonomy_level_no_tokens(self):
         assert self.delegation.get_autonomy_level(self.agent_did) == AutonomyLevel.WATCH
@@ -259,7 +262,10 @@ class TestCapabilityDelegation(unittest.TestCase):
             capabilities=["deploy"],
             autonomy_level=AutonomyLevel.AUTONOMOUS,
         )
-        assert self.delegation.get_autonomy_level(self.agent_did) == AutonomyLevel.AUTONOMOUS
+        assert (
+            self.delegation.get_autonomy_level(self.agent_did)
+            == AutonomyLevel.AUTONOMOUS
+        )
 
     def test_list_tokens(self):
         self.delegation.grant(

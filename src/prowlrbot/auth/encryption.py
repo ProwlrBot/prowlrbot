@@ -25,6 +25,7 @@ Cipher construction:
 Key derivation:
     PBKDF2-HMAC-SHA256, 100 000 iterations, 32-byte output.
 """
+
 from __future__ import annotations
 
 import base64
@@ -56,9 +57,7 @@ class SecretEncryptor:
 
     def __init__(self, key: bytes | None = None) -> None:
         if key is not None and len(key) != _KEY_LEN:
-            raise ValueError(
-                f"Key must be exactly {_KEY_LEN} bytes, got {len(key)}"
-            )
+            raise ValueError(f"Key must be exactly {_KEY_LEN} bytes, got {len(key)}")
         self._key: bytes | None = key
 
     # ------------------------------------------------------------------
@@ -98,8 +97,7 @@ class SecretEncryptor:
     def _require_key(self) -> bytes:
         if self._key is None:
             raise RuntimeError(
-                "No encryption key set. Call derive_key() or "
-                "load_key_file() first."
+                "No encryption key set. Call derive_key() or " "load_key_file() first."
             )
         return self._key
 

@@ -15,6 +15,7 @@ Integration path:
     2. Agents auto-register Agent Cards on startup
     3. External A2A agents discover ProwlrBot via /.well-known/agent.json
 """
+
 from __future__ import annotations
 
 import time
@@ -25,7 +26,6 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-
 
 # ------------------------------------------------------------------
 # Task Status — 7 states per A2A v0.3.0
@@ -353,13 +353,17 @@ async def send_task_subscribe(request: SendTaskRequest) -> StreamingResponse:
         if _event_bus is not None:
             from .sdk.streaming import StreamFilter
 
-            sub = _event_bus.subscribe(StreamFilter(
-                session_ids=[task.id],
-            ))
+            sub = _event_bus.subscribe(
+                StreamFilter(
+                    session_ids=[task.id],
+                )
+            )
             try:
                 async for event in sub:
                     yield f"data: {json.dumps({'type': event.type, 'task_id': task.id, 'data': event.data, 'timestamp': event.timestamp})}\n\n"
-                    if event.type in (StreamEventType.TASK_UPDATE,) and event.data.get("status") in ("completed", "failed", "canceled"):
+                    if event.type in (StreamEventType.TASK_UPDATE,) and event.data.get(
+                        "status"
+                    ) in ("completed", "failed", "canceled"):
                         break
             finally:
                 sub.close()
@@ -398,13 +402,17 @@ async def subscribe_task(task_id: str) -> StreamingResponse:
         if _event_bus is not None:
             from .sdk.streaming import StreamFilter
 
-            sub = _event_bus.subscribe(StreamFilter(
-                session_ids=[task.id],
-            ))
+            sub = _event_bus.subscribe(
+                StreamFilter(
+                    session_ids=[task.id],
+                )
+            )
             try:
                 async for event in sub:
                     yield f"data: {json.dumps({'type': event.type, 'task_id': task.id, 'data': event.data, 'timestamp': event.timestamp})}\n\n"
-                    if event.type in (StreamEventType.TASK_UPDATE,) and event.data.get("status") in ("completed", "failed", "canceled"):
+                    if event.type in (StreamEventType.TASK_UPDATE,) and event.data.get(
+                        "status"
+                    ) in ("completed", "failed", "canceled"):
                         break
             finally:
                 sub.close()

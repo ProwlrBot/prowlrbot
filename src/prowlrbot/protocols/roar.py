@@ -5,6 +5,7 @@ Unified protocol for agent identity, discovery, communication, and streaming.
 Layers: Identity / Discovery / Connect / Exchange / Stream.
 Backward compatible with MCP, A2A, and ACP.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -16,7 +17,6 @@ from enum import StrEnum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Layer 1: ROAR/Identity — W3C DID-based agent identity
@@ -181,7 +181,9 @@ class ROARMessage(BaseModel):
             {"id": self.id, "intent": self.intent, "payload": self.payload},
             sort_keys=True,
         )
-        actual_sig = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
+        actual_sig = hmac.new(
+            secret.encode(), body.encode(), hashlib.sha256
+        ).hexdigest()
         return hmac.compare_digest(expected_sig, actual_sig)
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Privacy controls API — settings, retention, anonymization, GDPR."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -67,9 +68,7 @@ async def apply_retention(
             try:
                 conn = sqlite3.connect(str(db_file))
                 cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                )
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
                 tables = [row[0] for row in cursor.fetchall()]
                 db_total = 0
                 for table in tables:
@@ -169,9 +168,7 @@ async def delete_user_data(
         try:
             conn = sqlite3.connect(str(db_file))
             cursor = conn.cursor()
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            )
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = [row[0] for row in cursor.fetchall()]
             db_total = 0
             for table in tables:
@@ -221,9 +218,7 @@ async def delete_user_data(
             ]
             removed = original - len(filtered)
             if removed > 0:
-                json_file.write_text(
-                    json.dumps(filtered, indent=2), encoding="utf-8"
-                )
+                json_file.write_text(json.dumps(filtered, indent=2), encoding="utf-8")
                 records_deleted[json_file.name] = removed
         except (json.JSONDecodeError, OSError):
             continue

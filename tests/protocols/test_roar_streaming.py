@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ROAR Protocol Phase 3 — Streaming Layer."""
+
 from __future__ import annotations
 
 import asyncio
@@ -270,8 +271,10 @@ class TestAIMDController(unittest.TestCase):
     def test_sawtooth_pattern(self):
         """AIMD should produce a sawtooth pattern: slow increase, fast decrease."""
         ctrl = AIMDController(
-            rate=100.0, window_size=3, additive_increase=10.0,
-            multiplicative_decrease=0.5
+            rate=100.0,
+            window_size=3,
+            additive_increase=10.0,
+            multiplicative_decrease=0.5,
         )
         # Increase for 2 windows
         for _ in range(6):

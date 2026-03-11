@@ -12,6 +12,7 @@ Remote terminals connect by setting PROWLR_HUB_URL in their MCP config.
 Security: Set PROWLR_HUB_SECRET to enable Bearer token authentication.
 Without it, the bridge is open (suitable for local-only use).
 """
+
 # NOTE: intentionally no `from __future__ import annotations` here.
 # FastAPI needs runtime-evaluable type annotations to detect Pydantic
 # BaseModel parameters as request bodies (not query params).
@@ -294,7 +295,8 @@ def create_bridge_app() -> FastAPI:
         task_id = req.task_id
         if not task_id and req.title:
             task = engine.create_task(
-                room["room_id"], req.title,
+                room["room_id"],
+                req.title,
                 description=req.description,
                 file_scopes=req.file_scopes,
                 priority=req.priority,
@@ -303,7 +305,11 @@ def create_bridge_app() -> FastAPI:
         result = engine.claim_task(task_id, agent_id, room["room_id"])
         if result.success:
             return {"success": True, "lock_token": result.lock_token}
-        return {"success": False, "reason": result.reason, "conflicts": result.conflicts}
+        return {
+            "success": False,
+            "reason": result.reason,
+            "conflicts": result.conflicts,
+        }
 
     @app.post("/update/{agent_id}")
     @limiter.limit("30/minute")
@@ -385,7 +391,11 @@ def create_bridge_app() -> FastAPI:
     @limiter.limit("60/minute")
     def get_events(request: Request, limit: int = 20, event_type: str = ""):
         room = engine.get_or_create_default_room()
-        return {"events": engine.get_events(room["room_id"], _clamp_limit(limit), event_type)}
+        return {
+            "events": engine.get_events(
+                room["room_id"], _clamp_limit(limit), event_type
+            )
+        }
 
     # --- JSON API endpoints for dashboard consumption ---
 

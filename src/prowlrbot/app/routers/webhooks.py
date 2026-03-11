@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """FastAPI router for webhook builder CRUD and trigger ingestion."""
+
 from __future__ import annotations
 
 import uuid
@@ -44,9 +45,7 @@ class TriggerResponse(BaseModel):
 
 def _get_store(request: Request) -> WebhookStore:
     """Return the WebhookStore, creating one lazily on app state."""
-    store: Optional[WebhookStore] = getattr(
-        request.app.state, "webhook_store", None
-    )
+    store: Optional[WebhookStore] = getattr(request.app.state, "webhook_store", None)
     if store is None:
         store = WebhookStore(WORKING_DIR)
         request.app.state.webhook_store = store

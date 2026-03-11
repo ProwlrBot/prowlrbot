@@ -146,9 +146,7 @@ class ConfigWatcher:
         old_channels = self._last_channels
         extra_new = getattr(new_channels, "__pydantic_extra__", None) or {}
         extra_old = (
-            getattr(old_channels, "__pydantic_extra__", None)
-            if old_channels
-            else {}
+            getattr(old_channels, "__pydantic_extra__", None) if old_channels else {}
         )
         for name in get_available_channels():
             new_ch = getattr(new_channels, name, None) or extra_new.get(name)
@@ -175,10 +173,7 @@ class ConfigWatcher:
         """Update heartbeat hash and reschedule if changed."""
         hb = getattr(loaded_config.agents.defaults, "heartbeat", None)
         new_hb_hash = _heartbeat_hash(hb)
-        if (
-            self._cron_manager is not None
-            and new_hb_hash != self._last_heartbeat_hash
-        ):
+        if self._cron_manager is not None and new_hb_hash != self._last_heartbeat_hash:
             self._last_heartbeat_hash = new_hb_hash
             try:
                 await self._cron_manager.reschedule_heartbeat()

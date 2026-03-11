@@ -494,13 +494,10 @@ def add_model(provider_id: str, model: ModelInfo) -> ProvidersData:
             provider_id,
             ProviderSettings(base_url=defn.default_base_url),
         )
-        all_ids = {m.id for m in defn.models} | {
-            m.id for m in settings.extra_models
-        }
+        all_ids = {m.id for m in defn.models} | {m.id for m in settings.extra_models}
         if model.id in all_ids:
             raise ValueError(
-                f"Model '{model.id}' already exists in provider "
-                f"'{provider_id}'.",
+                f"Model '{model.id}' already exists in provider " f"'{provider_id}'.",
             )
         settings.extra_models.append(model)
     else:
@@ -509,8 +506,7 @@ def add_model(provider_id: str, model: ModelInfo) -> ProvidersData:
             raise ValueError(f"Custom provider '{provider_id}' not found.")
         if any(m.id == model.id for m in cpd.models):
             raise ValueError(
-                f"Model '{model.id}' already exists in provider "
-                f"'{provider_id}'.",
+                f"Model '{model.id}' already exists in provider " f"'{provider_id}'.",
             )
         cpd.models.append(model)
         register_custom_provider(cpd)
@@ -542,9 +538,7 @@ def remove_model(provider_id: str, model_id: str) -> ProvidersData:
                 f"Model '{model_id}' not found in provider '{provider_id}'.",
             )
         original_len = len(settings.extra_models)
-        settings.extra_models = [
-            m for m in settings.extra_models if m.id != model_id
-        ]
+        settings.extra_models = [m for m in settings.extra_models if m.id != model_id]
         if len(settings.extra_models) == original_len:
             raise ValueError(
                 f"Model '{model_id}' not found in provider '{provider_id}'.",
@@ -561,10 +555,7 @@ def remove_model(provider_id: str, model_id: str) -> ProvidersData:
             )
         register_custom_provider(cpd)
 
-    if (
-        data.active_llm.provider_id == provider_id
-        and data.active_llm.model == model_id
-    ):
+    if data.active_llm.provider_id == provider_id and data.active_llm.model == model_id:
         data.active_llm = ModelSlotConfig()
 
     save_providers_json(data)
@@ -618,9 +609,7 @@ async def test_provider_connection(
         if len(defn.models) > 0:
             return {
                 "success": True,
-                "message": (
-                    f"{defn.name} is ready with {len(defn.models)} model(s)."
-                ),
+                "message": (f"{defn.name} is ready with {len(defn.models)} model(s)."),
             }
         else:
             return {
@@ -636,9 +625,7 @@ async def test_provider_connection(
             models = OllamaModelManager.list_models()
             return {
                 "success": True,
-                "message": (
-                    f"Ollama daemon is reachable with {len(models)} model(s)."
-                ),
+                "message": (f"Ollama daemon is reachable with {len(models)} model(s)."),
             }
         except ImportError:
             return {
@@ -701,9 +688,7 @@ async def test_provider_connection(
             elif response.status_code >= 500:
                 return {
                     "success": False,
-                    "message": (
-                        f"{defn.name} server error: {response.status_code}"
-                    ),
+                    "message": (f"{defn.name} server error: {response.status_code}"),
                 }
             elif response.status_code == 200:
                 return {
@@ -713,9 +698,7 @@ async def test_provider_connection(
     except httpx.ConnectError:
         return {
             "success": False,
-            "message": (
-                f"Cannot connect to {defn.name}. Please check the Base URL."
-            ),
+            "message": (f"Cannot connect to {defn.name}. Please check the Base URL."),
         }
     except httpx.TimeoutException:
         return {
@@ -769,16 +752,13 @@ async def test_provider_connection(
             return {
                 "success": False,
                 "message": (
-                    f"Cannot connect to {defn.name}. "
-                    f"Please check the Base URL."
+                    f"Cannot connect to {defn.name}. " f"Please check the Base URL."
                 ),
             }
         else:
             return {
                 "success": False,
-                "message": (
-                    f"{defn.name} configuration test failed: {error_msg}"
-                ),
+                "message": (f"{defn.name} configuration test failed: {error_msg}"),
             }
 
 
@@ -841,9 +821,7 @@ async def test_model_connection(
                 if model.name == model_id:
                     return {
                         "success": True,
-                        "message": (
-                            f"Model '{model_id}' is available in Ollama."
-                        ),
+                        "message": (f"Model '{model_id}' is available in Ollama."),
                     }
             return {
                 "success": False,
@@ -859,9 +837,7 @@ async def test_model_connection(
     if not data.is_configured(defn):
         return {
             "success": False,
-            "message": (
-                f"{defn.name} is not configured. Please add API key first."
-            ),
+            "message": (f"{defn.name} is not configured. Please add API key first."),
         }
 
     base_url, api_key = data.get_credentials(provider_id)
@@ -900,8 +876,7 @@ async def test_model_connection(
                 return {
                     "success": False,
                     "message": (
-                        f"Model '{model_id}' does not exist "
-                        f"or is not available."
+                        f"Model '{model_id}' does not exist " f"or is not available."
                     ),
                 }
             elif response.status_code == 400:
@@ -912,8 +887,7 @@ async def test_model_connection(
                         return {
                             "success": False,
                             "message": (
-                                f"Model '{model_id}' is invalid "
-                                f"or not supported."
+                                f"Model '{model_id}' is invalid " f"or not supported."
                             ),
                         }
                     return {
@@ -944,9 +918,7 @@ async def test_model_connection(
                         ):
                             return {
                                 "success": False,
-                                "message": (
-                                    f"Model '{model_id}' error: {error_msg}"
-                                ),
+                                "message": (f"Model '{model_id}' error: {error_msg}"),
                             }
                         return {
                             "success": False,
@@ -957,9 +929,7 @@ async def test_model_connection(
                     if "choices" in result and len(result["choices"]) > 0:
                         return {
                             "success": True,
-                            "message": (
-                                f"Model '{model_id}' is working correctly."
-                            ),
+                            "message": (f"Model '{model_id}' is working correctly."),
                         }
                     else:
                         # Some APIs return 200 but with no choices
@@ -984,17 +954,13 @@ async def test_model_connection(
             else:
                 return {
                     "success": False,
-                    "message": (
-                        f"Unexpected response code: {response.status_code}"
-                    ),
+                    "message": (f"Unexpected response code: {response.status_code}"),
                 }
 
     except httpx.ConnectError as e:
         return {
             "success": False,
-            "message": (
-                f"Cannot connect to {defn.name}. Check the Base URL: {str(e)}"
-            ),
+            "message": (f"Cannot connect to {defn.name}. Check the Base URL: {str(e)}"),
         }
     except httpx.TimeoutException:
         return {

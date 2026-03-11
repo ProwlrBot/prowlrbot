@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Webhook notifier — POST JSON to a configured URL."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone

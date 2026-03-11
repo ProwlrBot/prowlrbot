@@ -6,6 +6,7 @@ This module handles:
 - Message content manipulation
 - Message validation
 """
+
 import logging
 import os
 import urllib.parse
@@ -235,9 +236,7 @@ async def process_file_and_media_blocks_in_message(msg) -> None:
     Args:
         msg: The message object (Msg or list[Msg]) to process.
     """
-    messages = (
-        [msg] if isinstance(msg, Msg) else msg if isinstance(msg, list) else []
-    )
+    messages = [msg] if isinstance(msg, Msg) else msg if isinstance(msg, list) else []
 
     for message in messages:
         if not isinstance(message, Msg):
@@ -281,9 +280,7 @@ def is_first_user_interaction(messages: list) -> bool:
     system_prompt_count = sum(1 for msg in messages if msg.role == "system")
     non_system_messages = messages[system_prompt_count:]
 
-    user_msg_count = sum(
-        1 for msg in non_system_messages if msg.role == "user"
-    )
+    user_msg_count = sum(1 for msg in non_system_messages if msg.role == "user")
     assistant_msg_count = sum(
         1 for msg in non_system_messages if msg.role == "assistant"
     )

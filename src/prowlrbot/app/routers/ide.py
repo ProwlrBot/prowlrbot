@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for the embedded IDE workspace."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -18,13 +19,15 @@ _workspace = IDEWorkspace(db_path=WORKING_DIR / "ide.db")
 
 # --- File operations ---
 
+
 @router.get("/files")
 async def list_files(
     root: str = "", max_depth: int = 3, include_hidden: bool = False
 ) -> FileEntry:
     path = root or str(WORKING_DIR)
-    return _workspace.list_files(path, max_depth=max_depth,
-                                 include_hidden=include_hidden)
+    return _workspace.list_files(
+        path, max_depth=max_depth, include_hidden=include_hidden
+    )
 
 
 @router.get("/files/content")
@@ -68,6 +71,7 @@ async def apply_edit(edit: EditOperation) -> FileContent:
 
 # --- Sessions ---
 
+
 class CreateSessionRequest(BaseModel):
     workspace_root: str = ""
 
@@ -103,6 +107,7 @@ async def update_session(session_id: str, req: UpdateSessionRequest) -> IDESessi
 
 # --- Edit history ---
 
+
 @router.post("/sessions/{session_id}/edits")
 async def record_edit(session_id: str, edit: EditOperation) -> EditOperation:
     session = _workspace.get_session(session_id)
@@ -115,6 +120,4 @@ async def record_edit(session_id: str, edit: EditOperation) -> EditOperation:
 async def get_edit_history(
     session_id: str, path: Optional[str] = None, limit: int = 100
 ) -> List[EditOperation]:
-    return _workspace.get_edit_history(
-        session_id=session_id, path=path, limit=limit
-    )
+    return _workspace.get_edit_history(session_id=session_id, path=path, limit=limit)

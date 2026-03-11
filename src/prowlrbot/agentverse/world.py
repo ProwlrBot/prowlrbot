@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AgentVerse world state — manages agent presence, zones, and interactions."""
+
 from __future__ import annotations
 
 import json
@@ -104,7 +105,9 @@ class AgentVerseWorld:
         return presence
 
     def get_agent(self, agent_id: str) -> Optional[AgentPresence]:
-        row = self._conn.execute("SELECT * FROM agents WHERE agent_id = ?", (agent_id,)).fetchone()
+        row = self._conn.execute(
+            "SELECT * FROM agents WHERE agent_id = ?", (agent_id,)
+        ).fetchone()
         if not row:
             return None
         return self._row_to_presence(row)
@@ -159,13 +162,15 @@ class AgentVerseWorld:
                 "SELECT COUNT(*) as c FROM agents WHERE current_zone = ? AND online = 1",
                 (z.zone,),
             ).fetchone()
-            zones.append(ZoneInfo(
-                zone=z.zone,
-                name=z.name,
-                description=z.description,
-                agents_online=count["c"] if count else 0,
-                is_premium=z.is_premium,
-            ))
+            zones.append(
+                ZoneInfo(
+                    zone=z.zone,
+                    name=z.name,
+                    description=z.description,
+                    agents_online=count["c"] if count else 0,
+                    is_premium=z.is_premium,
+                )
+            )
         return zones
 
     # ------------------------------------------------------------------
@@ -177,19 +182,32 @@ class AgentVerseWorld:
         self._conn.execute(
             "INSERT INTO guilds (id, name, description, leader_id, members, combined_xp, created_at) "
             "VALUES (?,?,?,?,?,?,?)",
-            (guild.id, guild.name, guild.description, guild.leader_id,
-             json.dumps(guild.members), guild.combined_xp, guild.created_at),
+            (
+                guild.id,
+                guild.name,
+                guild.description,
+                guild.leader_id,
+                json.dumps(guild.members),
+                guild.combined_xp,
+                guild.created_at,
+            ),
         )
         self._conn.commit()
         return guild
 
     def list_guilds(self) -> List[Guild]:
-        rows = self._conn.execute("SELECT * FROM guilds ORDER BY combined_xp DESC").fetchall()
+        rows = self._conn.execute(
+            "SELECT * FROM guilds ORDER BY combined_xp DESC"
+        ).fetchall()
         return [
             Guild(
-                id=r["id"], name=r["name"], description=r["description"],
-                leader_id=r["leader_id"], members=json.loads(r["members"]),
-                combined_xp=r["combined_xp"], created_at=r["created_at"],
+                id=r["id"],
+                name=r["name"],
+                description=r["description"],
+                leader_id=r["leader_id"],
+                members=json.loads(r["members"]),
+                combined_xp=r["combined_xp"],
+                created_at=r["created_at"],
             )
             for r in rows
         ]
@@ -203,9 +221,15 @@ class AgentVerseWorld:
         self._conn.execute(
             "INSERT INTO trades (id, from_agent, to_agent, offering, requesting, status, created_at) "
             "VALUES (?,?,?,?,?,?,?)",
-            (trade.id, trade.from_agent, trade.to_agent,
-             json.dumps(trade.offering), json.dumps(trade.requesting),
-             trade.status, trade.created_at),
+            (
+                trade.id,
+                trade.from_agent,
+                trade.to_agent,
+                json.dumps(trade.offering),
+                json.dumps(trade.requesting),
+                trade.status,
+                trade.created_at,
+            ),
         )
         self._conn.commit()
         return trade
@@ -226,9 +250,13 @@ class AgentVerseWorld:
         ).fetchall()
         return [
             TradeOffer(
-                id=r["id"], from_agent=r["from_agent"], to_agent=r["to_agent"],
-                offering=json.loads(r["offering"]), requesting=json.loads(r["requesting"]),
-                status=TradeStatus(r["status"]), created_at=r["created_at"],
+                id=r["id"],
+                from_agent=r["from_agent"],
+                to_agent=r["to_agent"],
+                offering=json.loads(r["offering"]),
+                requesting=json.loads(r["requesting"]),
+                status=TradeStatus(r["status"]),
+                created_at=r["created_at"],
             )
             for r in rows
         ]
@@ -242,9 +270,17 @@ class AgentVerseWorld:
         self._conn.execute(
             "INSERT INTO battles (id, challenger_id, defender_id, benchmark, status, "
             "challenger_score, defender_score, winner_id, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
-            (battle.id, battle.challenger_id, battle.defender_id, battle.benchmark,
-             battle.status, battle.challenger_score, battle.defender_score,
-             battle.winner_id, battle.created_at),
+            (
+                battle.id,
+                battle.challenger_id,
+                battle.defender_id,
+                battle.benchmark,
+                battle.status,
+                battle.challenger_score,
+                battle.defender_score,
+                battle.winner_id,
+                battle.created_at,
+            ),
         )
         self._conn.commit()
         return battle
@@ -253,7 +289,9 @@ class AgentVerseWorld:
         self, battle_id: str, challenger_score: float, defender_score: float
     ) -> Optional[ArenaBattle]:
         winner = ""
-        row = self._conn.execute("SELECT * FROM battles WHERE id = ?", (battle_id,)).fetchone()
+        row = self._conn.execute(
+            "SELECT * FROM battles WHERE id = ?", (battle_id,)
+        ).fetchone()
         if not row:
             return None
         if challenger_score > defender_score:
@@ -262,14 +300,25 @@ class AgentVerseWorld:
             winner = row["defender_id"]
         self._conn.execute(
             "UPDATE battles SET status = ?, challenger_score = ?, defender_score = ?, winner_id = ? WHERE id = ?",
-            (BattleStatus.COMPLETED, challenger_score, defender_score, winner, battle_id),
+            (
+                BattleStatus.COMPLETED,
+                challenger_score,
+                defender_score,
+                winner,
+                battle_id,
+            ),
         )
         self._conn.commit()
         return ArenaBattle(
-            id=battle_id, challenger_id=row["challenger_id"], defender_id=row["defender_id"],
-            benchmark=row["benchmark"], status=BattleStatus.COMPLETED,
-            challenger_score=challenger_score, defender_score=defender_score,
-            winner_id=winner, created_at=row["created_at"],
+            id=battle_id,
+            challenger_id=row["challenger_id"],
+            defender_id=row["defender_id"],
+            benchmark=row["benchmark"],
+            status=BattleStatus.COMPLETED,
+            challenger_score=challenger_score,
+            defender_score=defender_score,
+            winner_id=winner,
+            created_at=row["created_at"],
         )
 
     # ------------------------------------------------------------------

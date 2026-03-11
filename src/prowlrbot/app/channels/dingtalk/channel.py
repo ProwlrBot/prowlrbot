@@ -282,8 +282,7 @@ class DingTalkChannel(BaseChannel):
             return
         session_in_url = session_param_from_webhook_url(session_webhook)
         logger.info(
-            "dingtalk _save_session_webhook: "
-            "webhook_key=%s session_from_url=%s",
+            "dingtalk _save_session_webhook: " "webhook_key=%s session_from_url=%s",
             webhook_key,
             session_in_url,
         )
@@ -332,8 +331,7 @@ class DingTalkChannel(BaseChannel):
         with self._processing_message_ids_lock:
             if msg_id and msg_id in self._processing_message_ids:
                 logger.info(
-                    "dingtalk dedup reject: msg_id already in progress "
-                    "msg_id=%r",
+                    "dingtalk dedup reject: msg_id already in progress " "msg_id=%r",
                     msg_id,
                 )
                 return False
@@ -583,8 +581,7 @@ class DingTalkChannel(BaseChannel):
                 result = await resp.json(content_type=None)
                 if resp.status >= 400:
                     logger.warning(
-                        "dingtalk upload_media failed: type=%s status=%s "
-                        "body=%s",
+                        "dingtalk upload_media failed: type=%s status=%s " "body=%s",
                         media_type,
                         resp.status,
                         result,
@@ -606,9 +603,7 @@ class DingTalkChannel(BaseChannel):
                 )
                 if media_id:
                     mid_preview = (
-                        media_id[:32] + "..."
-                        if len(media_id) > 32
-                        else media_id
+                        media_id[:32] + "..." if len(media_id) > 32 else media_id
                     )
                     logger.info(
                         "dingtalk upload_media ok: type=%s media_id=%s",
@@ -888,11 +883,7 @@ class DingTalkChannel(BaseChannel):
         )
         url = (url or "").strip() if isinstance(url, str) else ""
         raw_b64 = None
-        if (
-            isinstance(url, str)
-            and url.startswith("data:")
-            and "base64," in url
-        ):
+        if isinstance(url, str) and url.startswith("data:") and "base64," in url:
             raw_b64 = url
             url = ""
         if not raw_b64:
@@ -917,9 +908,7 @@ class DingTalkChannel(BaseChannel):
                     getattr(part, "mime_type", None) or ""
                 ).strip()
         else:
-            content_type_for_upload = (
-                getattr(part, "mime_type", None) or ""
-            ).strip()
+            content_type_for_upload = (getattr(part, "mime_type", None) or "").strip()
         if not data and url:
             data = await self._fetch_bytes_from_url(url)
 
@@ -1066,8 +1055,7 @@ class DingTalkChannel(BaseChannel):
                 )
             for i, part in enumerate(media_parts):
                 logger.info(
-                    "dingtalk send_content_parts: "
-                    "sending media part %s/%s type=%s",
+                    "dingtalk send_content_parts: " "sending media part %s/%s type=%s",
                     i + 1,
                     len(media_parts),
                     getattr(part, "type", None),
@@ -1102,10 +1090,7 @@ class DingTalkChannel(BaseChannel):
             body = "\n".join(text_parts) if text_parts else ""
             if prefix and body:
                 body = prefix + body
-        if (
-            m.get("reply_loop") is not None
-            and m.get("reply_future") is not None
-        ):
+        if m.get("reply_loop") is not None and m.get("reply_future") is not None:
             self._reply_sync(m, body)
         else:
             await self.send(to_handle, body.strip() or prefix, meta)
@@ -1131,10 +1116,7 @@ class DingTalkChannel(BaseChannel):
             return
         prev = existing_items[-1]
         pm = prev.get("meta") or {} if isinstance(prev, dict) else {}
-        if (
-            pm.get("reply_loop") is not None
-            and pm.get("reply_future") is not None
-        ):
+        if pm.get("reply_loop") is not None and pm.get("reply_future") is not None:
             self._reply_sync(pm, SENT_VIA_WEBHOOK)
 
     async def _run_process_loop(
@@ -1164,9 +1146,7 @@ class DingTalkChannel(BaseChannel):
             "_reply_futures_list",
         )
         safe_meta = {
-            k: v
-            for k, v in (send_meta or {}).items()
-            if k not in _NON_SERIALIZABLE
+            k: v for k, v in (send_meta or {}).items() if k not in _NON_SERIALIZABLE
         }
         request.channel_meta = safe_meta
         logger.info(
@@ -1179,8 +1159,7 @@ class DingTalkChannel(BaseChannel):
             logger.exception("dingtalk _process_one_request failed")
             self._reply_sync_batch(
                 send_meta,
-                self.bot_prefix
-                + "An error occurred while processing your request.",
+                self.bot_prefix + "An error occurred while processing your request.",
             )
             raise
 
@@ -1261,9 +1240,7 @@ class DingTalkChannel(BaseChannel):
                         ContentType.AUDIO,
                     )
                     media_count = sum(
-                        1
-                        for p in parts
-                        if getattr(p, "type", None) in _media_types
+                        1 for p in parts if getattr(p, "type", None) in _media_types
                     )
                     if media_count:
                         logger.info(
@@ -1333,8 +1310,7 @@ class DingTalkChannel(BaseChannel):
         elif last_response is None:
             self._reply_sync_batch(
                 reply_meta,
-                self.bot_prefix
-                + "An error occurred while processing your request.",
+                self.bot_prefix + "An error occurred while processing your request.",
             )
 
         if self._on_reply_sent:
@@ -1618,8 +1594,7 @@ class DingTalkChannel(BaseChannel):
                 data = await resp.json(content_type=None)
                 if resp.status >= 400:
                     raise RuntimeError(
-                        f"get accessToken failed status={resp.status} "
-                        f"body={data}",
+                        f"get accessToken failed status={resp.status} " f"body={data}",
                     )
 
             token = data.get("accessToken") or data.get("access_token")
@@ -1707,9 +1682,7 @@ class DingTalkChannel(BaseChannel):
                 )
             filename = filename_hint
             if "filename=" in disposition:
-                part = (
-                    disposition.split("filename=", 1)[-1].strip().strip("'\"")
-                )
+                part = disposition.split("filename=", 1)[-1].strip().strip("'\"")
                 if part:
                     filename = part
             suffix = ".file"
@@ -1810,9 +1783,7 @@ class DingTalkChannel(BaseChannel):
                     ext = guess.lstrip(".").lower()
 
         if not ext:
-            ext = (
-                default.rsplit(".", 1)[-1].lower() if "." in default else "bin"
-            )
+            ext = default.rsplit(".", 1)[-1].lower() if "." in default else "bin"
 
         # normalize common cases
         if ext == "jpeg":

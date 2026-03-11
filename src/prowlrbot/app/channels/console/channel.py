@@ -9,6 +9,7 @@ endpoint.  This channel only handles the **output** side: whenever a
 completed message event or a proactive send arrives, it is pretty-printed
 to the terminal.
 """
+
 from __future__ import annotations
 
 import logging
@@ -28,7 +29,6 @@ from ..base import (
     OutgoingContentPart,
     ProcessHandler,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -231,19 +231,14 @@ class ConsoleChannel(BaseChannel):
             elif t == ContentType.AUDIO and getattr(p, "data", None):
                 print(f"{_YELLOW}🔊 [Audio]{_RESET}")
             elif t == ContentType.FILE:
-                url = (
-                    getattr(p, "file_url", None)
-                    or getattr(p, "file_id", None)
-                    or ""
-                )
+                url = getattr(p, "file_url", None) or getattr(p, "file_id", None) or ""
                 print(f"{_YELLOW}📎 [File: {url}]{_RESET}")
         print()
 
     def _print_error(self, err: str) -> None:
         ts = _ts()
         print(
-            f"\n{_RED}{_BOLD}❌ [{ts}] Error{_RESET}\n"
-            f"{_RED}{err}{_RESET}\n",
+            f"\n{_RED}{_BOLD}❌ [{ts}] Error{_RESET}\n" f"{_RED}{err}{_RESET}\n",
         )
 
     def _parts_to_text(

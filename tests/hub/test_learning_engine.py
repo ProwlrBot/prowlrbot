@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the Learning Engine — CRUD, FTS5 search safety, thread safety, limits."""
+
 import threading
 import pytest
 from prowlrbot.learning.db import LearningDB, _sanitize_fts_query, _clamp_limit
@@ -18,7 +19,9 @@ def db(tmp_path):
 
 class TestLearningCRUD:
     def test_add_and_retrieve(self, db):
-        lid = db.add_learning("correction", "agent-1", "Fix import", "Use absolute imports")
+        lid = db.add_learning(
+            "correction", "agent-1", "Fix import", "Use absolute imports"
+        )
         assert lid is not None
         recent = db.get_recent(limit=1)
         assert len(recent) == 1
@@ -29,7 +32,9 @@ class TestLearningCRUD:
 
     def test_add_with_metadata(self, db):
         lid = db.add_learning(
-            "pattern", "agent-2", "Retry pattern",
+            "pattern",
+            "agent-2",
+            "Retry pattern",
             "Exponential backoff for HTTP calls",
             metadata={"language": "python", "context": "http"},
             confidence=0.85,
@@ -75,14 +80,23 @@ class TestLearningCRUD:
 
 class TestFTSSearch:
     def test_basic_search(self, db):
-        db.add_learning("correction", "a", "Fix async deadlock", "Use asyncio.gather instead of sequential awaits")
-        db.add_learning("pattern", "a", "Database pooling", "Always use connection pools for SQLite")
+        db.add_learning(
+            "correction",
+            "a",
+            "Fix async deadlock",
+            "Use asyncio.gather instead of sequential awaits",
+        )
+        db.add_learning(
+            "pattern", "a", "Database pooling", "Always use connection pools for SQLite"
+        )
         results = db.search("async deadlock")
         assert len(results) == 1
         assert results[0]["title"] == "Fix async deadlock"
 
     def test_search_content(self, db):
-        db.add_learning("insight", "a", "Perf tip", "Use connection pools for better throughput")
+        db.add_learning(
+            "insight", "a", "Perf tip", "Use connection pools for better throughput"
+        )
         results = db.search("connection pools")
         assert len(results) == 1
 
@@ -110,27 +124,27 @@ class TestFTSSearch:
 class TestFTSSafety:
     def test_sanitize_strips_operators(self):
         # * is stripped, OR/AND remain as text but are inside quotes so FTS treats them as words
-        result = _sanitize_fts_query('test OR *')
+        result = _sanitize_fts_query("test OR *")
         assert '"' in result  # Wrapped in quotes
-        assert '*' not in result  # Star operator removed
+        assert "*" not in result  # Star operator removed
         result2 = _sanitize_fts_query('foo AND "bar"')
         assert '"' in result2
         assert result2.count('"') == 2  # Only outer quotes remain
 
     def test_sanitize_strips_special_chars(self):
-        result = _sanitize_fts_query('hello(){}[]^~:!world')
+        result = _sanitize_fts_query("hello(){}[]^~:!world")
         assert '"' in result
-        assert '(' not in result
-        assert ')' not in result
-        assert '{' not in result
-        assert '!' not in result
+        assert "(" not in result
+        assert ")" not in result
+        assert "{" not in result
+        assert "!" not in result
 
     def test_sanitize_empty_string(self):
-        assert _sanitize_fts_query('') == '""'
-        assert _sanitize_fts_query('***') == '""'
+        assert _sanitize_fts_query("") == '""'
+        assert _sanitize_fts_query("***") == '""'
 
     def test_sanitize_normal_query_preserved(self):
-        assert _sanitize_fts_query('fix import error') == '"fix import error"'
+        assert _sanitize_fts_query("fix import error") == '"fix import error"'
 
     def test_search_with_malicious_fts_operators(self, db):
         db.add_learning("correction", "a", "Safe title", "Safe content about imports")
@@ -167,7 +181,9 @@ class TestLimitClamping:
 
     def test_search_respects_limit(self, db):
         for i in range(5):
-            db.add_learning("correction", "a", f"Search target {i}", f"Searchable content {i}")
+            db.add_learning(
+                "correction", "a", f"Search target {i}", f"Searchable content {i}"
+            )
         results = db.search("searchable", limit=2)
         assert len(results) <= 2
 
@@ -213,8 +229,10 @@ class TestThreadSafety:
             try:
                 for i in range(20):
                     db.add_learning(
-                        "correction", f"thread-{thread_id}",
-                        f"Title {thread_id}-{i}", f"Content {thread_id}-{i}",
+                        "correction",
+                        f"thread-{thread_id}",
+                        f"Title {thread_id}-{i}",
+                        f"Content {thread_id}-{i}",
                     )
             except Exception as e:
                 errors.append(e)
@@ -231,7 +249,9 @@ class TestThreadSafety:
 
     def test_concurrent_read_write(self, db):
         """Reads during writes should not crash or corrupt data."""
-        db.add_learning("correction", "seed", "Seed data", "Initial content for searching")
+        db.add_learning(
+            "correction", "seed", "Seed data", "Initial content for searching"
+        )
         write_errors = []
         read_errors = []
 

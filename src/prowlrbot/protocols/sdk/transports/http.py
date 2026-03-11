@@ -7,6 +7,7 @@ to the endpoint URL. Responses are returned synchronously.
 Ref: MCP uses "Streamable HTTP" (2025-11-25 spec), A2A uses HTTP POST.
 ROAR HTTP transport is compatible with both patterns.
 """
+
 from __future__ import annotations
 
 import logging
@@ -66,9 +67,7 @@ async def http_send(
             data = response.json()
             return ROARMessage.model_validate(data)
         except httpx.ConnectError as exc:
-            raise ConnectionError(
-                f"Failed to connect to {url}: {exc}"
-            ) from exc
+            raise ConnectionError(f"Failed to connect to {url}: {exc}") from exc
         except httpx.HTTPStatusError as exc:
             raise ConnectionError(
                 f"HTTP {exc.response.status_code} from {url}: "

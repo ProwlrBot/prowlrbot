@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """External agent manager — dispatches tasks to external AI agents."""
+
 from __future__ import annotations
 
 import asyncio
@@ -73,10 +74,17 @@ class ExternalAgentManager:
             "working_dir, environment, enabled, created_at) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             (
-                config.id, config.name, config.backend_type, config.command,
-                config.api_url, config.api_key, config.timeout_seconds,
-                config.working_dir, json.dumps(config.environment),
-                1 if config.enabled else 0, config.created_at,
+                config.id,
+                config.name,
+                config.backend_type,
+                config.command,
+                config.api_url,
+                config.api_key,
+                config.timeout_seconds,
+                config.working_dir,
+                json.dumps(config.environment),
+                1 if config.enabled else 0,
+                config.created_at,
             ),
         )
         self._conn.commit()
@@ -116,10 +124,16 @@ class ExternalAgentManager:
             "(id, agent_id, prompt, context, status, result, error, "
             "started_at, completed_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
             (
-                task.id, task.agent_id, task.prompt,
-                json.dumps(task.context), task.status,
-                task.result, task.error, task.started_at,
-                task.completed_at, task.created_at,
+                task.id,
+                task.agent_id,
+                task.prompt,
+                json.dumps(task.context),
+                task.status,
+                task.result,
+                task.error,
+                task.started_at,
+                task.completed_at,
+                task.created_at,
             ),
         )
         self._conn.commit()
@@ -134,7 +148,10 @@ class ExternalAgentManager:
         return self._row_to_task(row)
 
     def list_tasks(
-        self, agent_id: Optional[str] = None, status: Optional[str] = None, limit: int = 50
+        self,
+        agent_id: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: int = 50,
     ) -> List[ExternalTask]:
         query = "SELECT * FROM external_tasks WHERE 1=1"
         params: list = []
@@ -235,7 +252,9 @@ class ExternalAgentManager:
             proc.communicate(), timeout=agent.timeout_seconds
         )
         if proc.returncode != 0:
-            raise RuntimeError(f"CLI exited with code {proc.returncode}: {stderr.decode()}")
+            raise RuntimeError(
+                f"CLI exited with code {proc.returncode}: {stderr.decode()}"
+            )
         return stdout.decode()
 
     async def _run_docker(self, agent: ExternalAgentConfig, task: ExternalTask) -> str:
@@ -251,10 +270,14 @@ class ExternalAgentManager:
             proc.communicate(), timeout=agent.timeout_seconds
         )
         if proc.returncode != 0:
-            raise RuntimeError(f"Docker exited with code {proc.returncode}: {stderr.decode()}")
+            raise RuntimeError(
+                f"Docker exited with code {proc.returncode}: {stderr.decode()}"
+            )
         return stdout.decode()
 
-    async def _run_claude_code(self, agent: ExternalAgentConfig, task: ExternalTask) -> str:
+    async def _run_claude_code(
+        self, agent: ExternalAgentConfig, task: ExternalTask
+    ) -> str:
         """Run Claude Code as an external agent."""
         cmd = f"claude -p '{task.prompt}'"
         if agent.working_dir:
@@ -269,7 +292,9 @@ class ExternalAgentManager:
             proc.communicate(), timeout=agent.timeout_seconds
         )
         if proc.returncode != 0:
-            raise RuntimeError(f"Claude Code exited with code {proc.returncode}: {stderr.decode()}")
+            raise RuntimeError(
+                f"Claude Code exited with code {proc.returncode}: {stderr.decode()}"
+            )
         return stdout.decode()
 
     async def check_agent_health(self, agent_id: str) -> ExternalAgentStatus:
@@ -277,14 +302,18 @@ class ExternalAgentManager:
         agent = self.get_agent(agent_id)
         if not agent:
             return ExternalAgentStatus(
-                agent_id=agent_id, name="unknown",
+                agent_id=agent_id,
+                name="unknown",
                 backend_type=AgentBackendType.CUSTOM_CLI,
-                available=False, error="Agent not found",
+                available=False,
+                error="Agent not found",
             )
 
         status = ExternalAgentStatus(
-            agent_id=agent.id, name=agent.name,
-            backend_type=agent.backend_type, last_check=time.time(),
+            agent_id=agent.id,
+            name=agent.name,
+            backend_type=agent.backend_type,
+            last_check=time.time(),
         )
 
         try:
@@ -328,23 +357,32 @@ class ExternalAgentManager:
     @staticmethod
     def _row_to_config(row: sqlite3.Row) -> ExternalAgentConfig:
         return ExternalAgentConfig(
-            id=row["id"], name=row["name"],
+            id=row["id"],
+            name=row["name"],
             backend_type=AgentBackendType(row["backend_type"]),
-            command=row["command"], api_url=row["api_url"],
-            api_key=row["api_key"], timeout_seconds=row["timeout_seconds"],
+            command=row["command"],
+            api_url=row["api_url"],
+            api_key=row["api_key"],
+            timeout_seconds=row["timeout_seconds"],
             working_dir=row["working_dir"],
             environment=json.loads(row["environment"]) if row["environment"] else {},
-            enabled=bool(row["enabled"]), created_at=row["created_at"],
+            enabled=bool(row["enabled"]),
+            created_at=row["created_at"],
         )
 
     @staticmethod
     def _row_to_task(row: sqlite3.Row) -> ExternalTask:
         return ExternalTask(
-            id=row["id"], agent_id=row["agent_id"], prompt=row["prompt"],
+            id=row["id"],
+            agent_id=row["agent_id"],
+            prompt=row["prompt"],
             context=json.loads(row["context"]) if row["context"] else {},
-            status=TaskStatus(row["status"]), result=row["result"],
-            error=row["error"], started_at=row["started_at"],
-            completed_at=row["completed_at"], created_at=row["created_at"],
+            status=TaskStatus(row["status"]),
+            result=row["result"],
+            error=row["error"],
+            started_at=row["started_at"],
+            completed_at=row["completed_at"],
+            created_at=row["created_at"],
         )
 
     def close(self) -> None:

@@ -4,6 +4,7 @@
 This module provides the main ProwlrBotAgent class built on ReActAgent,
 with integrated tools, skills, and memory management.
 """
+
 import asyncio
 import logging
 import os
@@ -526,9 +527,7 @@ class ProwlrBotAgent(ReActAgent):
 
         # Check if message is a system command
         last_msg = msg[-1] if isinstance(msg, list) else msg
-        query = (
-            last_msg.get_text_content() if isinstance(last_msg, Msg) else None
-        )
+        query = last_msg.get_text_content() if isinstance(last_msg, Msg) else None
 
         if self.command_handler.is_command(query):
             logger.info(f"Received command: {query}")

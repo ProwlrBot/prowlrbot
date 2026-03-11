@@ -4,6 +4,7 @@
 """
 Base Channel: bound to AgentRequest/AgentResponse, unified by process.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -203,15 +204,9 @@ class BaseChannel(ABC):
             return False
         for c in contents:
             t = getattr(c, "type", None)
-            if (
-                t == ContentType.TEXT
-                and (getattr(c, "text", None) or "").strip()
-            ):
+            if t == ContentType.TEXT and (getattr(c, "text", None) or "").strip():
                 return True
-            if (
-                t == ContentType.REFUSAL
-                and (getattr(c, "refusal", None) or "").strip()
-            ):
+            if t == ContentType.REFUSAL and (getattr(c, "refusal", None) or "").strip():
                 return True
         return False
 
@@ -352,9 +347,7 @@ class BaseChannel(ABC):
         Args for _on_reply_sent(channel, *args). Default: (to_handle,
         session_id). Override e.g. to pass (user_id, session_id).
         """
-        session_id = (
-            getattr(request, "session_id", "") or f"{self.channel}:{to_handle}"
-        )
+        session_id = getattr(request, "session_id", "") or f"{self.channel}:{to_handle}"
         return (to_handle, session_id)
 
     async def refresh_webhook_or_token(self) -> None:
@@ -413,9 +406,7 @@ class BaseChannel(ABC):
         if isinstance(payload, dict):
             meta_from_payload = dict(payload.get("meta") or {})
             if payload.get("session_webhook"):
-                meta_from_payload["session_webhook"] = payload[
-                    "session_webhook"
-                ]
+                meta_from_payload["session_webhook"] = payload["session_webhook"]
             # Always attach so channel _before_consume_process can use it
             # (e.g. Feishu save receive_id for cron send).
             setattr(request, "channel_meta", meta_from_payload)

@@ -221,10 +221,7 @@ def _build_spec_from_cli(
 @click.option(
     "--target-session",
     default=None,
-    help=(
-        "Target session_id for the channel. "
-        "Required when not using -f/--file."
-    ),
+    help=("Target session_id for the channel. " "Required when not using -f/--file."),
 )
 @click.option(
     "--text",

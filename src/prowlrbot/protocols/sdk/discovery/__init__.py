@@ -9,6 +9,7 @@ Provides multi-tier agent discovery:
 
 Ref: IETF BANDAID draft for DNS-based agent discovery.
 """
+
 from .cache import DiscoveryCache
 from .hub import HubClient
 

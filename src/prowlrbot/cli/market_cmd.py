@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Marketplace CLI commands — search, install, publish, list, update."""
+
 from __future__ import annotations
 
 import json
@@ -39,7 +40,8 @@ def market_search(query: str, category: str):
     """Search the marketplace registry."""
     registry = _load_registry()
     results = [
-        item for item in registry
+        item
+        for item in registry
         if query.lower() in item.get("title", "").lower()
         or query.lower() in item.get("description", "").lower()
     ]
@@ -78,7 +80,8 @@ def market_list():
     """Show installed marketplace packages."""
     market = _market_dir()
     installed = [
-        d.name for d in market.iterdir()
+        d.name
+        for d in market.iterdir()
         if d.is_dir() and (d / "manifest.json").exists()
     ]
     if not installed:

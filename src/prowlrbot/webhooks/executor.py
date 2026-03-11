@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Webhook rule executor — matches triggers to rules and runs actions."""
+
 from __future__ import annotations
 
 import logging
@@ -35,16 +36,10 @@ class WebhookExecutor:
             [{"rule_id": "...", "rule_name": "...", "results": [...]}]
         """
         rules = await self._store.list_rules()
-        matching = [
-            r
-            for r in rules
-            if r.enabled and r.trigger.type == trigger_type
-        ]
+        matching = [r for r in rules if r.enabled and r.trigger.type == trigger_type]
 
         if not matching:
-            logger.debug(
-                "no matching webhook rules for trigger %s", trigger_type.value
-            )
+            logger.debug("no matching webhook rules for trigger %s", trigger_type.value)
             return []
 
         results: List[Dict[str, Any]] = []
@@ -77,7 +72,9 @@ class WebhookExecutor:
         action_results: List[Dict[str, Any]] = []
         for action in rule.actions:
             try:
-                result = await self._run_action(action.type, action.config, trigger_data)
+                result = await self._run_action(
+                    action.type, action.config, trigger_data
+                )
                 action_results.append(
                     {"action": action.type.value, "status": "ok", "result": result}
                 )
@@ -139,7 +136,9 @@ class WebhookExecutor:
         """Dispatch to the appropriate action handler."""
         handler = _ACTION_HANDLERS.get(action_type)
         if handler is None:
-            raise NotImplementedError(f"action type not implemented: {action_type.value}")
+            raise NotImplementedError(
+                f"action type not implemented: {action_type.value}"
+            )
         return await handler(self, config, trigger_data)
 
     # -- run_agent ---------------------------------------------------
@@ -278,7 +277,9 @@ class WebhookExecutor:
             priority (str): low | medium | high. Default medium.
         """
         title = config.get("title", "Webhook Task")
-        description = config.get("description", "Auto-created from webhook: {trigger_data}")
+        description = config.get(
+            "description", "Auto-created from webhook: {trigger_data}"
+        )
         description = description.replace("{trigger_data}", str(trigger_data))
         priority = config.get("priority", "medium")
 

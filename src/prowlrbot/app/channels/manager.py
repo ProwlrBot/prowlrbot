@@ -175,9 +175,7 @@ class ChannelManager:
                 from types import SimpleNamespace
 
                 raw = extra[key]
-                ch_cfg = (
-                    SimpleNamespace(**raw) if isinstance(raw, dict) else raw
-                )
+                ch_cfg = SimpleNamespace(**raw) if isinstance(raw, dict) else raw
             if ch_cfg is None:
                 continue
             if key == "console":
@@ -238,9 +236,7 @@ class ChannelManager:
                 key,
                 (channel_id, key) in self._in_progress,
                 bool(payload.get("session_webhook")),
-                "pending"
-                if (channel_id, key) in self._in_progress
-                else "queue",
+                "pending" if (channel_id, key) in self._in_progress else "queue",
             )
         if (channel_id, key) in self._in_progress:
             self._pending.setdefault((channel_id, key), []).append(payload)
@@ -485,8 +481,7 @@ class ChannelManager:
         )
         ch_name = getattr(ch, "channel", channel)
         logger.info(
-            "channel send_text: channel=%s user_id=%s session_id=%s "
-            "to_handle=%s",
+            "channel send_text: channel=%s user_id=%s session_id=%s " "to_handle=%s",
             ch_name,
             (user_id or "")[:40],
             (session_id or "")[:40],

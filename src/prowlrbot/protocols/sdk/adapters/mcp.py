@@ -9,6 +9,7 @@ Covers the full MCP tool lifecycle:
 
 Ref: MCP Specification (modelcontextprotocol.io)
 """
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -62,9 +63,7 @@ class MCPFullAdapter:
         params = mcp_message.get("params", {})
         msg_id = mcp_message.get("id", "")
 
-        intent = MCPFullAdapter.METHOD_TO_INTENT.get(
-            method, MessageIntent.EXECUTE
-        )
+        intent = MCPFullAdapter.METHOD_TO_INTENT.get(method, MessageIntent.EXECUTE)
 
         from_id = source_identity or AgentIdentity(
             display_name="mcp-client", agent_type="tool"
@@ -100,9 +99,7 @@ class MCPFullAdapter:
         """
         method = method_override or roar_message.payload.get(
             "mcp_method",
-            MCPFullAdapter.INTENT_TO_METHOD.get(
-                roar_message.intent, "tools/call"
-            ),
+            MCPFullAdapter.INTENT_TO_METHOD.get(roar_message.intent, "tools/call"),
         )
 
         params = roar_message.payload.get("mcp_params", roar_message.payload)

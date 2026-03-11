@@ -282,8 +282,7 @@ def _create_remote_model_instance(
         base_url = llm_cfg.base_url
     else:
         logger.warning(
-            "No active LLM configured — "
-            "falling back to DASHSCOPE_API_KEY env var",
+            "No active LLM configured — " "falling back to DASHSCOPE_API_KEY env var",
         )
         model_name = "qwen3-max"
         api_key = os.getenv("DASHSCOPE_API_KEY", "")

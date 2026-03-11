@@ -155,9 +155,7 @@ class AgentRunner(Runner):
                 exc=e,
                 locals_=locals(),
             )
-            path_hint = (
-                f"\n(Details:  {debug_dump_path})" if debug_dump_path else ""
-            )
+            path_hint = f"\n(Details:  {debug_dump_path})" if debug_dump_path else ""
             logger.exception(f"Error in query handler: {e}{path_hint}")
             if debug_dump_path:
                 setattr(e, "debug_dump_path", debug_dump_path)

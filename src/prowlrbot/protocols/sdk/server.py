@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """ROAR Protocol SDK — Server for receiving and handling ROAR messages."""
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +20,9 @@ from .streaming import EventBus, StreamFilter
 logger = logging.getLogger(__name__)
 
 # Type alias for handler functions (sync or async).
-HandlerFunc = Callable[[ROARMessage], Union[ROARMessage, Coroutine[Any, Any, ROARMessage]]]
+HandlerFunc = Callable[
+    [ROARMessage], Union[ROARMessage, Coroutine[Any, Any, ROARMessage]]
+]
 
 
 class ROARServer:
@@ -96,9 +99,7 @@ class ROARServer:
         """
         return await self._event_bus.publish(event)
 
-    def on(
-        self, intent: MessageIntent
-    ) -> Callable[[HandlerFunc], HandlerFunc]:
+    def on(self, intent: MessageIntent) -> Callable[[HandlerFunc], HandlerFunc]:
         """Register a handler for a specific message intent.
 
         Can be used as a decorator::

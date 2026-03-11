@@ -150,9 +150,7 @@ async def grep_search(  # pylint: disable=too-many-branches
         files = [search_root]
     else:
         files = sorted(
-            f
-            for f in search_root.rglob("*")
-            if f.is_file() and _is_text_file(f)
+            f for f in search_root.rglob("*") if f.is_file() and _is_text_file(f)
         )
 
     for file_path in files:

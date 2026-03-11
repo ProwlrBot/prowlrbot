@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Text chunking utilities for the RAG module."""
+
 from __future__ import annotations
 
 import re

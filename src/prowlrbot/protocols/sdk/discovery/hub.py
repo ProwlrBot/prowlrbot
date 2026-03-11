@@ -11,6 +11,7 @@ The Hub API follows a simple REST pattern:
   - GET  /agents?q=   — Search by capability
   - DELETE /agents/:did — Unregister
 """
+
 from __future__ import annotations
 
 import json
@@ -151,9 +152,7 @@ class HubClient:
                 resp.raise_for_status()
                 data = resp.json()
                 return [
-                    self._parse_entry(item)
-                    for item in data.get("agents", [])
-                    if item
+                    self._parse_entry(item) for item in data.get("agents", []) if item
                 ]
         except Exception as exc:
             logger.warning("Hub search failed for '%s': %s", query, exc)

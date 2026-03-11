@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AutoResearch engine — orchestrates research workflows."""
+
 from __future__ import annotations
 
 import hashlib
@@ -133,7 +134,7 @@ class ResearchEngine:
     @staticmethod
     def _extract_summary(content: str, max_length: int = 300) -> str:
         """Extract a brief summary from content."""
-        sentences = re.split(r'(?<=[.!?])\s+', content.strip())
+        sentences = re.split(r"(?<=[.!?])\s+", content.strip())
         summary = ""
         for s in sentences:
             if len(summary) + len(s) > max_length:
@@ -158,17 +159,19 @@ class ResearchEngine:
         topic_words = set(project.topic.lower().split())
 
         for source in project.sources:
-            sentences = re.split(r'(?<=[.!?])\s+', source.content)
+            sentences = re.split(r"(?<=[.!?])\s+", source.content)
             for sentence in sentences:
                 s_lower = sentence.lower()
                 overlap = sum(1 for w in topic_words if w in s_lower)
                 if overlap >= max(1, len(topic_words) // 2) and len(sentence) > 30:
-                    findings.append(ResearchFinding(
-                        claim=sentence.strip(),
-                        evidence=[source.id],
-                        confidence=overlap / len(topic_words) if topic_words else 0,
-                        category="extracted",
-                    ))
+                    findings.append(
+                        ResearchFinding(
+                            claim=sentence.strip(),
+                            evidence=[source.id],
+                            confidence=overlap / len(topic_words) if topic_words else 0,
+                            category="extracted",
+                        )
+                    )
 
         # Deduplicate similar findings
         seen = set()
@@ -189,8 +192,10 @@ class ResearchEngine:
         if project.objective:
             parts.append(f"## Objective\n{project.objective}\n")
 
-        parts.append(f"## Summary\nAnalyzed {len(project.sources)} sources, "
-                      f"extracted {len(project.findings)} key findings.\n")
+        parts.append(
+            f"## Summary\nAnalyzed {len(project.sources)} sources, "
+            f"extracted {len(project.findings)} key findings.\n"
+        )
 
         if project.findings:
             parts.append("## Key Findings\n")

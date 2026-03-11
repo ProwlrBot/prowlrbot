@@ -6,11 +6,10 @@ from pathlib import Path
 
 import click
 
-
 _SHELL_SCRIPTS = {
-    "bash": '_PROWLR_COMPLETE=bash_source prowlr',
-    "zsh": '_PROWLR_COMPLETE=zsh_source prowlr',
-    "fish": '_PROWLR_COMPLETE=fish_source prowlr',
+    "bash": "_PROWLR_COMPLETE=bash_source prowlr",
+    "zsh": "_PROWLR_COMPLETE=zsh_source prowlr",
+    "fish": "_PROWLR_COMPLETE=fish_source prowlr",
 }
 
 _SHELL_RC_FILES = {
@@ -21,18 +20,15 @@ _SHELL_RC_FILES = {
 _COMPLETION_MARKER = "# prowlr shell completion"
 
 _BASH_SNIPPET = (
-    f"\n{_COMPLETION_MARKER}\n"
-    'eval "$(_PROWLR_COMPLETE=bash_source prowlr)"\n'
+    f"\n{_COMPLETION_MARKER}\n" 'eval "$(_PROWLR_COMPLETE=bash_source prowlr)"\n'
 )
 
 _ZSH_SNIPPET = (
-    f"\n{_COMPLETION_MARKER}\n"
-    'eval "$(_PROWLR_COMPLETE=zsh_source prowlr)"\n'
+    f"\n{_COMPLETION_MARKER}\n" 'eval "$(_PROWLR_COMPLETE=zsh_source prowlr)"\n'
 )
 
 _FISH_SNIPPET = (
-    f"{_COMPLETION_MARKER}\n"
-    '_PROWLR_COMPLETE=fish_source prowlr | source\n'
+    f"{_COMPLETION_MARKER}\n" "_PROWLR_COMPLETE=fish_source prowlr | source\n"
 )
 
 
@@ -117,9 +113,7 @@ def completion_install(shell_name: str | None) -> None:
     else:
         rc_path = _SHELL_RC_FILES[shell_name]
         if _is_already_installed(rc_path):
-            click.echo(
-                f"Completion for prowlr is already installed in {rc_path}."
-            )
+            click.echo(f"Completion for prowlr is already installed in {rc_path}.")
             return
 
         snippet = _BASH_SNIPPET if shell_name == "bash" else _ZSH_SNIPPET

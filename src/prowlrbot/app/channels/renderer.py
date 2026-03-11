@@ -4,6 +4,7 @@
 Pluggable message renderer: Message -> sendable parts (runtime Content).
 Style/capabilities control markdown, emoji, code fence.
 """
+
 from __future__ import annotations
 
 import json
@@ -105,9 +106,7 @@ class MessageRenderer:
                 name = data.get("name") or "tool"
                 if s.show_tool_details:
                     args = data.get("arguments") or "{}"
-                    args_preview = (
-                        args[:200] + "..." if len(args) > 200 else args
-                    )
+                    args_preview = args[:200] + "..." if len(args) > 200 else args
                 else:
                     args_preview = "..."
                 text = _fmt_tool_call(name, args_preview, s)
@@ -130,9 +129,7 @@ class MessageRenderer:
                     if stype == "url" and src.get("url"):
                         url = src["url"]
                     elif stype == "base64" and src.get("data"):
-                        mt = (
-                            src.get("media_type") or "application/octet-stream"
-                        )
+                        mt = src.get("media_type") or "application/octet-stream"
                         url = f"data:{mt};base64,{src['data']}"
                     if url:
                         if btype == "image":
@@ -286,9 +283,7 @@ class MessageRenderer:
                     name = data.get("name")
                     output = data.get("output")
                     args = data.get("arguments")
-                    if name is not None and (
-                        output is not None or args is not None
-                    ):
+                    if name is not None and (output is not None or args is not None):
                         if not s.show_tool_details:
                             preview = "..."
                         elif output is not None:

@@ -7,6 +7,7 @@ frames at any time. Ideal for real-time streaming (Layer 5).
 
 Ref: Neither MCP nor A2A support WebSocket — this is a ROAR differentiator.
 """
+
 from __future__ import annotations
 
 import asyncio

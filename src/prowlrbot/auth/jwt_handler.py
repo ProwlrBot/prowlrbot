@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Manual JWT implementation using HMAC-SHA256 (no external dependency)."""
+
 from __future__ import annotations
 
 import base64
@@ -62,9 +63,7 @@ class JWTHandler:
             iat=now,
             exp=now + self._expiry_minutes * 60,
         )
-        header_b64 = _b64url_encode(
-            json.dumps(header, separators=(",", ":")).encode()
-        )
+        header_b64 = _b64url_encode(json.dumps(header, separators=(",", ":")).encode())
         payload_b64 = _b64url_encode(
             json.dumps(payload.model_dump(), separators=(",", ":")).encode()
         )

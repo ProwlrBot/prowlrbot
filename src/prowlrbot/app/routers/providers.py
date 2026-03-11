@@ -74,11 +74,7 @@ def _build_provider_info(
     cur_base_url, cur_api_key = data.get_credentials(provider.id)
 
     settings = data.providers.get(provider.id)
-    extra = (
-        list(settings.extra_models)
-        if settings and not provider.is_custom
-        else []
-    )
+    extra = list(settings.extra_models) if settings and not provider.is_custom else []
 
     return ProviderInfo(
         id=provider.id,
@@ -120,9 +116,7 @@ async def configure_provider(
     # Allow base_url for custom providers, providers without a default
     # base URL (e.g. Azure OpenAI), and Ollama (user may override).
     allow_base_url = (
-        provider.is_custom
-        or not provider.default_base_url
-        or provider.id == "ollama"
+        provider.is_custom or not provider.default_base_url or provider.id == "ollama"
     )
     base_url = body.base_url if allow_base_url else None
     data = update_provider_settings(

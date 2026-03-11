@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Swarm CLI commands for AI agent swarm management."""
+
 from __future__ import annotations
 
 import json
@@ -27,11 +28,7 @@ def swarm_status():
 
 
 @swarm_group.command(name="up", help="Start swarm infrastructure")
-@click.option(
-    "--env-file",
-    default=".env.swarm",
-    help="Path to environment file"
-)
+@click.option("--env-file", default=".env.swarm", help="Path to environment file")
 def swarm_up(env_file: str):
     """Start the swarm infrastructure (Redis + Worker)."""
     click.echo(f"Starting AI Swarm with config: {env_file}")
@@ -48,12 +45,7 @@ def swarm_down():
 
 
 @swarm_group.command(name="logs", help="View swarm logs")
-@click.option(
-    "--follow",
-    "-f",
-    is_flag=True,
-    help="Follow log output"
-)
+@click.option("--follow", "-f", is_flag=True, help="Follow log output")
 def swarm_logs(follow: bool):
     """View swarm logs."""
     cmd = "docker compose -f docker-compose.swarm.yml logs"
@@ -64,18 +56,8 @@ def swarm_logs(follow: bool):
 
 @swarm_group.command(name="enqueue", help="Enqueue a job to the swarm")
 @click.argument("capability")
-@click.option(
-    "--param",
-    "-p",
-    multiple=True,
-    help="Parameters as key=value"
-)
-@click.option(
-    "--wait",
-    "-w",
-    is_flag=True,
-    help="Wait for result"
-)
+@click.option("--param", "-p", multiple=True, help="Parameters as key=value")
+@click.option("--wait", "-w", is_flag=True, help="Wait for result")
 def swarm_enqueue(capability: str, param: tuple, wait: bool):
     """Enqueue a job to the swarm for execution.
 
@@ -85,6 +67,7 @@ def swarm_enqueue(capability: str, param: tuple, wait: bool):
     """
     import sys
     import os
+
     # Add swarm/client to path relative to prowlrbot package
     prowlrbot_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     project_root = os.path.dirname(prowlrbot_root)
@@ -125,11 +108,7 @@ def swarm_enqueue(capability: str, param: tuple, wait: bool):
 @swarm_group.command(name="result", help="Get job result")
 @click.argument("job_id")
 @click.option(
-    "--timeout",
-    "-t",
-    default=0,
-    type=int,
-    help="Seconds to wait (0 = immediate)"
+    "--timeout", "-t", default=0, type=int, help="Seconds to wait (0 = immediate)"
 )
 def swarm_result(job_id: str, timeout: int):
     """Get the result of a job."""
@@ -138,14 +117,19 @@ def swarm_result(job_id: str, timeout: int):
 
     # Get project root relative to this file's location
     # src/prowlrbot/cli/swarm_cmd.py -> project root
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    )
     swarm_client_path = os.path.join(project_root, "swarm", "client")
 
     sys.path.insert(0, swarm_client_path)
     try:
         from client import JobQueue
     except ImportError as e:
-        click.echo(f"Error: Cannot import JobQueue client from {swarm_client_path}: {e}", err=True)
+        click.echo(
+            f"Error: Cannot import JobQueue client from {swarm_client_path}: {e}",
+            err=True,
+        )
         sys.exit(1)
 
     queue = JobQueue()

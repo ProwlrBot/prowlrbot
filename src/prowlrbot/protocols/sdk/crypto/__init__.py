@@ -13,6 +13,7 @@ Usage::
     signature = signer.sign(message_bytes)
     assert signer.verify(message_bytes, signature)
 """
+
 from .ed25519 import KeyPair, Ed25519Signer, NACL_AVAILABLE
 
 __all__ = [

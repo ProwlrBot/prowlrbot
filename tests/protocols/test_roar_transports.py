@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ROAR Protocol Phase 2 — Transport Layer & Server/Client Integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -90,9 +91,7 @@ class TestROARServer(unittest.TestCase):
             payload={"task": "run-tests"},
         )
 
-        response = asyncio.run(
-            self.server.handle_message(incoming)
-        )
+        response = asyncio.run(self.server.handle_message(incoming))
         assert response.intent == MessageIntent.RESPOND
         assert response.payload["result"] == "run-tests"
 
@@ -113,9 +112,7 @@ class TestROARServer(unittest.TestCase):
             payload={"event": "build_complete"},
         )
 
-        response = asyncio.run(
-            self.server.handle_message(incoming)
-        )
+        response = asyncio.run(self.server.handle_message(incoming))
         assert response.payload["ack"] is True
 
     def test_handle_message_no_handler(self):
@@ -126,11 +123,11 @@ class TestROARServer(unittest.TestCase):
             payload={"question": "who are you?"},
         )
 
-        response = asyncio.run(
-            self.server.handle_message(incoming)
-        )
+        response = asyncio.run(self.server.handle_message(incoming))
         assert response.payload["error"] == "unhandled_intent"
-        assert "ASK" in response.payload["message"] or "ask" in response.payload["message"]
+        assert (
+            "ASK" in response.payload["message"] or "ask" in response.payload["message"]
+        )
 
 
 class TestROARClientTransport(unittest.TestCase):
@@ -241,9 +238,7 @@ class TestTransportDispatcher(unittest.TestCase):
         )
 
         with self.assertRaises((ConnectionError, NotImplementedError)):
-            asyncio.run(
-                send_message(config, msg)
-            )
+            asyncio.run(send_message(config, msg))
 
 
 class TestMessageSigningCrossTransport(unittest.TestCase):

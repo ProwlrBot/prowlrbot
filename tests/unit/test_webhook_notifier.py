@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlrbot.monitor.notifications.webhook."""
+
 import json
 
 import pytest
@@ -19,7 +20,9 @@ class TestWebhookNotifier:
 
         transport = httpx.MockTransport(handler)
         client = httpx.AsyncClient(transport=transport)
-        notifier = WebhookNotifier(url="https://hooks.example.com/notify", client=client)
+        notifier = WebhookNotifier(
+            url="https://hooks.example.com/notify", client=client
+        )
 
         ok = await notifier.notify("my-monitor", "2 lines changed", "new content")
         assert ok is True
@@ -48,7 +51,9 @@ class TestWebhookNotifier:
     async def test_notify_server_error(self):
         transport = httpx.MockTransport(lambda req: httpx.Response(500))
         client = httpx.AsyncClient(transport=transport)
-        notifier = WebhookNotifier(url="https://hooks.example.com/notify", client=client)
+        notifier = WebhookNotifier(
+            url="https://hooks.example.com/notify", client=client
+        )
 
         ok = await notifier.notify("test", "change")
         assert ok is False
@@ -60,7 +65,9 @@ class TestWebhookNotifier:
 
         transport = httpx.MockTransport(handler)
         client = httpx.AsyncClient(transport=transport)
-        notifier = WebhookNotifier(url="https://hooks.example.com/notify", client=client)
+        notifier = WebhookNotifier(
+            url="https://hooks.example.com/notify", client=client
+        )
 
         ok = await notifier.notify("test", "change")
         assert ok is False

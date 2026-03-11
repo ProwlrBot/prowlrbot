@@ -120,12 +120,24 @@ class LearningDB:
                 """INSERT INTO learnings
                    (learning_id, category, source, title, content, metadata, confidence, created_at, updated_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (learning_id, category, source, title, content, json.dumps(metadata or {}), confidence, now, now),
+                (
+                    learning_id,
+                    category,
+                    source,
+                    title,
+                    content,
+                    json.dumps(metadata or {}),
+                    confidence,
+                    now,
+                    now,
+                ),
             )
             self._conn.commit()
         return learning_id
 
-    def search(self, query: str, category: Optional[str] = None, limit: int = 10) -> List[Dict[str, Any]]:
+    def search(
+        self, query: str, category: Optional[str] = None, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Full-text search across learnings. Query is sanitized for FTS5 safety."""
         safe_query = _sanitize_fts_query(query)
         limit = _clamp_limit(limit)
@@ -147,7 +159,9 @@ class LearningDB:
             ).fetchall()
         return [dict(r) for r in rows]
 
-    def get_recent(self, limit: int = 20, category: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_recent(
+        self, limit: int = 20, category: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Get most recent learnings, optionally filtered by category."""
         limit = _clamp_limit(limit)
         if category:
@@ -183,7 +197,9 @@ class LearningDB:
     def delete_learning(self, learning_id: str) -> bool:
         """Remove a learning."""
         with self._lock:
-            cur = self._conn.execute("DELETE FROM learnings WHERE learning_id = ?", (learning_id,))
+            cur = self._conn.execute(
+                "DELETE FROM learnings WHERE learning_id = ?", (learning_id,)
+            )
             self._conn.commit()
         return cur.rowcount > 0
 
@@ -198,12 +214,19 @@ class LearningDB:
             self._conn.commit()
         return session_id
 
-    def end_session(self, session_id: str, summary: str = "", learnings_captured: int = 0) -> None:
+    def end_session(
+        self, session_id: str, summary: str = "", learnings_captured: int = 0
+    ) -> None:
         """Record session end with summary."""
         with self._lock:
             self._conn.execute(
                 "UPDATE sessions SET ended_at = ?, summary = ?, learnings_captured = ? WHERE session_id = ?",
-                (datetime.utcnow().isoformat(), summary, learnings_captured, session_id),
+                (
+                    datetime.utcnow().isoformat(),
+                    summary,
+                    learnings_captured,
+                    session_id,
+                ),
             )
             self._conn.commit()
 

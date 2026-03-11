@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for marketplace CLI commands."""
+
 import pytest
 from click.testing import CliRunner
 from prowlrbot.cli.market_cmd import market_group

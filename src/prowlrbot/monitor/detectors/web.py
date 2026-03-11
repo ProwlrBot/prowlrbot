@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Web page detector — fetch URL, optionally extract via CSS selector, diff."""
+
 from __future__ import annotations
 
 import re
@@ -59,7 +60,9 @@ class WebDetector(BaseDetector):
                     await client.aclose()
 
             html = resp.text
-            content = _css_extract(html, self.css_selector) if self.css_selector else html
+            content = (
+                _css_extract(html, self.css_selector) if self.css_selector else html
+            )
 
             result = diff_text(last_content, content)
             return DetectionResult(

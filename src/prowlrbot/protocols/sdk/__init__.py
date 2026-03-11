@@ -8,6 +8,7 @@ Usage::
 
     from prowlrbot.protocols.sdk import ROARClient, ROARServer, create_roar_router
 """
+
 from ..roar import (
     AgentIdentity,
     AgentCard,
@@ -26,11 +27,21 @@ from ..roar import (
 from .client import ROARClient
 from .server import ROARServer
 from .router import create_roar_router
-from .streaming import EventBus, StreamFilter, Subscription, AIMDController, IdempotencyGuard
+from .streaming import (
+    EventBus,
+    StreamFilter,
+    Subscription,
+    AIMDController,
+    IdempotencyGuard,
+)
 from .crypto import KeyPair, Ed25519Signer, NACL_AVAILABLE
 from .identity import (
-    DIDDocument, DIDKeyMethod, DIDWebMethod,
-    CapabilityDelegation, DelegationToken, AutonomyLevel,
+    DIDDocument,
+    DIDKeyMethod,
+    DIDWebMethod,
+    CapabilityDelegation,
+    DelegationToken,
+    AutonomyLevel,
 )
 
 __all__ = [

@@ -3,6 +3,7 @@
 
 This module handles system commands like /compact, /new, /clear, etc.
 """
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -38,11 +39,7 @@ def _get_block_tokens(
 
     if block_type == "thinking":
         thinking = block.get("thinking", "")
-        return (
-            (safe_count_str_tokens(thinking), thinking)
-            if thinking
-            else (0, "")
-        )
+        return (safe_count_str_tokens(thinking), thinking) if thinking else (0, "")
 
     if block_type == "tool_use":
         # Count input dict and raw_input string
@@ -55,9 +52,7 @@ def _get_block_tokens(
     if block_type == "tool_result":
         output = block.get("output")
         if isinstance(output, str):
-            return (
-                (safe_count_str_tokens(output), output) if output else (0, "")
-            )
+            return (safe_count_str_tokens(output), output) if output else (0, "")
         if isinstance(output, list):
             # Recursively count tokens in nested blocks
             total_tokens = 0
@@ -288,9 +283,7 @@ class CommandHandler:
         config = load_config()
         max_input_length = config.agents.running.max_input_length
         context_usage_ratio = (
-            (estimated_tokens / max_input_length * 100)
-            if max_input_length > 0
-            else 0
+            (estimated_tokens / max_input_length * 100) if max_input_length > 0 else 0
         )
 
         lines = []
@@ -301,11 +294,7 @@ class CommandHandler:
                 if isinstance(content, str):
                     text_tokens = safe_count_str_tokens(content)
                     seq_blocks = ""
-                    preview = (
-                        f"{content[:100]}..."
-                        if len(content) > 100
-                        else content
-                    )
+                    preview = f"{content[:100]}..." if len(content) > 100 else content
                 else:
                     block_infos = []
                     total_tokens = 0
@@ -360,8 +349,7 @@ class CommandHandler:
         task_count = len(self.memory_manager.summary_tasks)
         if task_count == 0:
             return await self._make_system_msg(
-                "**No Summary Tasks**\n\n"
-                "- No pending summary tasks to wait for",
+                "**No Summary Tasks**\n\n" "- No pending summary tasks to wait for",
             )
 
         result = await self.memory_manager.await_summary_tasks()

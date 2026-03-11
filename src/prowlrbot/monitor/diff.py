@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Content diffing engine."""
+
 from __future__ import annotations
 
 import difflib
@@ -45,8 +46,12 @@ def diff_text(old: Optional[str], new: Optional[str]) -> DiffResult:
     )
 
     # Build a short human-readable summary.
-    added = sum(1 for l in unified.splitlines() if l.startswith("+") and not l.startswith("+++"))
-    removed = sum(1 for l in unified.splitlines() if l.startswith("-") and not l.startswith("---"))
+    added = sum(
+        1 for l in unified.splitlines() if l.startswith("+") and not l.startswith("+++")
+    )
+    removed = sum(
+        1 for l in unified.splitlines() if l.startswith("-") and not l.startswith("---")
+    )
     summary = f"{added} line(s) added, {removed} line(s) removed"
 
     return DiffResult(changed=True, summary=summary, unified_diff=unified)

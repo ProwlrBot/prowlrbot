@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ROAR Protocol Phase 5 — Discovery Enhancement."""
+
 from __future__ import annotations
 
 import time

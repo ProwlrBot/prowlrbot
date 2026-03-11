@@ -17,7 +17,6 @@ import re
 import sys
 from dataclasses import dataclass, field
 
-
 # ---------------------------------------------------------------------------
 # Label detection rules
 # ---------------------------------------------------------------------------
@@ -25,51 +24,136 @@ from dataclasses import dataclass, field
 # Patterns are case-insensitive partial matches.
 
 LABEL_RULES: list[tuple[str, list[str]]] = [
-    ("bug", [
-        r"\bcrash(es|ed|ing)?\b", r"\bbug\b", r"\bbroken\b", r"\bfail(s|ed|ing|ure)?\b",
-        r"\berror\b", r"\bexception\b", r"\bsegfault\b", r"\bregression\b",
-        r"\bdoesn'?t work\b", r"\bnot working\b", r"\bunexpected\b",
-        r"\b500\b", r"\b404\b", r"\btraceback\b", r"\bpanic\b",
-    ]),
-    ("feature", [
-        r"\bfeature\b", r"\brequest\b", r"\badd(ing)?\b", r"\bnew\b",
-        r"\bimplement\b", r"\bsupport\b", r"\bpropos(e|al)\b",
-        r"\bwould be (nice|great|good)\b", r"\bwish\b",
-    ]),
-    ("enhancement", [
-        r"\bimprove\b", r"\benhance\b", r"\boptimize\b", r"\bupgrade\b",
-        r"\bbetter\b", r"\brefactor\b", r"\bclean\s?up\b",
-    ]),
-    ("question", [
-        r"\bhow (do|can|to)\b", r"\bquestion\b", r"\bis (it|there)\b",
-        r"\bwhat (is|are|does)\b", r"\bwhy (does|is|do)\b",
-        r"\bhelp\b", r"\bconfused\b",
-    ]),
-    ("documentation", [
-        r"\bdoc(s|umentation)?\b", r"\breadme\b", r"\btypo\b",
-        r"\bexample\b", r"\btutorial\b", r"\bguide\b",
-    ]),
-    ("security", [
-        r"\bsecurity\b", r"\bvulnerabilit(y|ies)\b", r"\bcve\b",
-        r"\binjection\b", r"\bxss\b", r"\bcsrf\b", r"\bauth(entication)?\b",
-        r"\bpermission\b", r"\bleak\b", r"\bexploit\b",
-    ]),
-    ("performance", [
-        r"\bperformance\b", r"\bslow\b", r"\blatency\b", r"\bmemory\b",
-        r"\bcpu\b", r"\btimeout\b", r"\bbottleneck\b", r"\blag\b",
-    ]),
-    ("dependencies", [
-        r"\bdependenc(y|ies)\b", r"\bupdate .* version\b", r"\bnpm\b",
-        r"\bpip\b", r"\bpackage\b", r"\bupgrade\b.*\bversion\b",
-    ]),
-    ("ci/cd", [
-        r"\bci\b", r"\bcd\b", r"\bgithub actions?\b", r"\bpipeline\b",
-        r"\bbuild\b", r"\bdeploy\b", r"\bworkflow\b",
-    ]),
-    ("good first issue", [
-        r"\btypo\b", r"\bspelling\b", r"\bgrammar\b",
-        r"\bminor\b", r"\bsmall\b",
-    ]),
+    (
+        "bug",
+        [
+            r"\bcrash(es|ed|ing)?\b",
+            r"\bbug\b",
+            r"\bbroken\b",
+            r"\bfail(s|ed|ing|ure)?\b",
+            r"\berror\b",
+            r"\bexception\b",
+            r"\bsegfault\b",
+            r"\bregression\b",
+            r"\bdoesn'?t work\b",
+            r"\bnot working\b",
+            r"\bunexpected\b",
+            r"\b500\b",
+            r"\b404\b",
+            r"\btraceback\b",
+            r"\bpanic\b",
+        ],
+    ),
+    (
+        "feature",
+        [
+            r"\bfeature\b",
+            r"\brequest\b",
+            r"\badd(ing)?\b",
+            r"\bnew\b",
+            r"\bimplement\b",
+            r"\bsupport\b",
+            r"\bpropos(e|al)\b",
+            r"\bwould be (nice|great|good)\b",
+            r"\bwish\b",
+        ],
+    ),
+    (
+        "enhancement",
+        [
+            r"\bimprove\b",
+            r"\benhance\b",
+            r"\boptimize\b",
+            r"\bupgrade\b",
+            r"\bbetter\b",
+            r"\brefactor\b",
+            r"\bclean\s?up\b",
+        ],
+    ),
+    (
+        "question",
+        [
+            r"\bhow (do|can|to)\b",
+            r"\bquestion\b",
+            r"\bis (it|there)\b",
+            r"\bwhat (is|are|does)\b",
+            r"\bwhy (does|is|do)\b",
+            r"\bhelp\b",
+            r"\bconfused\b",
+        ],
+    ),
+    (
+        "documentation",
+        [
+            r"\bdoc(s|umentation)?\b",
+            r"\breadme\b",
+            r"\btypo\b",
+            r"\bexample\b",
+            r"\btutorial\b",
+            r"\bguide\b",
+        ],
+    ),
+    (
+        "security",
+        [
+            r"\bsecurity\b",
+            r"\bvulnerabilit(y|ies)\b",
+            r"\bcve\b",
+            r"\binjection\b",
+            r"\bxss\b",
+            r"\bcsrf\b",
+            r"\bauth(entication)?\b",
+            r"\bpermission\b",
+            r"\bleak\b",
+            r"\bexploit\b",
+        ],
+    ),
+    (
+        "performance",
+        [
+            r"\bperformance\b",
+            r"\bslow\b",
+            r"\blatency\b",
+            r"\bmemory\b",
+            r"\bcpu\b",
+            r"\btimeout\b",
+            r"\bbottleneck\b",
+            r"\blag\b",
+        ],
+    ),
+    (
+        "dependencies",
+        [
+            r"\bdependenc(y|ies)\b",
+            r"\bupdate .* version\b",
+            r"\bnpm\b",
+            r"\bpip\b",
+            r"\bpackage\b",
+            r"\bupgrade\b.*\bversion\b",
+        ],
+    ),
+    (
+        "ci/cd",
+        [
+            r"\bci\b",
+            r"\bcd\b",
+            r"\bgithub actions?\b",
+            r"\bpipeline\b",
+            r"\bbuild\b",
+            r"\bdeploy\b",
+            r"\bworkflow\b",
+        ],
+    ),
+    (
+        "good first issue",
+        [
+            r"\btypo\b",
+            r"\bspelling\b",
+            r"\bgrammar\b",
+            r"\bminor\b",
+            r"\bsmall\b",
+        ],
+    ),
 ]
 
 # ---------------------------------------------------------------------------
@@ -78,28 +162,66 @@ LABEL_RULES: list[tuple[str, list[str]]] = [
 
 PRIORITY_RULES: list[tuple[str, str, list[str]]] = [
     # (priority, description, patterns)
-    ("P0", "Critical — system down, data loss, or security breach", [
-        r"\bcrash(es|ed)?\b", r"\bsegfault\b", r"\bdata loss\b",
-        r"\bsecurity\b", r"\bvulnerabilit(y|ies)\b", r"\bcve\b",
-        r"\bproduction (down|broken|outage)\b", r"\bblocking\b",
-        r"\bcritical\b", r"\burgent\b", r"\bemergency\b",
-    ]),
-    ("P1", "High — major functionality broken for many users", [
-        r"\bbroken\b", r"\bfail(s|ed|ure)\b", r"\berror\b",
-        r"\bregression\b", r"\bcannot\b", r"\bunable to\b",
-        r"\bdoesn'?t work\b", r"\bnot working\b",
-        r"\b500\b", r"\bpanic\b",
-    ]),
-    ("P2", "Medium — feature request or non-critical bug", [
-        r"\bfeature\b", r"\brequest\b", r"\bimprove\b",
-        r"\benhance\b", r"\bwould be\b", r"\bshould\b",
-        r"\bexpected\b", r"\binconsistent\b",
-    ]),
-    ("P3", "Low — cosmetic, typos, minor suggestions", [
-        r"\btypo\b", r"\bspelling\b", r"\bgrammar\b",
-        r"\bcosmetic\b", r"\bminor\b", r"\bnit\b",
-        r"\bnice to have\b",
-    ]),
+    (
+        "P0",
+        "Critical — system down, data loss, or security breach",
+        [
+            r"\bcrash(es|ed)?\b",
+            r"\bsegfault\b",
+            r"\bdata loss\b",
+            r"\bsecurity\b",
+            r"\bvulnerabilit(y|ies)\b",
+            r"\bcve\b",
+            r"\bproduction (down|broken|outage)\b",
+            r"\bblocking\b",
+            r"\bcritical\b",
+            r"\burgent\b",
+            r"\bemergency\b",
+        ],
+    ),
+    (
+        "P1",
+        "High — major functionality broken for many users",
+        [
+            r"\bbroken\b",
+            r"\bfail(s|ed|ure)\b",
+            r"\berror\b",
+            r"\bregression\b",
+            r"\bcannot\b",
+            r"\bunable to\b",
+            r"\bdoesn'?t work\b",
+            r"\bnot working\b",
+            r"\b500\b",
+            r"\bpanic\b",
+        ],
+    ),
+    (
+        "P2",
+        "Medium — feature request or non-critical bug",
+        [
+            r"\bfeature\b",
+            r"\brequest\b",
+            r"\bimprove\b",
+            r"\benhance\b",
+            r"\bwould be\b",
+            r"\bshould\b",
+            r"\bexpected\b",
+            r"\binconsistent\b",
+        ],
+    ),
+    (
+        "P3",
+        "Low — cosmetic, typos, minor suggestions",
+        [
+            r"\btypo\b",
+            r"\bspelling\b",
+            r"\bgrammar\b",
+            r"\bcosmetic\b",
+            r"\bminor\b",
+            r"\bnit\b",
+            r"\bnice to have\b",
+        ],
+    ),
 ]
 
 # ---------------------------------------------------------------------------
@@ -108,40 +230,107 @@ PRIORITY_RULES: list[tuple[str, str, list[str]]] = [
 
 COMPONENT_OWNERS: list[tuple[str, str, list[str]]] = [
     # (component, owner_hint, file path patterns)
-    ("Channels", "channels-team", [
-        r"\bchannel\b", r"\bdiscord\b", r"\btelegram\b",
-        r"\bfeishu\b", r"\bdingtalk\b", r"\bslack\b", r"\bimessage\b",
-    ]),
-    ("CLI", "cli-team", [
-        r"\bcli\b", r"\bcommand\b", r"\bterminal\b",
-    ]),
-    ("Agent Core", "agent-team", [
-        r"\bagent\b", r"\breact\b", r"\bprompt\b",
-        r"\bmemory\b", r"\btool\b", r"\bskill\b",
-    ]),
-    ("MCP", "mcp-team", [
-        r"\bmcp\b", r"\bmodel context\b",
-    ]),
-    ("Providers", "providers-team", [
-        r"\bprovider\b", r"\bmodel\b", r"\bollama\b",
-        r"\bopenai\b", r"\banthropic\b", r"\bgroq\b",
-    ]),
-    ("Console UI", "frontend-team", [
-        r"\bconsole\b", r"\bui\b", r"\bfrontend\b",
-        r"\breact\b", r"\bvite\b", r"\bant design\b",
-    ]),
-    ("Config", "config-team", [
-        r"\bconfig\b", r"\bsettings?\b", r"\benv\b",
-    ]),
-    ("Cron", "cron-team", [
-        r"\bcron\b", r"\bschedul\b", r"\bheartbeat\b",
-    ]),
-    ("Docker/Swarm", "infra-team", [
-        r"\bdocker\b", r"\bswarm\b", r"\bcontainer\b",
-    ]),
-    ("Documentation", "docs-team", [
-        r"\bdoc(s|umentation)?\b", r"\breadme\b",
-    ]),
+    (
+        "Channels",
+        "channels-team",
+        [
+            r"\bchannel\b",
+            r"\bdiscord\b",
+            r"\btelegram\b",
+            r"\bfeishu\b",
+            r"\bdingtalk\b",
+            r"\bslack\b",
+            r"\bimessage\b",
+        ],
+    ),
+    (
+        "CLI",
+        "cli-team",
+        [
+            r"\bcli\b",
+            r"\bcommand\b",
+            r"\bterminal\b",
+        ],
+    ),
+    (
+        "Agent Core",
+        "agent-team",
+        [
+            r"\bagent\b",
+            r"\breact\b",
+            r"\bprompt\b",
+            r"\bmemory\b",
+            r"\btool\b",
+            r"\bskill\b",
+        ],
+    ),
+    (
+        "MCP",
+        "mcp-team",
+        [
+            r"\bmcp\b",
+            r"\bmodel context\b",
+        ],
+    ),
+    (
+        "Providers",
+        "providers-team",
+        [
+            r"\bprovider\b",
+            r"\bmodel\b",
+            r"\bollama\b",
+            r"\bopenai\b",
+            r"\banthropic\b",
+            r"\bgroq\b",
+        ],
+    ),
+    (
+        "Console UI",
+        "frontend-team",
+        [
+            r"\bconsole\b",
+            r"\bui\b",
+            r"\bfrontend\b",
+            r"\breact\b",
+            r"\bvite\b",
+            r"\bant design\b",
+        ],
+    ),
+    (
+        "Config",
+        "config-team",
+        [
+            r"\bconfig\b",
+            r"\bsettings?\b",
+            r"\benv\b",
+        ],
+    ),
+    (
+        "Cron",
+        "cron-team",
+        [
+            r"\bcron\b",
+            r"\bschedul\b",
+            r"\bheartbeat\b",
+        ],
+    ),
+    (
+        "Docker/Swarm",
+        "infra-team",
+        [
+            r"\bdocker\b",
+            r"\bswarm\b",
+            r"\bcontainer\b",
+        ],
+    ),
+    (
+        "Documentation",
+        "docs-team",
+        [
+            r"\bdoc(s|umentation)?\b",
+            r"\breadme\b",
+        ],
+    ),
 ]
 
 
@@ -149,9 +338,11 @@ COMPONENT_OWNERS: list[tuple[str, str, list[str]]] = [
 # Data structures
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TriageResult:
     """Result of triaging an issue."""
+
     title: str
     labels: list[str] = field(default_factory=list)
     priority: str = "P2"
@@ -163,6 +354,7 @@ class TriageResult:
 # ---------------------------------------------------------------------------
 # Triage logic
 # ---------------------------------------------------------------------------
+
 
 def _match_any(text: str, patterns: list[str]) -> bool:
     """Return True if any pattern matches the text (case-insensitive)."""
@@ -244,14 +436,18 @@ def _build_response_template(result: TriageResult) -> str:
     elif "question" in result.labels:
         lines.append("Thanks for reaching out!")
         lines.append("")
-        lines.append("We will look into this and get back to you. "
-                      "In the meantime, you might find the answer in our documentation.")
+        lines.append(
+            "We will look into this and get back to you. "
+            "In the meantime, you might find the answer in our documentation."
+        )
     elif "security" in result.labels:
         lines.append("Thank you for reporting this security concern.")
         lines.append("")
-        lines.append("**Important:** If this is a security vulnerability, please do not "
-                      "discuss details publicly. Instead, email security@prowlrbot.dev "
-                      "or use GitHub's private vulnerability reporting feature.")
+        lines.append(
+            "**Important:** If this is a security vulnerability, please do not "
+            "discuss details publicly. Instead, email security@prowlrbot.dev "
+            "or use GitHub's private vulnerability reporting feature."
+        )
     else:
         lines.append("Thank you for opening this issue. We will review it shortly.")
 
@@ -261,6 +457,7 @@ def _build_response_template(result: TriageResult) -> str:
 # ---------------------------------------------------------------------------
 # Output formatting
 # ---------------------------------------------------------------------------
+
 
 def format_markdown(result: TriageResult) -> str:
     """Format triage result as markdown."""
@@ -326,24 +523,28 @@ def format_json(result: TriageResult) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Triage a GitHub issue and suggest labels, priority, and assignees.",
     )
     parser.add_argument(
-        "--title", "-t",
+        "--title",
+        "-t",
         type=str,
         required=True,
         help="Issue title.",
     )
     parser.add_argument(
-        "--body", "-b",
+        "--body",
+        "-b",
         type=str,
         default="",
         help="Issue body text.",
     )
     parser.add_argument(
-        "--format", "-f",
+        "--format",
+        "-f",
         type=str,
         choices=["markdown", "json"],
         default="markdown",

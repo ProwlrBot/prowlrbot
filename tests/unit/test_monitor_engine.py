@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlrbot.monitor.engine."""
+
 import asyncio
 import json
 
@@ -57,6 +58,7 @@ class TestMonitorEngine:
 
         def patched(cfg):
             from prowlrbot.monitor.detectors.web import WebDetector
+
             return WebDetector(
                 url=cfg.url,
                 css_selector=cfg.css_selector,
@@ -89,6 +91,7 @@ class TestMonitorEngine:
 
         def patched(cfg):
             from prowlrbot.monitor.detectors.web import WebDetector
+
             return WebDetector(
                 url=cfg.url,
                 css_selector=cfg.css_selector,
@@ -128,6 +131,7 @@ class TestMonitorEngine:
 
         def patched(cfg):
             from prowlrbot.monitor.detectors.web import WebDetector
+
             return WebDetector(
                 url=cfg.url,
                 css_selector=cfg.css_selector,
@@ -175,9 +179,7 @@ class TestMonitorEngineAPI:
     async def test_api_monitor_run_once(self, storage):
         engine = MonitorEngine(storage=storage)
         payload = json.dumps({"data": {"status": "up"}})
-        transport = httpx.MockTransport(
-            lambda req: httpx.Response(200, text=payload)
-        )
+        transport = httpx.MockTransport(lambda req: httpx.Response(200, text=payload))
         config = APIMonitorConfig(
             name="api1",
             url="https://api.example.com/status",
@@ -187,6 +189,7 @@ class TestMonitorEngineAPI:
 
         def patched(cfg):
             from prowlrbot.monitor.detectors.api import APIDetector
+
             return APIDetector(
                 url=cfg.url,
                 json_path=cfg.json_path,

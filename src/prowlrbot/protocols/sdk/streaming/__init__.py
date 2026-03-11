@@ -18,6 +18,7 @@ Usage::
     async for event in sub:
         print(event)
 """
+
 from .local import EventBus, StreamFilter, Subscription
 from .backpressure import AIMDController
 from .dedup import IdempotencyGuard

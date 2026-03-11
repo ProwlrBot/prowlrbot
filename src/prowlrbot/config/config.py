@@ -118,16 +118,12 @@ class AgentsRunningConfig(BaseModel):
     max_iters: int = Field(
         default=50,
         ge=1,
-        description=(
-            "Maximum number of reasoning-acting iterations for ReAct agent"
-        ),
+        description=("Maximum number of reasoning-acting iterations for ReAct agent"),
     )
     max_input_length: int = Field(
         default=128 * 1024,  # 128K = 131072 tokens
         ge=1000,
-        description=(
-            "Maximum input length (tokens) for the model context window"
-        ),
+        description=("Maximum input length (tokens) for the model context window"),
     )
 
 

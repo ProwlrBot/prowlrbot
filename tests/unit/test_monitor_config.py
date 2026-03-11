@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlrbot.monitor.config."""
+
 import pytest
 
 from prowlrbot.monitor.config import (
@@ -96,21 +97,19 @@ class TestAPIMonitorConfig:
 
 class TestParseMonitorConfigs:
     def test_parse_web(self):
-        configs = parse_monitor_configs([
-            {"name": "w", "type": "web", "url": "https://example.com"}
-        ])
+        configs = parse_monitor_configs(
+            [{"name": "w", "type": "web", "url": "https://example.com"}]
+        )
         assert len(configs) == 1
         assert isinstance(configs[0], WebMonitorConfig)
 
     def test_parse_api(self):
-        configs = parse_monitor_configs([
-            {"name": "a", "type": "api", "url": "https://api.example.com"}
-        ])
+        configs = parse_monitor_configs(
+            [{"name": "a", "type": "api", "url": "https://api.example.com"}]
+        )
         assert len(configs) == 1
         assert isinstance(configs[0], APIMonitorConfig)
 
     def test_default_type_is_web(self):
-        configs = parse_monitor_configs([
-            {"name": "d", "url": "https://example.com"}
-        ])
+        configs = parse_monitor_configs([{"name": "d", "url": "https://example.com"}])
         assert isinstance(configs[0], WebMonitorConfig)

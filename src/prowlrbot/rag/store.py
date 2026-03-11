@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """SQLite-backed storage for RAG documents and chunks."""
+
 from __future__ import annotations
 
 import json
@@ -29,8 +30,7 @@ class RAGStore:
     # ------------------------------------------------------------------
 
     def _init_db(self) -> None:
-        self._conn.executescript(
-            """
+        self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS documents (
                 id           TEXT PRIMARY KEY,
                 title        TEXT NOT NULL,
@@ -53,8 +53,7 @@ class RAGStore:
 
             CREATE INDEX IF NOT EXISTS idx_chunks_document_id
                 ON chunks(document_id);
-            """
-        )
+            """)
         self._conn.commit()
 
     # ------------------------------------------------------------------
@@ -121,12 +120,8 @@ class RAGStore:
 
     def delete_document(self, document_id: str) -> bool:
         """Delete a document and its chunks. Returns *True* if a row was deleted."""
-        self._conn.execute(
-            "DELETE FROM chunks WHERE document_id = ?", (document_id,)
-        )
-        cur = self._conn.execute(
-            "DELETE FROM documents WHERE id = ?", (document_id,)
-        )
+        self._conn.execute("DELETE FROM chunks WHERE document_id = ?", (document_id,))
+        cur = self._conn.execute("DELETE FROM documents WHERE id = ?", (document_id,))
         self._conn.commit()
         return cur.rowcount > 0
 
@@ -202,12 +197,8 @@ class RAGStore:
 
     def get_stats(self) -> dict:
         """Return summary statistics about the RAG store."""
-        doc_count = self._conn.execute(
-            "SELECT COUNT(*) FROM documents"
-        ).fetchone()[0]
-        chunk_count = self._conn.execute(
-            "SELECT COUNT(*) FROM chunks"
-        ).fetchone()[0]
+        doc_count = self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
+        chunk_count = self._conn.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
         status_rows = self._conn.execute(
             "SELECT status, COUNT(*) FROM documents GROUP BY status"
         ).fetchall()

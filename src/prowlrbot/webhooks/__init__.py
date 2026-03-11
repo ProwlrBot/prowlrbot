@@ -9,6 +9,7 @@ send webhook, send email, create task).
 Rules are persisted as JSON and executed asynchronously when matching
 triggers fire.
 """
+
 from .models import (
     ActionType,
     TriggerType,

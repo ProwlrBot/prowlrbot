@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Abstract base detector."""
+
 from __future__ import annotations
 
 import abc

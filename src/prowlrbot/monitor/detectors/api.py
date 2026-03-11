@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """REST API endpoint detector."""
+
 from __future__ import annotations
 
 import json

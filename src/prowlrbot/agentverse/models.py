@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AgentVerse data models — avatars, zones, guilds, trades, battles."""
+
 from __future__ import annotations
 
 import uuid
@@ -7,7 +8,6 @@ from enum import StrEnum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Avatar system
@@ -72,14 +72,50 @@ class ZoneInfo(BaseModel):
 
 
 ZONE_REGISTRY: list[ZoneInfo] = [
-    ZoneInfo(zone=Zone.TOWN_SQUARE, name="Town Square", description="Agents socialize, share discoveries, form teams"),
-    ZoneInfo(zone=Zone.TRADING_POST, name="Trading Post", description="Trade skills, prompts, knowledge", is_premium=False),
-    ZoneInfo(zone=Zone.WORKSHOP, name="Workshop", description="Collaborative skill building", is_premium=True),
-    ZoneInfo(zone=Zone.ARENA, name="Arena", description="Benchmark battles between agents", is_premium=False),
-    ZoneInfo(zone=Zone.ACADEMY, name="Academy", description="Learn new skills, training scenarios", is_premium=True),
-    ZoneInfo(zone=Zone.MISSION_BOARD, name="Mission Board", description="Community tasks and bounties"),
-    ZoneInfo(zone=Zone.HOME, name="Your Home", description="Private space to customize and review"),
-    ZoneInfo(zone=Zone.MARKETPLACE_MALL, name="Marketplace Mall", description="Browse and buy from the marketplace"),
+    ZoneInfo(
+        zone=Zone.TOWN_SQUARE,
+        name="Town Square",
+        description="Agents socialize, share discoveries, form teams",
+    ),
+    ZoneInfo(
+        zone=Zone.TRADING_POST,
+        name="Trading Post",
+        description="Trade skills, prompts, knowledge",
+        is_premium=False,
+    ),
+    ZoneInfo(
+        zone=Zone.WORKSHOP,
+        name="Workshop",
+        description="Collaborative skill building",
+        is_premium=True,
+    ),
+    ZoneInfo(
+        zone=Zone.ARENA,
+        name="Arena",
+        description="Benchmark battles between agents",
+        is_premium=False,
+    ),
+    ZoneInfo(
+        zone=Zone.ACADEMY,
+        name="Academy",
+        description="Learn new skills, training scenarios",
+        is_premium=True,
+    ),
+    ZoneInfo(
+        zone=Zone.MISSION_BOARD,
+        name="Mission Board",
+        description="Community tasks and bounties",
+    ),
+    ZoneInfo(
+        zone=Zone.HOME,
+        name="Your Home",
+        description="Private space to customize and review",
+    ),
+    ZoneInfo(
+        zone=Zone.MARKETPLACE_MALL,
+        name="Marketplace Mall",
+        description="Browse and buy from the marketplace",
+    ),
 ]
 
 
@@ -137,8 +173,12 @@ class TradeOffer(BaseModel):
     id: str = Field(default_factory=lambda: f"trade_{uuid.uuid4().hex[:8]}")
     from_agent: str
     to_agent: str
-    offering: Dict[str, Any] = Field(default_factory=dict)  # e.g. {"skill": "seo_analyzer"}
-    requesting: Dict[str, Any] = Field(default_factory=dict)  # e.g. {"skill": "newsletter_writer"}
+    offering: Dict[str, Any] = Field(
+        default_factory=dict
+    )  # e.g. {"skill": "seo_analyzer"}
+    requesting: Dict[str, Any] = Field(
+        default_factory=dict
+    )  # e.g. {"skill": "newsletter_writer"}
     status: TradeStatus = TradeStatus.PENDING
     created_at: float = 0.0
 

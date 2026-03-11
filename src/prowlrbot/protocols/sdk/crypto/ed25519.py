@@ -12,6 +12,7 @@ published in the agent's DID Document or AgentCard.
 Ref: Bernstein, D.J. et al. (2012). "High-speed high-security signatures."
      NIST FIPS 186-5 approved Ed25519 as EdDSA.
 """
+
 from __future__ import annotations
 
 import base64
@@ -82,12 +83,10 @@ class KeyPair:
         signing_key = nacl.signing.SigningKey.generate()
         verify_key = signing_key.verify_key
 
-        private_b64 = base64.urlsafe_b64encode(
-            signing_key.encode()
-        ).decode().rstrip("=")
-        public_b64 = base64.urlsafe_b64encode(
-            verify_key.encode()
-        ).decode().rstrip("=")
+        private_b64 = (
+            base64.urlsafe_b64encode(signing_key.encode()).decode().rstrip("=")
+        )
+        public_b64 = base64.urlsafe_b64encode(verify_key.encode()).decode().rstrip("=")
 
         # did:key multicodec prefix for Ed25519: 0xed01
         multicodec = b"\xed\x01" + verify_key.encode()
@@ -120,9 +119,7 @@ class KeyPair:
         signing_key = nacl.signing.SigningKey(raw)
         verify_key = signing_key.verify_key
 
-        public_b64 = base64.urlsafe_b64encode(
-            verify_key.encode()
-        ).decode().rstrip("=")
+        public_b64 = base64.urlsafe_b64encode(verify_key.encode()).decode().rstrip("=")
 
         multicodec = b"\xed\x01" + verify_key.encode()
         did_key = "did:key:z" + _b58encode(multicodec)
@@ -158,9 +155,7 @@ class Ed25519Signer:
             )
         self._keypair = keypair
         padded = keypair.private_key + "=" * (4 - len(keypair.private_key) % 4)
-        self._signing_key = nacl.signing.SigningKey(
-            base64.urlsafe_b64decode(padded)
-        )
+        self._signing_key = nacl.signing.SigningKey(base64.urlsafe_b64decode(padded))
         self._verify_key = self._signing_key.verify_key
 
     def sign(self, message: bytes) -> str:
@@ -241,9 +236,7 @@ class Ed25519Signer:
         try:
             padded_key = public_key_b64 + "=" * (4 - len(public_key_b64) % 4)
             padded_sig = signature + "=" * (4 - len(signature) % 4)
-            verify_key = nacl.signing.VerifyKey(
-                base64.urlsafe_b64decode(padded_key)
-            )
+            verify_key = nacl.signing.VerifyKey(base64.urlsafe_b64decode(padded_key))
             verify_key.verify(message, base64.urlsafe_b64decode(padded_sig))
             return True
         except Exception:

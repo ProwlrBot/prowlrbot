@@ -7,6 +7,7 @@ Inherits from ReMeFs to provide memory management capabilities including:
 - Semantic memory search
 - Memory file retrieval
 """
+
 import asyncio
 import datetime
 import json
@@ -495,9 +496,7 @@ class MemoryManager(ReMeFb):
         # (Windows=local, others=chroma)
         memory_store_backend = os.environ.get("MEMORY_STORE_BACKEND", "auto")
         if memory_store_backend == "auto":
-            memory_backend = (
-                "local" if platform.system() == "Windows" else "chroma"
-            )
+            memory_backend = "local" if platform.system() == "Windows" else "chroma"
         else:
             memory_backend = memory_store_backend
 
@@ -629,9 +628,7 @@ class MemoryManager(ReMeFb):
         self.default_embedding_model.dimensions = embedding_dimensions
         self.default_embedding_model.enable_cache = embedding_cache_enabled
         self.default_embedding_model.max_cache_size = embedding_max_cache_size
-        self.default_embedding_model.max_input_length = (
-            embedding_max_input_length
-        )
+        self.default_embedding_model.max_input_length = embedding_max_input_length
         self.default_embedding_model.max_batch_size = embedding_max_batch_size
 
     async def start(self):
@@ -747,9 +744,7 @@ class MemoryManager(ReMeFb):
                     ),
                 )
 
-                turn_prefix_summary: str = (
-                    turn_prefix_summary_msg.get_text_content()
-                )
+                turn_prefix_summary: str = turn_prefix_summary_msg.get_text_content()
             except Exception as e:
                 logger.exception(
                     f"Failed to generate turn prefix summary: {e}",

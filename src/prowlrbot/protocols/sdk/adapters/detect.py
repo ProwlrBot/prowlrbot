@@ -5,6 +5,7 @@ Examines the structure of an incoming JSON message to determine whether
 it's ROAR native, MCP (JSON-RPC 2.0), or A2A protocol format, then
 routes to the appropriate adapter.
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -49,8 +50,12 @@ def detect_protocol(message: Dict[str, Any]) -> ProtocolType:
 
         # MCP methods
         mcp_prefixes = (
-            "tools/", "resources/", "prompts/",
-            "completion/", "initialize", "notifications/",
+            "tools/",
+            "resources/",
+            "prompts/",
+            "completion/",
+            "initialize",
+            "notifications/",
         )
         if any(method.startswith(p) for p in mcp_prefixes):
             return ProtocolType.MCP

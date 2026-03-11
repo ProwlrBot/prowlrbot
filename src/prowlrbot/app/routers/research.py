@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for AutoResearch workflows."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for gamification — XP, levels, achievements, leaderboards."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List
@@ -71,13 +72,15 @@ async def get_unlocked_achievements(entity_id: str) -> List[Dict[str, Any]]:
     result = []
     for u in unlocked:
         defn = _tracker.get_achievement_def(u.achievement_id)
-        result.append({
-            "achievement_id": u.achievement_id,
-            "unlocked_at": u.unlocked_at,
-            "name": defn.name if defn else u.achievement_id,
-            "description": defn.description if defn else "",
-            "badge": defn.badge if defn else "",
-        })
+        result.append(
+            {
+                "achievement_id": u.achievement_id,
+                "unlocked_at": u.unlocked_at,
+                "name": defn.name if defn else u.achievement_id,
+                "description": defn.description if defn else "",
+                "badge": defn.badge if defn else "",
+            }
+        )
     return result
 
 
@@ -92,4 +95,8 @@ async def unlock_achievement(req: UnlockRequest) -> Dict[str, Any]:
     result = _tracker.unlock_achievement(req.entity_id, req.achievement_id)
     if result is None:
         return {"status": "already_unlocked"}
-    return {"status": "unlocked", "achievement_id": result.achievement_id, "unlocked_at": result.unlocked_at}
+    return {
+        "status": "unlocked",
+        "achievement_id": result.achievement_id,
+        "unlocked_at": result.unlocked_at,
+    }

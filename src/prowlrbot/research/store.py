@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Research project storage — SQLite backed."""
+
 from __future__ import annotations
 
 import json
@@ -59,12 +60,17 @@ class ResearchStore:
             "synthesis, status, max_sources, created_at, updated_at) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             (
-                project.id, project.topic, project.objective,
+                project.id,
+                project.topic,
+                project.objective,
                 json.dumps(project.search_queries),
                 json.dumps([s.model_dump() for s in project.sources]),
                 json.dumps([f.model_dump() for f in project.findings]),
-                project.synthesis, project.status, project.max_sources,
-                project.created_at, project.updated_at,
+                project.synthesis,
+                project.status,
+                project.max_sources,
+                project.created_at,
+                project.updated_at,
             ),
         )
         self._conn.commit()
@@ -91,7 +97,8 @@ class ResearchStore:
         rows = self._conn.execute(query, params).fetchall()
         return [
             ResearchSummary(
-                id=r["id"], topic=r["topic"],
+                id=r["id"],
+                topic=r["topic"],
                 status=ResearchStatus(r["status"]),
                 source_count=len(json.loads(r["sources"])),
                 finding_count=len(json.loads(r["findings"])),
@@ -120,13 +127,19 @@ class ResearchStore:
         sources_data = json.loads(row["sources"]) if row["sources"] else []
         findings_data = json.loads(row["findings"]) if row["findings"] else []
         return ResearchProject(
-            id=row["id"], topic=row["topic"], objective=row["objective"],
-            search_queries=json.loads(row["search_queries"]) if row["search_queries"] else [],
+            id=row["id"],
+            topic=row["topic"],
+            objective=row["objective"],
+            search_queries=(
+                json.loads(row["search_queries"]) if row["search_queries"] else []
+            ),
             sources=[Source(**s) for s in sources_data],
             findings=[ResearchFinding(**f) for f in findings_data],
-            synthesis=row["synthesis"], status=ResearchStatus(row["status"]),
+            synthesis=row["synthesis"],
+            status=ResearchStatus(row["status"]),
             max_sources=row["max_sources"],
-            created_at=row["created_at"], updated_at=row["updated_at"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
         )
 
     def close(self) -> None:

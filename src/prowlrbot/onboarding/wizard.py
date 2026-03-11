@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Onboarding wizard — tracks setup progress and guides users."""
+
 from __future__ import annotations
 
 import json
@@ -110,10 +111,7 @@ class OnboardingManager:
     def start(self, user_id: str) -> OnboardingProgress:
         """Start onboarding for a user."""
         now = time.time()
-        steps = [
-            StepInfo(step=s, **STEP_DETAILS[s])
-            for s in STEP_ORDER
-        ]
+        steps = [StepInfo(step=s, **STEP_DETAILS[s]) for s in STEP_ORDER]
         progress = OnboardingProgress(
             user_id=user_id,
             current_step=OnboardingStep.WELCOME,
@@ -131,7 +129,9 @@ class OnboardingManager:
             return None
         return self._row_to_progress(row)
 
-    def complete_step(self, user_id: str, step: OnboardingStep) -> Optional[OnboardingProgress]:
+    def complete_step(
+        self, user_id: str, step: OnboardingStep
+    ) -> Optional[OnboardingProgress]:
         """Mark a step as completed and advance to next."""
         progress = self.get_progress(user_id)
         if not progress:
@@ -145,7 +145,7 @@ class OnboardingManager:
 
         # Advance to next uncompleted step
         current_idx = STEP_ORDER.index(step)
-        for next_step in STEP_ORDER[current_idx + 1:]:
+        for next_step in STEP_ORDER[current_idx + 1 :]:
             step_info = next((s for s in progress.steps if s.step == next_step), None)
             if step_info and not step_info.completed and not step_info.skipped:
                 progress.current_step = next_step
@@ -157,7 +157,9 @@ class OnboardingManager:
         self._save(progress)
         return progress
 
-    def skip_step(self, user_id: str, step: OnboardingStep) -> Optional[OnboardingProgress]:
+    def skip_step(
+        self, user_id: str, step: OnboardingStep
+    ) -> Optional[OnboardingProgress]:
         """Skip a step."""
         progress = self.get_progress(user_id)
         if not progress:
@@ -170,7 +172,7 @@ class OnboardingManager:
 
         # Advance to next
         current_idx = STEP_ORDER.index(step)
-        for next_step in STEP_ORDER[current_idx + 1:]:
+        for next_step in STEP_ORDER[current_idx + 1 :]:
             step_info = next((s for s in progress.steps if s.step == next_step), None)
             if step_info and not step_info.completed and not step_info.skipped:
                 progress.current_step = next_step
@@ -204,10 +206,12 @@ class OnboardingManager:
             "(user_id, current_step, steps, preferences, started_at, completed_at) "
             "VALUES (?,?,?,?,?,?)",
             (
-                progress.user_id, progress.current_step,
+                progress.user_id,
+                progress.current_step,
                 json.dumps([s.model_dump() for s in progress.steps]),
                 json.dumps(progress.preferences),
-                progress.started_at, progress.completed_at,
+                progress.started_at,
+                progress.completed_at,
             ),
         )
         self._conn.commit()

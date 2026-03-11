@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """FastAPI dependency functions for JWT authentication and RBAC."""
+
 from __future__ import annotations
 
 import logging
@@ -45,7 +46,9 @@ async def get_current_user(request: Request) -> User:
     """
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid Authorization header"
+        )
 
     token = auth_header[7:]
     handler = _get_jwt_handler()

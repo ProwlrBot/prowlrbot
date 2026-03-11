@@ -228,8 +228,7 @@ class CronManager:
         parts = [p for p in spec.schedule.cron.split() if p]
         if len(parts) != 5:
             raise ValueError(
-                f"cron must have 5 fields, got {len(parts)}:"
-                f" {spec.schedule.cron}",
+                f"cron must have 5 fields, got {len(parts)}:" f" {spec.schedule.cron}",
             )
 
         minute, hour, day, month, day_of_week = parts

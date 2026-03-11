@@ -4,6 +4,7 @@
 This module provides token counting functionality for estimating
 message token usage with Qwen tokenizer.
 """
+
 import logging
 from pathlib import Path
 
@@ -29,9 +30,7 @@ def _get_token_counter():
         # Qwen3 series uses the same tokenizer as Qwen2.5
 
         # Try local tokenizer first, fall back to online if not found
-        local_tokenizer_path = (
-            Path(__file__).parent.parent.parent / "tokenizer"
-        )
+        local_tokenizer_path = Path(__file__).parent.parent.parent / "tokenizer"
 
         if (
             local_tokenizer_path.exists()

@@ -7,7 +7,6 @@ from unittest.mock import patch
 from prowlrbot.providers.detector import ProviderDetector
 from prowlrbot.providers.models import ProviderDefinition
 
-
 # Test fixtures: fake provider definitions with env_var set
 _FAKE_ANTHROPIC = ProviderDefinition(
     id="anthropic",

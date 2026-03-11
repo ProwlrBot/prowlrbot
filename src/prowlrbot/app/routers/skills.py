@@ -13,7 +13,6 @@ from ...agents.skills_hub import (
     install_skill_from_hub,
 )
 
-
 logger = logging.getLogger(__name__)
 
 

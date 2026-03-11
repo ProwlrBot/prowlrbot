@@ -120,9 +120,7 @@ class JobsFile(BaseModel):
 class CronJobState(BaseModel):
     next_run_at: Optional[datetime] = None
     last_run_at: Optional[datetime] = None
-    last_status: Optional[
-        Literal["success", "error", "running", "skipped"]
-    ] = None
+    last_status: Optional[Literal["success", "error", "running", "skipped"]] = None
     last_error: Optional[str] = None
 
 

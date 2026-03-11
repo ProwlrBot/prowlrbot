@@ -138,6 +138,7 @@ class RateLimiter:
 # FastAPI / Starlette middleware
 # ---------------------------------------------------------------------------
 
+
 def _extract_client_key(request: Request) -> str:
     """Derive a client key from the request.
 

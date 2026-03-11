@@ -1,4 +1,5 @@
 """Tests for Bridge API."""
+
 import json
 import os
 import sys
@@ -32,6 +33,7 @@ class TestBridgeAPI:
         executor = CapabilityExecutor()
 
         import asyncio
+
         with pytest.raises(ValueError, match="Unknown capability"):
             asyncio.run(executor.execute("unknown:capability", {}))
 
@@ -79,7 +81,9 @@ class TestShellSecurity:
         blocked = ["rm -rf /", "rm -rf /*", "> /dev/sda", "dd if=/dev/zero"]
 
         for cmd in blocked:
-            assert any(b in cmd.lower() for b in ["rm -rf /", "> /dev/sda", "dd if=/dev/zero"])
+            assert any(
+                b in cmd.lower() for b in ["rm -rf /", "> /dev/sda", "dd if=/dev/zero"]
+            )
 
     def test_safe_commands_allowed(self):
         """Test that safe commands are allowed."""

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """SQLite-backed storage for the ProwlrBot Marketplace."""
+
 from __future__ import annotations
 
 import json
@@ -41,8 +42,7 @@ class MarketplaceStore:
 
     def _init_db(self) -> None:
         cur = self._conn.cursor()
-        cur.executescript(
-            """
+        cur.executescript("""
             CREATE TABLE IF NOT EXISTS listings (
                 id             TEXT PRIMARY KEY,
                 author_id      TEXT NOT NULL,
@@ -80,8 +80,7 @@ class MarketplaceStore:
                 installed_at TEXT NOT NULL,
                 FOREIGN KEY (listing_id) REFERENCES listings(id)
             );
-            """
-        )
+            """)
         self._conn.commit()
 
     # ------------------------------------------------------------------
@@ -141,9 +140,7 @@ class MarketplaceStore:
         params: list[object] = []
 
         if query:
-            conditions.append(
-                "(title LIKE ? OR description LIKE ? OR tags LIKE ?)"
-            )
+            conditions.append("(title LIKE ? OR description LIKE ? OR tags LIKE ?)")
             like = f"%{query}%"
             params.extend([like, like, like])
 
@@ -193,9 +190,7 @@ class MarketplaceStore:
 
         set_clause = ", ".join(f"{k} = ?" for k in filtered)
         params = list(filtered.values()) + [listing_id]
-        self._conn.execute(
-            f"UPDATE listings SET {set_clause} WHERE id = ?", params
-        )
+        self._conn.execute(f"UPDATE listings SET {set_clause} WHERE id = ?", params)
         self._conn.commit()
         return self.get_listing(listing_id)
 
@@ -264,9 +259,7 @@ class MarketplaceStore:
         self._conn.commit()
         return review
 
-    def get_reviews(
-        self, listing_id: str, limit: int = 50
-    ) -> list[ReviewEntry]:
+    def get_reviews(self, listing_id: str, limit: int = 50) -> list[ReviewEntry]:
         """Return reviews for a listing, newest first."""
         rows = self._conn.execute(
             "SELECT * FROM reviews WHERE listing_id = ? ORDER BY created_at DESC LIMIT ?",

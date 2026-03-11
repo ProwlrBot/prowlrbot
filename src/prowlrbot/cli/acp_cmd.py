@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """CLI command to start the ACP server over stdio."""
+
 from __future__ import annotations
 
 import asyncio

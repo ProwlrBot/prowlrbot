@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """XP tracking, levels, achievements, and leaderboards — SQLite backed."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -108,6 +109,7 @@ class XPTracker:
 
         # Calculate XP to next level
         from .models import USER_LEVELS, AGENT_LEVELS
+
         levels = USER_LEVELS if entity_type == "user" else AGENT_LEVELS
         xp_to_next = 0
         for _, _, threshold in levels:
@@ -208,7 +210,9 @@ class XPTracker:
         # Award XP for the achievement
         ach = self.get_achievement_def(achievement_id)
         if ach and ach.xp_reward > 0:
-            self.award_xp(entity_id, ach.xp_reward, "achievement", f"Unlocked: {ach.name}")
+            self.award_xp(
+                entity_id, ach.xp_reward, "achievement", f"Unlocked: {ach.name}"
+            )
 
         return UnlockedAchievement(
             achievement_id=achievement_id,
@@ -251,9 +255,7 @@ class XPTracker:
     def cleanup(self, older_than_days: int = 365) -> int:
         """Delete XP log entries older than N days. Returns count deleted."""
         cutoff = time.time() - (older_than_days * 86400)
-        cursor = self._conn.execute(
-            "DELETE FROM xp_log WHERE timestamp < ?", (cutoff,)
-        )
+        cursor = self._conn.execute("DELETE FROM xp_log WHERE timestamp < ?", (cutoff,))
         self._conn.commit()
         return cursor.rowcount
 

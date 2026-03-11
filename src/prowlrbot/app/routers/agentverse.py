@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API endpoints for AgentVerse — the virtual world for AI agents."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -24,6 +25,7 @@ _world = AgentVerseWorld(db_path=WORKING_DIR / "agentverse.db")
 
 
 # --- Agents ---
+
 
 @router.post("/agents", response_model=AgentPresence)
 async def register_agent(presence: AgentPresence) -> AgentPresence:
@@ -64,6 +66,7 @@ async def add_friend(agent_id: str, friend_id: str) -> Dict[str, str]:
 
 # --- Zones ---
 
+
 @router.get("/zones", response_model=List[ZoneInfo])
 async def list_zones() -> List[ZoneInfo]:
     return _world.get_zone_info()
@@ -76,6 +79,7 @@ async def agents_in_zone(zone: Zone) -> List[AgentPresence]:
 
 # --- Guilds ---
 
+
 @router.post("/guilds", response_model=Guild)
 async def create_guild(guild: Guild) -> Guild:
     return _world.create_guild(guild)
@@ -87,6 +91,7 @@ async def list_guilds() -> List[Guild]:
 
 
 # --- Trades ---
+
 
 @router.post("/trades", response_model=TradeOffer)
 async def create_trade(trade: TradeOffer) -> TradeOffer:
@@ -112,6 +117,7 @@ async def respond_trade(req: TradeResponse) -> Dict[str, str]:
 
 # --- Battles ---
 
+
 @router.post("/battles", response_model=ArenaBattle)
 async def create_battle(battle: ArenaBattle) -> ArenaBattle:
     return _world.create_battle(battle)
@@ -125,7 +131,9 @@ class BattleResult(BaseModel):
 
 @router.post("/battles/complete")
 async def complete_battle(result: BattleResult) -> Dict[str, Any]:
-    battle = _world.complete_battle(result.battle_id, result.challenger_score, result.defender_score)
+    battle = _world.complete_battle(
+        result.battle_id, result.challenger_score, result.defender_score
+    )
     if not battle:
         raise HTTPException(404, "Battle not found")
     return {"winner": battle.winner_id, "status": "completed"}

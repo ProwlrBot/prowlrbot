@@ -33,9 +33,7 @@ async def test_full_detection_pipeline():
         with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = MagicMock(status_code=200)
             for p in detected:
-                result = await checker.check(
-                    p, api_key=os.environ.get(p.env_var, "")
-                )
+                result = await checker.check(p, api_key=os.environ.get(p.env_var, ""))
                 health_status[p.id] = result
 
         # All should be healthy (mocked 200)
@@ -78,9 +76,7 @@ async def test_pipeline_with_unhealthy_provider():
         with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
             mock_get.side_effect = mock_get_side_effect
             for p in detected:
-                result = await checker.check(
-                    p, api_key=os.environ.get(p.env_var, "")
-                )
+                result = await checker.check(p, api_key=os.environ.get(p.env_var, ""))
                 health_status[p.id] = result
 
         # Groq should be unhealthy
