@@ -25,6 +25,7 @@ import {
   Trophy,
   Shield,
   Eye,
+  Palette,
   Rocket,
   FileText,
   Search,
@@ -53,6 +54,7 @@ const keyToPath: Record<string, string> = {
   leaderboard: "/leaderboard",
   security: "/security",
   privacy: "/privacy",
+  appearance: "/appearance",
   templates: "/templates",
   research: "/research",
   replay: "/replay",
@@ -240,6 +242,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "privacy",
           label: "Privacy",
           icon: <Eye size={16} />,
+        },
+        {
+          key: "appearance",
+          label: "Appearance",
+          icon: <Palette size={16} />,
         },
         {
           key: "onboarding",

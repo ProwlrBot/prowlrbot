@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from ...auth.privacy import PrivacyManager
 from ...constant import WORKING_DIR
+from ...themes import THEMES, THEME_IDS
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -37,6 +38,15 @@ class ThemeRequest(BaseModel):
         ...,
         pattern=r"^(light|dark|system)$",
         description="Theme preference: light, dark, or system.",
+    )
+
+
+class ColorThemeRequest(BaseModel):
+    """Request body for color theme selection."""
+
+    color_theme: str = Field(
+        ...,
+        description="Color theme ID from the available themes list.",
     )
 
 
@@ -96,6 +106,7 @@ async def get_all_settings() -> Dict[str, Any]:
         "autonomy_defaults": autonomy_defaults,
         "notification_preferences": notification_prefs,
         "theme": general.get("theme", "system"),
+        "color_theme": general.get("color_theme", "tech-innovation"),
     }
 
 
@@ -111,6 +122,41 @@ async def set_theme(req: ThemeRequest) -> Dict[str, str]:
     settings["theme"] = req.theme
     _save_settings(settings)
     return {"theme": req.theme}
+
+
+# ------------------------------------------------------------------
+# GET /settings/themes — available color themes
+# ------------------------------------------------------------------
+
+
+@router.get("/themes")
+async def get_themes() -> Dict[str, Any]:
+    """Return all available color themes and the currently active one."""
+    settings = _load_settings()
+    return {
+        "themes": THEMES,
+        "active": settings.get("color_theme", "tech-innovation"),
+    }
+
+
+# ------------------------------------------------------------------
+# PUT /settings/color-theme — select a color theme
+# ------------------------------------------------------------------
+
+
+@router.put("/color-theme")
+async def set_color_theme(req: ColorThemeRequest) -> Dict[str, str]:
+    """Set the active color theme."""
+    if req.color_theme not in THEME_IDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown theme '{req.color_theme}'. "
+            f"Valid: {sorted(THEME_IDS)}",
+        )
+    settings = _load_settings()
+    settings["color_theme"] = req.color_theme
+    _save_settings(settings)
+    return {"color_theme": req.color_theme}
 
 
 # ------------------------------------------------------------------

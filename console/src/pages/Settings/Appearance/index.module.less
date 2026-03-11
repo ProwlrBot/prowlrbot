@@ -1,0 +1,200 @@
+.page {
+  padding: 24px;
+}
+
+/* ---- Sections ---- */
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.sectionDesc {
+  margin: 0 0 16px;
+  color: #999;
+  font-size: 14px;
+}
+
+/* ---- Card Section ---- */
+
+.cardSection {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: #d9d9d9;
+  }
+}
+
+.cardSectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ---- Loading / Error ---- */
+
+.centerState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+.stateText {
+  font-size: 14px;
+  color: #999;
+}
+
+.stateTextError {
+  font-size: 14px;
+  color: #ff4d4f;
+  margin-bottom: 4px;
+}
+
+/* ---- Theme Grid ---- */
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.themeCard {
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: #fff;
+
+  &:hover {
+    border-color: #b3b3ff;
+    box-shadow: 0 4px 12px rgba(97, 92, 237, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+.themeCardActive {
+  border-color: #615ced;
+  box-shadow: 0 4px 12px rgba(97, 92, 237, 0.2);
+  background: #fafaff;
+}
+
+.themeSwatches {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.themeSwatch {
+  flex: 1;
+  border-radius: 0;
+  transition: transform 0.15s;
+
+  &:first-child {
+    border-radius: 8px 0 0 8px;
+  }
+
+  &:last-child {
+    border-radius: 0 8px 8px 0;
+  }
+}
+
+.themeName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.themeDescription {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.themeBestFor {
+  font-size: 11px;
+  color: #615ced;
+  background: #f0f0ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.activeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #615ced;
+  background: #ededff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+/* ---- Mode Selector ---- */
+
+.modeGrid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modeCard {
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: #fff;
+  text-align: center;
+  min-width: 120px;
+
+  &:hover {
+    border-color: #b3b3ff;
+    box-shadow: 0 4px 12px rgba(97, 92, 237, 0.12);
+  }
+}
+
+.modeCardActive {
+  border-color: #615ced;
+  box-shadow: 0 4px 12px rgba(97, 92, 237, 0.2);
+  background: #fafaff;
+}
+
+.modeIcon {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.modeLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
