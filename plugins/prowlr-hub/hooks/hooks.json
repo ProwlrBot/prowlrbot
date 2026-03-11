@@ -23,6 +23,18 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/scripts/statusline.js",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
