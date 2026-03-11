@@ -479,23 +479,241 @@ def market_unlock(content_key: str, user: str):
 
 @market_group.command(name="tiers")
 def market_tiers():
-    """Show subscription tiers and pricing."""
-    click.echo()
-    click.echo("  ╔══════════════════════════════════════════════════════╗")
-    click.echo("  ║   ProwlrBot Pro Tiers                               ║")
-    click.echo("  ╚══════════════════════════════════════════════════════╝")
-    click.echo()
-    click.echo(f"  {'Tier':<10} {'Price':<10} {'Agents':<8} {'Teams':<8} {'Credits/mo':<12} {'Earn':<6} {'Publish'}")
-    click.echo(f"  {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*12} {'─'*6} {'─'*7}")
+    """Show detailed subscription tiers with all features."""
+    w = 62  # box width
 
-    tier_prices = {"free": "$0", "starter": "$5/mo", "pro": "$15/mo", "team": "$29/mo"}
-    for tier in ProTier:
-        limits = PRO_TIER_LIMITS[tier]
-        agents = "∞" if limits["agents"] >= 999 else str(limits["agents"])
-        teams = "∞" if limits["teams"] >= 999 else str(limits["teams"])
-        publish = "Yes" if limits["marketplace_publish"] else "No"
-        click.echo(
-            f"  {tier.value:<10} {tier_prices[tier.value]:<10} {agents:<8} {teams:<8} "
-            f"{limits['monthly_credits']:<12} {limits['credit_earn_multiplier']}x{'':<4} {publish}"
-        )
     click.echo()
+    click.echo(f"  ╔{'═' * w}╗")
+    click.echo(f"  ║{'ProwlrBot Pro Tiers':^{w}}║")
+    click.echo(f"  ║{'Always watching. Always ready.':^{w}}║")
+    click.echo(f"  ╚{'═' * w}╝")
+
+    _tier_details = {
+        "free": {
+            "label": "FREE",
+            "price": "$0/mo",
+            "tagline": "Get started, no commitment",
+            "features": [
+                ("Agents", "Up to 2 external agents"),
+                ("Teams", "1 team"),
+                ("Credits", "50/month"),
+                ("Earn Multiplier", "1x base rate"),
+                ("Marketplace", "Browse & install free packages"),
+                ("Channels", "Console + 1 messaging channel"),
+                ("Monitoring", "Basic web change detection"),
+                ("Storage", "Local SQLite databases"),
+                ("Support", "Community (GitHub Discussions)"),
+            ],
+            "not_included": [
+                "Marketplace publishing",
+                "Premium content",
+                "Priority support",
+                "Custom workflows",
+                "Business insights",
+                "Agent blueprints",
+            ],
+        },
+        "starter": {
+            "label": "STARTER",
+            "price": "$5/mo",
+            "tagline": "For individual developers",
+            "features": [
+                ("Agents", "Up to 3 external agents"),
+                ("Teams", "1 team"),
+                ("Credits", "500/month"),
+                ("Earn Multiplier", "2x earn rate on contributions"),
+                ("Marketplace", "Browse, install, review, tip"),
+                ("Channels", "Console + 3 messaging channels"),
+                ("Monitoring", "Web + API monitoring with alerts"),
+                ("Prompt Libraries", "Access starter prompt packs"),
+                ("Workflow Templates", "Basic workflow templates"),
+                ("Storage", "Local SQLite + encrypted secrets"),
+                ("Support", "Community + email support"),
+            ],
+            "not_included": [
+                "Marketplace publishing",
+                "Business insights & roadmaps",
+                "Agent blueprints",
+                "Custom spec generation",
+                "Priority support",
+            ],
+        },
+        "pro": {
+            "label": "PRO",
+            "price": "$15/mo",
+            "tagline": "For power users & small teams",
+            "popular": True,
+            "features": [
+                ("Agents", "Unlimited external agents"),
+                ("Teams", "Up to 5 teams"),
+                ("Credits", "2,000/month"),
+                ("Earn Multiplier", "3x earn rate on contributions"),
+                ("Marketplace", "Full access: browse, install, PUBLISH"),
+                ("Revenue Share", "70/30 split on paid listings"),
+                ("Channels", "All 8 channels (Discord, Telegram, etc.)"),
+                ("Monitoring", "Advanced monitoring + competitor tracking"),
+                ("Workflow Templates", "All basic + advanced workflows"),
+                ("Business Specs", "Custom job specs tailored to you"),
+                ("Insight Packs", "Market analysis & competitor reports"),
+                ("Roadmap Generators", "Auto-generate product roadmaps"),
+                ("Agent Blueprints", "Pre-configured agent teams"),
+                ("Prompt Libraries", "Full prompt collection access"),
+                ("Hub Access", "Multi-agent coordination via hub"),
+                ("AgentVerse", "Full world access + guilds"),
+                ("Storage", "SQLite + Redis + encrypted vault"),
+                ("Support", "Priority email + Discord channel"),
+            ],
+            "not_included": [
+                "Enterprise team features",
+                "Custom SLA",
+            ],
+        },
+        "team": {
+            "label": "TEAM",
+            "price": "$29/mo",
+            "tagline": "For teams & businesses",
+            "features": [
+                ("Agents", "Unlimited external agents"),
+                ("Teams", "Unlimited teams"),
+                ("Credits", "10,000/month"),
+                ("Earn Multiplier", "5x earn rate on contributions"),
+                ("Marketplace", "Full access + priority review queue"),
+                ("Revenue Share", "70/30 split + featured placement"),
+                ("Channels", "All 8 channels + custom channel support"),
+                ("Monitoring", "Enterprise monitoring + SLA tracking"),
+                ("Workflow Templates", "All templates + custom creation"),
+                ("Business Specs", "Unlimited custom specs"),
+                ("Insight Packs", "Full market intelligence suite"),
+                ("Roadmap Generators", "Detailed + enterprise roadmaps"),
+                ("Agent Blueprints", "All blueprints + custom design"),
+                ("Prompt Libraries", "Master collection + private prompts"),
+                ("Hub Access", "Priority hub + dedicated bridge"),
+                ("AgentVerse", "Premium zones + tournaments"),
+                ("Swarm Mode", "Docker-based multi-node agents"),
+                ("Custom Workflows", "Build & save custom automations"),
+                ("API Access", "Full REST API for integrations"),
+                ("Storage", "SQLite + Redis + S3-compatible"),
+                ("Audit Log", "Full activity and compliance logging"),
+                ("Support", "Priority support + onboarding call"),
+            ],
+            "not_included": [],
+        },
+    }
+
+    for tier_key, info in _tier_details.items():
+        is_popular = info.get("popular", False)
+
+        click.echo()
+        if is_popular:
+            click.echo(f"  {'* MOST POPULAR *':^{w}}")
+        click.echo(f"  ┌{'─' * w}┐")
+        click.echo(f"  │{info['label'] + '  ' + info['price']:^{w}}│")
+        click.echo(f"  │{info['tagline']:^{w}}│")
+        click.echo(f"  ├{'─' * w}┤")
+
+        # Features
+        click.echo(f"  │{'  INCLUDED:':>{14}}{'':<{w - 14}}│")
+        for label, desc in info["features"]:
+            line = f"    [+] {label:<22} {desc}"
+            click.echo(f"  │{line:<{w}}│")
+
+        # Not included
+        if info.get("not_included"):
+            click.echo(f"  │{'':─<{w}}│")
+            click.echo(f"  │{'  NOT INCLUDED:':>{16}}{'':<{w - 16}}│")
+            for item in info["not_included"]:
+                line = f"    [ ] {item}"
+                click.echo(f"  │{line:<{w}}│")
+
+        click.echo(f"  └{'─' * w}┘")
+
+    # Comparison table
+    click.echo()
+    click.echo(f"  {'Quick Comparison':^{w}}")
+    click.echo()
+    click.echo(f"  {'Feature':<26} {'Free':<8} {'Starter':<10} {'Pro':<10} {'Team':<10}")
+    click.echo(f"  {'─'*26} {'─'*8} {'─'*10} {'─'*10} {'─'*10}")
+    _rows = [
+        ("Price", "$0", "$5/mo", "$15/mo", "$29/mo"),
+        ("External Agents", "2", "3", "Unlimited", "Unlimited"),
+        ("Teams", "1", "1", "5", "Unlimited"),
+        ("Monthly Credits", "50", "500", "2,000", "10,000"),
+        ("Earn Multiplier", "1x", "2x", "3x", "5x"),
+        ("Channels", "2", "4", "All 8", "All 8+"),
+        ("Marketplace Publish", "—", "—", "Yes", "Yes"),
+        ("Workflow Templates", "—", "Basic", "All", "All+Custom"),
+        ("Business Specs", "—", "—", "Yes", "Unlimited"),
+        ("Insight Packs", "—", "—", "Yes", "Full Suite"),
+        ("Roadmap Generators", "—", "—", "Yes", "Enterprise"),
+        ("Agent Blueprints", "—", "—", "Yes", "All+Custom"),
+        ("Prompt Libraries", "—", "Starter", "Full", "Master"),
+        ("Hub/Swarm", "—", "—", "Hub", "Hub+Swarm"),
+        ("AgentVerse", "Basic", "Basic", "Full", "Premium"),
+        ("Support", "Community", "Email", "Priority", "Priority+"),
+    ]
+    for row in _rows:
+        click.echo(f"  {row[0]:<26} {row[1]:<8} {row[2]:<10} {row[3]:<10} {row[4]:<10}")
+
+    click.echo()
+    click.echo("  Upgrade: prowlr market upgrade <tier>")
+    click.echo("  Credits: prowlr market buy-credits")
+    click.echo()
+
+
+# ── Upgrade ──────────────────────────────────────────────────────────────────
+
+
+@market_group.command(name="upgrade")
+@click.argument("tier", type=click.Choice(["starter", "pro", "team"]))
+@click.option("--user", "-u", default="local", help="User ID")
+def market_upgrade(tier: str, user: str):
+    """Upgrade your subscription tier."""
+    store = _get_store()
+    balance = store.get_balance(user)
+    tier_prices = {"starter": 5, "pro": 15, "team": 29}
+    price = tier_prices[tier]
+
+    current = balance.tier
+    if current == tier:
+        click.echo(f"  Already on {tier.upper()} tier.")
+        store.close()
+        return
+
+    tier_order = ["free", "starter", "pro", "team"]
+    if tier_order.index(tier) < tier_order.index(current):
+        click.echo(f"  Downgrade from {current.upper()} to {tier.upper()}?")
+        click.echo("  Note: Downgrades take effect at next billing cycle.")
+    else:
+        click.echo(f"  Upgrade from {current.upper()} to {tier.upper()}")
+
+    limits = PRO_TIER_LIMITS[ProTier(tier)]
+    click.echo()
+    click.echo(f"  Tier:         {tier.upper()}")
+    click.echo(f"  Price:        ${price}/mo")
+    click.echo(f"  Credits/mo:   {limits['monthly_credits']}")
+    click.echo(f"  Agents:       {'Unlimited' if limits['agents'] >= 999 else limits['agents']}")
+    click.echo(f"  Teams:        {'Unlimited' if limits['teams'] >= 999 else limits['teams']}")
+    click.echo(f"  Earn bonus:   {limits['credit_earn_multiplier']}x")
+    click.echo(f"  Publish:      {'Yes' if limits['marketplace_publish'] else 'No'}")
+    click.echo()
+
+    if not click.confirm(f"  Confirm upgrade to {tier.upper()} (${price}/mo)?"):
+        click.echo("  Cancelled.")
+        store.close()
+        return
+
+    # Set tier and grant monthly credits
+    store.set_tier(user, tier)
+    new_balance = store.add_credits(
+        user_id=user,
+        amount=limits["monthly_credits"],
+        transaction_type=CreditTransactionType.monthly_grant,
+        description=f"Welcome to {tier.upper()} — monthly credit grant",
+    )
+
+    click.echo()
+    click.echo(f"  Upgraded to {tier.upper()}!")
+    click.echo(f"  +{limits['monthly_credits']} credits added")
+    click.echo(f"  New balance: {new_balance.balance} credits")
+    click.echo()
+    store.close()
