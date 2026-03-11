@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 def _sanitize_fts_query(query: str) -> str:
     """Escape FTS5 special characters and wrap as phrase query."""
-    sanitized = re.sub(r'[*"(){}[\]^~:!]', " ", query)
+    sanitized = re.sub(r'[*"(){}[\]^~:!\\]', " ", query)
     sanitized = sanitized.strip()
     if not sanitized:
         return '""'

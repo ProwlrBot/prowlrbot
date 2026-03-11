@@ -11,6 +11,7 @@ import json
 import logging
 import platform
 import sqlite3
+import threading
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
@@ -51,6 +52,7 @@ class WarRoomEngine:
         self._conn = init_db(db_path)
         self._db_path = db_path
         self._on_event = None
+        self._lock = threading.Lock()
 
     def set_event_callback(self, callback):
         """Set a callback function called on every mutation."""
@@ -310,7 +312,7 @@ class WarRoomEngine:
         to ensure no two agents can claim the same task or lock the same files.
         """
         try:
-            with self._conn:
+            with self._lock, self._conn:
                 # Check task is available
                 task = self._conn.execute(
                     "SELECT * FROM tasks WHERE task_id=? AND status='pending'",
@@ -489,7 +491,7 @@ class WarRoomEngine:
     ) -> LockResult:
         """Advisory file lock outside of a task. Atomic via transaction."""
         try:
-            with self._conn:
+            with self._lock, self._conn:
                 existing = self._conn.execute(
                     """SELECT * FROM file_locks
                        WHERE file_path=? AND room_id=?
@@ -656,9 +658,10 @@ class WarRoomEngine:
 
     def purge_old_events(self, retention_days: int = 30) -> int:
         """Delete events older than retention_days. Returns count deleted."""
+        cutoff = (datetime.utcnow() - timedelta(days=retention_days)).isoformat()
         result = self._conn.execute(
-            "DELETE FROM events WHERE timestamp < datetime('now', ?)",
-            (f"-{retention_days} days",),
+            "DELETE FROM events WHERE timestamp < ?",
+            (cutoff,),
         )
         self._conn.commit()
         return result.rowcount
