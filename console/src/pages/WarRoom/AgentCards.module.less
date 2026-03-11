@@ -1,0 +1,106 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: #12121a;
+  border: 1px solid #1e1e2e;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.card:hover {
+  border-color: #14b8a6;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotIdle {
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.dotWorking {
+  background: #3b82f6;
+  box-shadow: 0 0 6px #3b82f6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.dotDisconnected {
+  background: #555;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  font-size: 11px;
+  color: #888;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #1e1e2e;
+  color: #888;
+}
+
+.tagPython { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.tagSecurity { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.tagFrontend { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.tagDocs { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+.tagGeneral { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+
+.taskLink {
+  font-size: 11px;
+  color: #14b8a6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heartbeat {
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+.heartbeatFresh { color: #22c55e; }
+.heartbeatStale { color: #eab308; }
+.heartbeatDead { color: #ef4444; }

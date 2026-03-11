@@ -13,16 +13,19 @@ Remote terminals connect by setting PROWLR_HUB_URL in their MCP config.
 # FastAPI needs runtime-evaluable type annotations to detect Pydantic
 # BaseModel parameters as request bodies (not query params).
 
+import asyncio
 import logging
 import os
 from typing import List
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from .engine import WarRoomEngine
 from .status_page import STATUS_HTML
+from .websocket import broadcast_ws, warroom_ws
 
 logger = logging.getLogger(__name__)
 
@@ -77,11 +80,32 @@ class FindingRequest(BaseModel):
 def create_bridge_app() -> FastAPI:
     """Create a FastAPI app that exposes the war room engine over HTTP."""
     app = FastAPI(title="ProwlrHub Bridge", version="1.0.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:8088", "http://127.0.0.1:8088"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     db_path = os.environ.get("PROWLR_HUB_DB", None)
     engine = WarRoomEngine(db_path)
 
     # Ensure default room exists
     engine.get_or_create_default_room()
+
+    # Wire engine events → WebSocket broadcast
+    def _on_engine_event(event: dict):
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(broadcast_ws(event))
+        except RuntimeError:
+            pass  # No event loop yet
+
+    engine.set_event_callback(_on_engine_event)
+
+    # WebSocket endpoint for real-time war room events
+    @app.websocket("/ws/warroom")
+    async def ws_warroom(ws):
+        await warroom_ws(ws)
 
     @app.get("/", response_class=HTMLResponse)
     async def status_page():
@@ -197,6 +221,45 @@ def create_bridge_app() -> FastAPI:
     def get_events(limit: int = 20, event_type: str = ""):
         room = engine.get_or_create_default_room()
         return {"events": engine.get_events(room["room_id"], limit, event_type)}
+
+    # --- JSON API endpoints for dashboard consumption ---
+
+    @app.get("/api/agents")
+    def api_agents():
+        room = engine.get_or_create_default_room()
+        return engine.get_agents(room["room_id"])
+
+    @app.get("/api/board")
+    def api_board(status: str = ""):
+        room = engine.get_or_create_default_room()
+        tasks = engine.get_mission_board(room["room_id"])
+        if status:
+            tasks = [t for t in tasks if t["status"] == status]
+        return tasks
+
+    @app.get("/api/events")
+    def api_events(limit: int = 50, event_type: str = ""):
+        room = engine.get_or_create_default_room()
+        return engine.get_events(room["room_id"], limit, event_type)
+
+    @app.get("/api/context")
+    def api_context(key: str = ""):
+        room = engine.get_or_create_default_room()
+        return engine.get_context(room["room_id"], key)
+
+    @app.get("/api/conflicts")
+    def api_conflicts():
+        room = engine.get_or_create_default_room()
+        room_id = room["room_id"]
+        rows = engine._conn.execute(
+            """SELECT fl.*, a.name as agent_name
+               FROM file_locks fl
+               LEFT JOIN agents a ON fl.agent_id = a.agent_id
+               WHERE fl.room_id=?
+               ORDER BY fl.acquired_at DESC""",
+            (room_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
     return app
 

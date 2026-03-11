@@ -50,6 +50,19 @@ class WarRoomEngine:
     def __init__(self, db_path: Optional[str] = None) -> None:
         self._conn = init_db(db_path)
         self._db_path = db_path
+        self._on_event = None
+
+    def set_event_callback(self, callback):
+        """Set a callback function called on every mutation."""
+        self._on_event = callback
+
+    def _notify(self, event_type: str, payload: dict):
+        """Notify listeners of an engine event."""
+        if self._on_event:
+            try:
+                self._on_event({"type": event_type, "timestamp": datetime.utcnow().isoformat(), **payload})
+            except Exception:
+                pass  # Don't let notification errors break the engine
 
     # -- Room Management --
 
@@ -117,6 +130,7 @@ class WarRoomEngine:
         self._conn.commit()
         self._emit_event(room_id, "agent.connected", agent_id=agent_id,
                          payload={"name": name, "capabilities": capabilities or []})
+        self._notify("agent.connected", {"agent_id": agent_id, "name": name})
 
         return {
             "agent_id": agent_id,
@@ -357,6 +371,7 @@ class WarRoomEngine:
                 room_id, "task.claimed", agent_id=agent_id, task_id=task_id,
                 payload={"lock_token": lock_token, "file_scopes": file_scopes},
             )
+            self._notify("task.claimed", {"task_id": task_id, "agent_id": agent_id})
             return ClaimResult(success=True, lock_token=lock_token)
 
         except sqlite3.IntegrityError as e:
@@ -422,6 +437,7 @@ class WarRoomEngine:
             room_id, "task.completed", agent_id=agent_id, task_id=task_id,
             payload={"summary": summary},
         )
+        self._notify("task.completed", {"task_id": task_id, "agent_id": agent_id})
         return True
 
     def fail_task(
@@ -458,6 +474,7 @@ class WarRoomEngine:
             room_id, "task.failed", agent_id=agent_id, task_id=task_id,
             payload={"reason": reason},
         )
+        self._notify("task.failed", {"task_id": task_id, "agent_id": agent_id})
         return True
 
     # -- File Locking --
@@ -494,6 +511,7 @@ class WarRoomEngine:
             self._conn.commit()
             self._emit_event(room_id, "lock.acquired", agent_id=agent_id,
                              payload={"file": file_path, "branch": branch})
+            self._notify("lock.acquired", {"file_path": file_path, "agent_id": agent_id})
             return LockResult(success=True, lock_token=lock_token)
         except sqlite3.IntegrityError:
             return LockResult(success=False, reason="conflict")
@@ -513,6 +531,7 @@ class WarRoomEngine:
         if result.rowcount > 0:
             self._emit_event(room_id, "lock.released", agent_id=agent_id,
                              payload={"file": file_path})
+            self._notify("lock.released", {"file_path": file_path, "agent_id": agent_id})
             return True
         return False
 
@@ -553,6 +572,7 @@ class WarRoomEngine:
             (key, room_id, agent_id, json.dumps(value)),
         )
         self._conn.commit()
+        self._notify("finding.shared", {"key": key, "agent_id": agent_id})
 
     def get_context(self, room_id: str, key: str = "") -> List[Dict[str, Any]]:
         """Read shared context. Empty key returns all."""
@@ -612,6 +632,7 @@ class WarRoomEngine:
             room_id, "agent.broadcast", agent_id=agent_id,
             payload={"message": message},
         )
+        self._notify("agent.broadcast", {"agent_id": agent_id, "message": message})
 
     # -- Internal --
 

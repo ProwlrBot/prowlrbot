@@ -58,6 +58,7 @@ const keyToPath: Record<string, string> = {
   replay: "/replay",
   "external-agents": "/external-agents",
   onboarding: "/onboarding",
+  warroom: "/warroom",
 };
 
 interface SidebarProps {
@@ -89,6 +90,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       key: "dashboard",
       label: t("nav.dashboard"),
       icon: <LayoutDashboard size={16} />,
+    },
+    {
+      key: "warroom",
+      label: "War Room",
+      icon: <Radio size={16} />,
     },
     {
       key: "chat-group",

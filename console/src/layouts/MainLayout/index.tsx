@@ -24,6 +24,7 @@ import SecurityPage from "../../pages/Settings/Security";
 import PrivacyPage from "../../pages/Settings/Privacy";
 import TemplatesPage from "../../pages/Settings/Templates";
 import OnboardingPage from "../../pages/Settings/Onboarding";
+import WarRoomPage from "../../pages/WarRoom";
 
 const { Content } = Layout;
 
@@ -52,6 +53,7 @@ const pathToKey: Record<string, string> = {
   "/replay": "replay",
   "/external-agents": "external-agents",
   "/onboarding": "onboarding",
+  "/warroom": "warroom",
 };
 
 export default function MainLayout() {
@@ -95,6 +97,7 @@ export default function MainLayout() {
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/warroom" element={<WarRoomPage />} />
               <Route path="/" element={<Dashboard />} />
             </Routes>
           </div>
