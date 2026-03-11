@@ -18,9 +18,11 @@ import os
 from typing import List
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from .engine import WarRoomEngine
+from .status_page import STATUS_HTML
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,11 @@ def create_bridge_app() -> FastAPI:
 
     # Ensure default room exists
     engine.get_or_create_default_room()
+
+    @app.get("/", response_class=HTMLResponse)
+    async def status_page():
+        """Standalone war room status page."""
+        return STATUS_HTML
 
     @app.get("/health")
     def health():
