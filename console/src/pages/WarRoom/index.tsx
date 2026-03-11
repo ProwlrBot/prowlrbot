@@ -1,33 +1,207 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { Drawer } from "antd";
 import { warroom, connectWarRoomWS } from "../../api/warroom";
-import type { Agent, Task, WarRoomEvent, Finding } from "../../api/warroom";
+import type { Agent, Task, WarRoomEvent, Finding, FileLock } from "../../api/warroom";
 import KanbanBoard from "./KanbanBoard";
 import AgentCards from "./AgentCards";
 import LiveFeed from "./LiveFeed";
 import FindingsWall from "./FindingsWall";
 import MetricsPanel from "./MetricsPanel";
 
+function TaskDetailDrawer({
+  task,
+  onClose,
+}: {
+  task: Task | null;
+  onClose: () => void;
+}) {
+  if (!task) return null;
+
+  return (
+    <Drawer
+      title={task.title}
+      open={!!task}
+      onClose={onClose}
+      width={420}
+      styles={{
+        header: { background: "#12121a", borderBottom: "1px solid #1e1e2e", color: "#e0e0e0" },
+        body: { background: "#0a0a0f", color: "#e0e0e0" },
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div>
+          <div style={{ color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+            Status
+          </div>
+          <span
+            style={{
+              padding: "2px 8px",
+              borderRadius: 4,
+              fontSize: 12,
+              background:
+                task.status === "done"
+                  ? "rgba(34,197,94,0.15)"
+                  : task.status === "failed"
+                    ? "rgba(239,68,68,0.15)"
+                    : task.status === "in_progress"
+                      ? "rgba(59,130,246,0.15)"
+                      : "rgba(20,184,166,0.15)",
+              color:
+                task.status === "done"
+                  ? "#22c55e"
+                  : task.status === "failed"
+                    ? "#ef4444"
+                    : task.status === "in_progress"
+                      ? "#3b82f6"
+                      : "#14b8a6",
+            }}
+          >
+            {task.status}
+          </span>
+          <span
+            style={{
+              marginLeft: 8,
+              padding: "2px 8px",
+              borderRadius: 4,
+              fontSize: 12,
+              background:
+                task.priority === "high" || task.priority === "critical"
+                  ? "rgba(239,68,68,0.15)"
+                  : "#1e1e2e",
+              color:
+                task.priority === "high" || task.priority === "critical"
+                  ? "#ef4444"
+                  : "#888",
+            }}
+          >
+            {task.priority}
+          </span>
+        </div>
+
+        {task.description && (
+          <div>
+            <div style={{ color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+              Description
+            </div>
+            <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.5 }}>
+              {task.description}
+            </div>
+          </div>
+        )}
+
+        {task.owner_name && (
+          <div>
+            <div style={{ color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+              Owner
+            </div>
+            <div style={{ fontSize: 13, color: "#14b8a6" }}>
+              {task.owner_name}
+            </div>
+          </div>
+        )}
+
+        {task.file_scopes.length > 0 && (
+          <div>
+            <div style={{ color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+              File Scopes
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {task.file_scopes.map((f) => (
+                <code
+                  key={f}
+                  style={{
+                    fontSize: 11,
+                    color: "#8b5cf6",
+                    background: "#1e1e2e",
+                    padding: "2px 6px",
+                    borderRadius: 3,
+                  }}
+                >
+                  {f}
+                </code>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {task.blocked_by.length > 0 && (
+          <div>
+            <div style={{ color: "#ef4444", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+              Blocked By
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {task.blocked_by.map((b) => (
+                <span key={b} style={{ fontSize: 12, color: "#ef4444" }}>
+                  {b}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {task.progress_note && (
+          <div>
+            <div style={{ color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+              Progress Note
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                color: "#aaa",
+                background: "#1a1a2e",
+                padding: 8,
+                borderRadius: 4,
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {task.progress_note}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 16, fontSize: 11, color: "#555", flexWrap: "wrap" }}>
+          {task.created_at && (
+            <span>Created: {new Date(task.created_at).toLocaleString()}</span>
+          )}
+          {task.claimed_at && (
+            <span>Claimed: {new Date(task.claimed_at).toLocaleString()}</span>
+          )}
+          {task.completed_at && (
+            <span>
+              Completed: {new Date(task.completed_at).toLocaleString()}
+            </span>
+          )}
+        </div>
+      </div>
+    </Drawer>
+  );
+}
+
 export default function WarRoomPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [events, setEvents] = useState<WarRoomEvent[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
+  const [conflicts, setConflicts] = useState<FileLock[]>([]);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      const [a, t, e, f] = await Promise.all([
+      const [a, t, e, f, c] = await Promise.all([
         warroom.agents(),
         warroom.board(),
         warroom.events(100),
         warroom.context(),
+        warroom.conflicts(),
       ]);
       setAgents(a);
       setTasks(t);
       setEvents(e);
       setFindings(f);
+      setConflicts(c);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Connection failed");
@@ -54,6 +228,10 @@ export default function WarRoomPage() {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [refresh]);
+
+  const handleTaskSelect = useCallback((task: Task) => {
+    setSelectedTask(task);
+  }, []);
 
   return (
     <div style={{ padding: 24, background: "#0a0a0f", minHeight: "100%" }}>
@@ -107,31 +285,38 @@ export default function WarRoomPage() {
             {connected ? "Live" : "Polling"}
           </span>
           <span style={{ color: "#888", fontSize: 11 }}>
-            {agents.length} agents | {tasks.length} tasks
+            {agents.filter((a) => a.status !== "disconnected").length} agents |{" "}
+            {tasks.length} tasks
           </span>
         </div>
       </div>
 
       {/* Agent Cards */}
       <div style={{ marginBottom: 16 }}>
-        <AgentCards agents={agents} />
+        <AgentCards agents={agents} tasks={tasks} />
       </div>
 
       {/* Metrics */}
       <div style={{ marginBottom: 16 }}>
-        <MetricsPanel agents={agents} events={events} />
+        <MetricsPanel agents={agents} tasks={tasks} events={events} conflicts={conflicts} />
       </div>
 
       {/* Kanban Board */}
       <div style={{ marginBottom: 16 }}>
-        <KanbanBoard tasks={tasks} onTaskSelect={() => {}} />
+        <KanbanBoard tasks={tasks} onTaskSelect={handleTaskSelect} />
       </div>
 
       {/* Bottom row: Live Feed + Findings */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <LiveFeed events={events} />
-        <FindingsWall findings={findings} />
+        <LiveFeed events={events} agents={agents} />
+        <FindingsWall findings={findings} agents={agents} />
       </div>
+
+      {/* Task Detail Drawer */}
+      <TaskDetailDrawer
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+      />
     </div>
   );
 }

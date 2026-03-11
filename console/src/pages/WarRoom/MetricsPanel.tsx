@@ -5,26 +5,137 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  CartesianGrid,
 } from "recharts";
-import type { Agent, WarRoomEvent } from "../../api/warroom";
+import type { Agent, Task, WarRoomEvent, FileLock } from "../../api/warroom";
 
 interface MetricsPanelProps {
   agents: Agent[];
+  tasks: Task[];
   events: WarRoomEvent[];
+  conflicts: FileLock[];
 }
 
-const PIE_COLORS = {
+const PIE_COLORS: Record<string, string> = {
   idle: "#22c55e",
   working: "#3b82f6",
   disconnected: "#555",
 };
 
-export default function MetricsPanel({ agents, events }: MetricsPanelProps) {
+const STATUS_LABELS: Record<string, string> = {
+  idle: "Idle",
+  working: "Working",
+  disconnected: "Disconnected",
+};
+
+/** Build hourly buckets from events of a given type, looking back `hoursBack` hours. */
+function buildHourlyBuckets(
+  events: WarRoomEvent[],
+  eventType: string,
+  hoursBack: number,
+): { hour: string; count: number }[] {
+  const now = Date.now();
+  const cutoff = now - hoursBack * 3600000;
+  const filtered = events.filter(
+    (e) => e.type === eventType && new Date(e.timestamp).getTime() >= cutoff,
+  );
+
+  const hourMap = new Map<string, number>();
+
+  // Pre-fill all hour slots so chart shows continuous data
+  for (let i = hoursBack - 1; i >= 0; i--) {
+    const h = new Date(now - i * 3600000);
+    const key = `${h.getHours()}:00`;
+    hourMap.set(key, 0);
+  }
+
+  for (const e of filtered) {
+    const d = new Date(e.timestamp);
+    const key = `${d.getHours()}:00`;
+    hourMap.set(key, (hourMap.get(key) || 0) + 1);
+  }
+
+  return [...hourMap.entries()].map(([hour, count]) => ({ hour, count }));
+}
+
+/** A single stat card. */
+function StatCard({
+  label,
+  value,
+  suffix,
+  color,
+}: {
+  label: string;
+  value: number | string;
+  suffix?: string;
+  color: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "#1a1a2e",
+        border: "1px solid #2e2e3e",
+        borderRadius: 8,
+        padding: "12px 16px",
+        flex: 1,
+        minWidth: 120,
+      }}
+    >
+      <div
+        style={{
+          color: "#666",
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </div>
+      <div style={{ color, fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>
+        {value}
+        {suffix && (
+          <span style={{ fontSize: 12, fontWeight: 400, color: "#888", marginLeft: 4 }}>
+            {suffix}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function MetricsPanel({ agents, tasks, events, conflicts }: MetricsPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
+
+  // Summary statistics
+  const stats = useMemo(() => {
+    const totalAgents = agents.length;
+    const activeAgents = agents.filter((a) => a.status !== "disconnected").length;
+    const workingAgents = agents.filter((a) => a.status === "working").length;
+    const activeTasks = tasks.filter((t) => t.status !== "done" && t.status !== "failed").length;
+    const completedTasks = tasks.filter((t) => t.status === "done").length;
+    const failedTasks = tasks.filter((t) => t.status === "failed").length;
+    const totalFinished = completedTasks + failedTasks;
+    const completionRate = totalFinished > 0 ? Math.round((completedTasks / totalFinished) * 100) : 0;
+    const activeLocks = conflicts.length;
+
+    return {
+      totalAgents,
+      activeAgents,
+      workingAgents,
+      activeTasks,
+      completedTasks,
+      completionRate,
+      totalFinished,
+      activeLocks,
+    };
+  }, [agents, tasks, conflicts]);
 
   // Agent utilization pie data
   const utilization = useMemo(() => {
@@ -39,31 +150,18 @@ export default function MetricsPanel({ agents, events }: MetricsPanelProps) {
       .map(([name, value]) => ({ name, value }));
   }, [agents]);
 
-  // Task velocity — completions per hour from events
-  const velocity = useMemo(() => {
-    const completions = events.filter((e) => e.type === "task.completed");
-    const hourMap = new Map<string, number>();
+  // Task velocity -- completions per hour (last 12 hours)
+  const velocity = useMemo(() => buildHourlyBuckets(events, "task.completed", 12), [events]);
 
-    for (const e of completions) {
-      const d = new Date(e.timestamp);
-      const key = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:00`;
-      hourMap.set(key, (hourMap.get(key) || 0) + 1);
-    }
+  // Lock contention -- lock.acquired events per hour (last 12 hours)
+  const lockContention = useMemo(() => buildHourlyBuckets(events, "lock.acquired", 12), [events]);
 
-    // If no completions, show placeholder data
-    if (hourMap.size === 0) {
-      const now = new Date();
-      return Array.from({ length: 6 }, (_, i) => {
-        const h = new Date(now.getTime() - (5 - i) * 3600000);
-        return { hour: `${h.getHours()}:00`, tasks: 0 };
-      });
-    }
-
-    return [...hourMap.entries()]
-      .sort()
-      .slice(-12)
-      .map(([hour, tasks]) => ({ hour, tasks }));
-  }, [events]);
+  const chartTooltipStyle = {
+    background: "#1a1a2e",
+    border: "1px solid #2e2e3e",
+    borderRadius: 4,
+    fontSize: 11,
+  };
 
   if (collapsed) {
     return (
@@ -80,16 +178,30 @@ export default function MetricsPanel({ agents, events }: MetricsPanelProps) {
           alignItems: "center",
         }}
       >
-        <span style={{ color: "#14b8a6", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
+        <span
+          style={{
+            color: "#14b8a6",
+            fontSize: 13,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: 1,
+          }}
+        >
           Metrics
         </span>
-        <span style={{ color: "#555", fontSize: 11 }}>Click to expand</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{ color: "#888", fontSize: 11 }}>
+            {stats.activeAgents} agents | {stats.activeTasks} tasks | {stats.activeLocks} locks
+          </span>
+          <span style={{ color: "#555", fontSize: 11 }}>Click to expand</span>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{ background: "#12121a", border: "1px solid #1e1e2e", borderRadius: 8, padding: 16 }}>
+      {/* Header */}
       <div
         onClick={() => setCollapsed(true)}
         style={{
@@ -100,18 +212,71 @@ export default function MetricsPanel({ agents, events }: MetricsPanelProps) {
           cursor: "pointer",
         }}
       >
-        <span style={{ color: "#14b8a6", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
+        <span
+          style={{
+            color: "#14b8a6",
+            fontSize: 13,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: 1,
+          }}
+        >
           Metrics
         </span>
         <span style={{ color: "#555", fontSize: 11 }}>Click to collapse</span>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+      {/* Summary Stats Row */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <StatCard
+          label="Active Agents"
+          value={stats.activeAgents}
+          suffix={`/ ${stats.totalAgents}`}
+          color="#22c55e"
+        />
+        <StatCard
+          label="Working"
+          value={stats.workingAgents}
+          color="#3b82f6"
+        />
+        <StatCard
+          label="Active Tasks"
+          value={stats.activeTasks}
+          color="#f59e0b"
+        />
+        <StatCard
+          label="Completed"
+          value={stats.completedTasks}
+          color="#14b8a6"
+        />
+        <StatCard
+          label="Success Rate"
+          value={stats.totalFinished > 0 ? `${stats.completionRate}%` : "--"}
+          color={stats.completionRate >= 80 ? "#22c55e" : stats.completionRate >= 50 ? "#f59e0b" : "#ef4444"}
+        />
+        <StatCard
+          label="File Locks"
+          value={stats.activeLocks}
+          color={stats.activeLocks > 0 ? "#f97316" : "#555"}
+        />
+      </div>
+
+      {/* Charts Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
         {/* Task Velocity */}
         <div>
-          <div style={{ color: "#888", fontSize: 11, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
-            Task Velocity
+          <div
+            style={{
+              color: "#888",
+              fontSize: 11,
+              marginBottom: 8,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
+            Task Velocity (tasks/hr)
           </div>
-          <ResponsiveContainer width="100%" height={120}>
+          <ResponsiveContainer width="100%" height={140}>
             <AreaChart data={velocity}>
               <defs>
                 <linearGradient id="tealGrad" x1="0" y1="0" x2="0" y2="1">
@@ -119,54 +284,117 @@ export default function MetricsPanel({ agents, events }: MetricsPanelProps) {
                   <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="hour" tick={{ fill: "#555", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis hide allowDecimals={false} />
-              <Tooltip
-                contentStyle={{ background: "#1a1a2e", border: "1px solid #2e2e3e", borderRadius: 4, fontSize: 11 }}
-                labelStyle={{ color: "#888" }}
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+              <XAxis
+                dataKey="hour"
+                tick={{ fill: "#555", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
               />
-              <Area type="monotone" dataKey="tasks" stroke="#14b8a6" fill="url(#tealGrad)" strokeWidth={2} />
+              <YAxis hide allowDecimals={false} />
+              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#888" }} />
+              <Area
+                type="monotone"
+                dataKey="count"
+                name="Tasks"
+                stroke="#14b8a6"
+                fill="url(#tealGrad)"
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Agent Utilization */}
         <div>
-          <div style={{ color: "#888", fontSize: 11, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+          <div
+            style={{
+              color: "#888",
+              fontSize: 11,
+              marginBottom: 8,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
             Agent Utilization
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <ResponsiveContainer width={120} height={120}>
+            <ResponsiveContainer width={120} height={140}>
               <PieChart>
-                <Pie data={utilization} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={30} outerRadius={50}>
+                <Pie
+                  data={utilization}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={55}
+                >
                   {utilization.map((entry) => (
                     <Cell
                       key={entry.name}
-                      fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS] || "#555"}
+                      fill={PIE_COLORS[entry.name] || "#555"}
                     />
                   ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{ background: "#1a1a2e", border: "1px solid #2e2e3e", borderRadius: 4, fontSize: 11 }}
-                />
+                <Tooltip contentStyle={chartTooltipStyle} />
               </PieChart>
             </ResponsiveContainer>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {utilization.map((entry) => (
-                <div key={entry.name} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#aaa" }}>
+                <div
+                  key={entry.name}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 11,
+                    color: "#aaa",
+                  }}
+                >
                   <span
                     style={{
                       width: 8,
                       height: 8,
                       borderRadius: "50%",
-                      background: PIE_COLORS[entry.name as keyof typeof PIE_COLORS] || "#555",
+                      background: PIE_COLORS[entry.name] || "#555",
+                      flexShrink: 0,
                     }}
                   />
-                  {entry.name}: {entry.value}
+                  {STATUS_LABELS[entry.name] || entry.name}: {entry.value}
                 </div>
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Lock Contention */}
+        <div>
+          <div
+            style={{
+              color: "#888",
+              fontSize: 11,
+              marginBottom: 8,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
+            Lock Contention (locks/hr)
+          </div>
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={lockContention}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+              <XAxis
+                dataKey="hour"
+                tick={{ fill: "#555", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis hide allowDecimals={false} />
+              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#888" }} />
+              <Bar dataKey="count" name="Locks" fill="#f97316" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

@@ -1,8 +1,10 @@
-import { useState } from "react";
-import type { Finding } from "../../api/warroom";
+import { useMemo, useState } from "react";
+import type { Agent, Finding } from "../../api/warroom";
+import styles from "./FindingsWall.module.less";
 
 interface FindingsWallProps {
   findings: Finding[];
+  agents?: Agent[];
 }
 
 function formatTime(ts: string): string {
@@ -12,85 +14,97 @@ function formatTime(ts: string): string {
       minute: "2-digit",
     });
   } catch {
-    return "—";
+    return "--:--";
   }
 }
 
-export default function FindingsWall({ findings }: FindingsWallProps) {
+export default function FindingsWall({ findings, agents }: FindingsWallProps) {
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const filtered = search
-    ? findings.filter(
-        (f) =>
-          f.key.toLowerCase().includes(search.toLowerCase()) ||
-          f.value.toLowerCase().includes(search.toLowerCase()),
-      )
-    : findings;
+  // Build agent name lookup
+  const agentNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (agents) {
+      for (const a of agents) {
+        map.set(a.agent_id, a.name);
+      }
+    }
+    return map;
+  }, [agents]);
+
+  const filtered = useMemo(() => {
+    if (!search) return findings;
+    const lower = search.toLowerCase();
+    return findings.filter(
+      (f) =>
+        f.key.toLowerCase().includes(lower) ||
+        f.value.toLowerCase().includes(lower) ||
+        (agentNames.get(f.agent_id) || "").toLowerCase().includes(lower),
+    );
+  }, [findings, search, agentNames]);
+
+  const toggleExpand = (key: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
 
   return (
-    <div style={{ background: "#12121a", border: "1px solid #1e1e2e", borderRadius: 8, padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span style={{ color: "#14b8a6", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <span className={styles.title}>
           Shared Findings
+          <span className={styles.count}>{findings.length}</span>
         </span>
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search findings..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            background: "#1e1e2e",
-            border: "1px solid #2e2e3e",
-            borderRadius: 4,
-            padding: "4px 8px",
-            color: "#e0e0e0",
-            fontSize: 11,
-            outline: "none",
-            width: 140,
-          }}
+          className={styles.searchInput}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 8 }}>
+      <div className={styles.grid}>
         {filtered.length === 0 && (
-          <div style={{ color: "#555", fontSize: 12, textAlign: "center", padding: 20, fontStyle: "italic", gridColumn: "1 / -1" }}>
-            No findings shared yet
+          <div className={styles.empty}>
+            {search ? "No findings match your search" : "No findings shared yet"}
           </div>
         )}
-        {filtered.map((finding) => (
-          <div
-            key={finding.key}
-            onClick={() => setExpanded(expanded === finding.key ? null : finding.key)}
-            style={{
-              background: "#1a1a2e",
-              border: "1px solid #1e1e2e",
-              borderRadius: 6,
-              padding: 12,
-              cursor: "pointer",
-              transition: "border-color 0.15s ease",
-            }}
-          >
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#e0e0e0", marginBottom: 4 }}>
-              {finding.key}
-            </div>
+        {filtered.map((finding) => {
+          const isExpanded = expanded.has(finding.key);
+          const agentLabel =
+            agentNames.get(finding.agent_id) ||
+            finding.agent_id?.slice(0, 12) ||
+            "unknown";
+
+          return (
             <div
-              style={{
-                fontSize: 11,
-                color: "#aaa",
-                overflow: expanded === finding.key ? "visible" : "hidden",
-                textOverflow: expanded === finding.key ? "unset" : "ellipsis",
-                whiteSpace: expanded === finding.key ? "pre-wrap" : "nowrap",
-                maxHeight: expanded === finding.key ? "none" : 20,
-              }}
+              key={finding.key}
+              className={styles.card}
+              onClick={() => toggleExpand(finding.key)}
             >
-              {finding.value}
+              <div className={styles.cardKey}>{finding.key}</div>
+              <div
+                className={
+                  isExpanded ? styles.cardValueExpanded : styles.cardValue
+                }
+              >
+                {finding.value}
+              </div>
+              <div className={styles.cardFooter}>
+                <span>{agentLabel}</span>
+                <span>{formatTime(finding.updated_at)}</span>
+              </div>
             </div>
-            <div style={{ fontSize: 10, color: "#555", marginTop: 6, display: "flex", justifyContent: "space-between" }}>
-              <span>{finding.agent_id?.slice(0, 12)}</span>
-              <span>{formatTime(finding.updated_at)}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

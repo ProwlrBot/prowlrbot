@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Tag } from "antd";
-import type { WarRoomEvent } from "../../api/warroom";
+import type { Agent, WarRoomEvent } from "../../api/warroom";
+import styles from "./LiveFeed.module.less";
 
 interface LiveFeedProps {
   events: WarRoomEvent[];
+  agents?: Agent[];
 }
 
 const EVENT_COLORS: Record<string, string> = {
@@ -18,14 +20,24 @@ const EVENT_COLORS: Record<string, string> = {
   "lock.acquired": "orange",
   "lock.released": "default",
   "finding.shared": "gold",
+  "conflict.detected": "volcano",
 };
 
-const FILTERS = ["all", "tasks", "locks", "broadcasts", "findings"] as const;
+const FILTERS = [
+  { key: "all", label: "All" },
+  { key: "tasks", label: "Tasks" },
+  { key: "locks", label: "Locks" },
+  { key: "broadcasts", label: "Broadcasts" },
+  { key: "findings", label: "Findings" },
+] as const;
 
 function matchesFilter(event: WarRoomEvent, filter: string): boolean {
   if (filter === "all") return true;
   if (filter === "tasks") return event.type.startsWith("task.");
-  if (filter === "locks") return event.type.startsWith("lock.");
+  if (filter === "locks")
+    return (
+      event.type.startsWith("lock.") || event.type.startsWith("conflict.")
+    );
   if (filter === "broadcasts") return event.type === "agent.broadcast";
   if (filter === "findings") return event.type === "finding.shared";
   return true;
@@ -36,73 +48,124 @@ function formatTime(ts: string): string {
     return new Date(ts).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
     });
   } catch {
-    return "—";
+    return "--:--";
   }
 }
 
-export default function LiveFeed({ events }: LiveFeedProps) {
-  const [filter, setFilter] = useState<string>("all");
+function extractDescription(event: WarRoomEvent): string {
+  const payload = event.payload;
+  if (payload?.message) return String(payload.message);
+  if (payload?.title) return String(payload.title);
+  if (payload?.key) return `shared: ${String(payload.key)}`;
+  if (payload?.file_path) return String(payload.file_path);
+  if (payload?.status) return `status: ${String(payload.status)}`;
+  return "";
+}
 
-  const filtered = events.filter((e) => matchesFilter(e, filter));
+export default function LiveFeed({ events, agents }: LiveFeedProps) {
+  const [filter, setFilter] = useState<string>("all");
+  const [agentFilter, setAgentFilter] = useState<string>("all");
+
+  // Get unique agent IDs from events for the agent filter dropdown
+  const agentIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const e of events) {
+      if (e.agent_id) ids.add(e.agent_id);
+    }
+    return Array.from(ids).sort();
+  }, [events]);
+
+  // Build agent name lookup
+  const agentNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (agents) {
+      for (const a of agents) {
+        map.set(a.agent_id, a.name);
+      }
+    }
+    return map;
+  }, [agents]);
+
+  const filtered = useMemo(() => {
+    return events
+      .filter((e) => matchesFilter(e, filter))
+      .filter(
+        (e) => agentFilter === "all" || e.agent_id === agentFilter,
+      )
+      .slice(0, 100);
+  }, [events, filter, agentFilter]);
 
   return (
-    <div style={{ background: "#12121a", border: "1px solid #1e1e2e", borderRadius: 8, padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span style={{ color: "#14b8a6", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
-          Live Feed
-        </span>
-        <div style={{ display: "flex", gap: 4 }}>
-          {FILTERS.map((f) => (
-            <span
-              key={f}
-              onClick={() => setFilter(f)}
-              style={{
-                fontSize: 11,
-                padding: "2px 8px",
-                borderRadius: 4,
-                cursor: "pointer",
-                background: filter === f ? "rgba(20,184,166,0.15)" : "#1e1e2e",
-                color: filter === f ? "#14b8a6" : "#888",
-              }}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <span className={styles.title}>Live Feed</span>
+        <div className={styles.controls}>
+          <div className={styles.filters}>
+            {FILTERS.map((f) => (
+              <span
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`${styles.filterTab} ${
+                  filter === f.key ? styles.filterTabActive : ""
+                }`}
+              >
+                {f.label}
+              </span>
+            ))}
+          </div>
+          {agentIds.length > 0 && (
+            <select
+              className={styles.agentFilter}
+              value={agentFilter}
+              onChange={(e) => setAgentFilter(e.target.value)}
+              title="Filter by agent"
             >
-              {f}
-            </span>
-          ))}
+              <option value="all">All agents</option>
+              {agentIds.map((id) => (
+                <option key={id} value={id}>
+                  {agentNames.get(id) || id.slice(0, 16)}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
-      <div style={{ maxHeight: 400, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+      <div className={styles.eventList}>
         {filtered.length === 0 && (
-          <div style={{ color: "#555", fontSize: 12, textAlign: "center", padding: 20, fontStyle: "italic" }}>
-            No events yet
-          </div>
+          <div className={styles.empty}>No events yet</div>
         )}
-        {filtered.map((event) => (
-          <div
-            key={event.event_id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 0",
-              borderBottom: "1px solid #1e1e2e",
-              fontSize: 12,
-              animation: "slideIn 0.3s ease",
-            }}
-          >
-            <span style={{ color: "#555", minWidth: 50, fontSize: 11 }}>
-              {formatTime(event.timestamp)}
-            </span>
-            <Tag color={EVENT_COLORS[event.type] || "default"} style={{ fontSize: 10, margin: 0 }}>
-              {event.type.split(".").pop()}
-            </Tag>
-            <span style={{ color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {event.agent_id ? event.agent_id.slice(0, 12) : "system"}
-              {event.task_id ? ` → ${event.task_id.slice(0, 12)}` : ""}
-            </span>
-          </div>
-        ))}
+        {filtered.map((event) => {
+          const desc = extractDescription(event);
+          const agentLabel =
+            agentNames.get(event.agent_id || "") ||
+            (event.agent_id ? event.agent_id.slice(0, 12) : "system");
+
+          return (
+            <div key={event.event_id} className={styles.eventRow}>
+              <span className={styles.eventTime}>
+                {formatTime(event.timestamp)}
+              </span>
+              <Tag
+                color={EVENT_COLORS[event.type] || "default"}
+                style={{ fontSize: 10, margin: 0 }}
+              >
+                {event.type.split(".").pop()}
+              </Tag>
+              <span className={styles.eventAgent}>
+                {agentLabel}
+                {event.task_id ? ` \u2192 ${event.task_id.slice(0, 12)}` : ""}
+              </span>
+              {desc && (
+                <span className={styles.eventPayload} title={desc}>
+                  {desc}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

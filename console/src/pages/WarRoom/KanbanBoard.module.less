@@ -8,8 +8,8 @@
 
 .column {
   flex: 1;
-  min-width: 240px;
-  max-width: 320px;
+  min-width: 220px;
+  max-width: 300px;
   background: #12121a;
   border: 1px solid #1e1e2e;
   border-radius: 8px;
@@ -28,12 +28,25 @@
   margin-bottom: 4px;
 }
 
+.columnHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.columnDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .columnTitle {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #14b8a6;
+  color: #e0e0e0;
 }
 
 .columnCount {
@@ -50,11 +63,12 @@
   flex-direction: column;
   gap: 8px;
   min-height: 60px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
 }
 
 .cardListDragOver {
   background: rgba(20, 184, 166, 0.05);
-  border-radius: 6px;
 }
 
 .card {
@@ -63,18 +77,28 @@
   border-radius: 6px;
   padding: 12px;
   cursor: grab;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
   border-left: 3px solid #3b82f6;
 }
 
 .card:hover {
   border-color: #14b8a6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .cardDragging {
   box-shadow: 0 8px 24px rgba(20, 184, 166, 0.2);
   transform: scale(1.02);
   border-color: #14b8a6;
+}
+
+.cardBlocked {
+  border: 1px dashed #ef4444;
+  border-left: 3px dashed #ef4444;
 }
 
 .cardHigh {
@@ -93,8 +117,18 @@
   font-size: 13px;
   font-weight: 600;
   color: #e0e0e0;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.3;
+}
+
+.cardDescription {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
 }
 
 .cardMeta {
@@ -129,6 +163,16 @@
   border: 1px dashed #ef4444;
 }
 
+.tagPriorityHigh {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.tagPriorityLow {
+  background: rgba(136, 136, 136, 0.15);
+  color: #888;
+}
+
 .progressNote {
   font-size: 11px;
   color: #666;
@@ -136,6 +180,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cardTimestamp {
+  font-size: 10px;
+  color: #444;
+  margin-top: 6px;
 }
 
 .empty {

@@ -121,8 +121,13 @@ STATUS_HTML = """\
   }
 
   function badgeClass(type){
-    var map = {register:'badge-register',claim:'badge-claim',complete:'badge-complete',
-               fail:'badge-fail',broadcast:'badge-broadcast'};
+    if(!type) return 'event-badge badge-default';
+    var map = {'agent.connected':'badge-register','agent.disconnected':'badge-fail',
+               'task.created':'badge-claim','task.claimed':'badge-claim',
+               'task.updated':'badge-default','task.completed':'badge-complete',
+               'task.failed':'badge-fail','agent.broadcast':'badge-broadcast',
+               'lock.acquired':'badge-claim','lock.released':'badge-default',
+               'room.created':'badge-register'};
     return 'event-badge ' + (map[type] || 'badge-default');
   }
 
@@ -150,7 +155,7 @@ STATUS_HTML = """\
     var pending=0, active=0, done=0;
     tasks.forEach(function(t){
       if(t.status==='pending') pending++;
-      else if(t.status==='active') active++;
+      else if(t.status==='claimed'||t.status==='in_progress') active++;
       else if(t.status==='done') done++;
     });
     c2.appendChild(el('div','sub', pending+' pending / '+active+' active / '+done+' done'));
@@ -199,11 +204,17 @@ STATUS_HTML = """\
     }
     events.forEach(function(ev){
       var row = el('div','event-item');
-      var ts = ev.timestamp || ev.created_at || '';
+      var ts = ev.timestamp || '';
       if(ts.length > 19) ts = ts.substring(0,19).replace('T',' ');
       row.appendChild(el('span','event-time', ts));
-      row.appendChild(el('span', badgeClass(ev.event_type || ''), ev.event_type || '?'));
-      row.appendChild(el('span','event-desc', ev.description || ev.data || ''));
+      var evType = ev.type || '?';
+      row.appendChild(el('span', badgeClass(evType), evType));
+      // Build description from payload fields
+      var payload = ev.payload || {};
+      var desc = payload.message || payload.summary || payload.reason
+                 || payload.title || payload.name || payload.file || '';
+      if(ev.agent_id) desc = (desc ? desc : evType) + ' [' + (ev.agent_id || '').substring(0,12) + ']';
+      row.appendChild(el('span','event-desc', desc));
       sec.appendChild(row);
     });
     return sec;
