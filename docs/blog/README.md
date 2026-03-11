@@ -1,6 +1,6 @@
 # ProwlrBot Blog
 
-> Humanized posts about what we're building, why it matters, and where we're headed.
+>  Posts about what we're building, why it matters, and where we're headed.
 
 ## Categories
 
