@@ -252,7 +252,7 @@ def market_popular(limit: int):
 
 @market_group.command(name="update")
 @click.option("--token", envvar="GITHUB_TOKEN", default=None, help="GitHub token (or set GITHUB_TOKEN)")
-def market_update(token: str):
+def market_update(token: "str | None"):
     """Sync marketplace registry from ProwlrBot/prowlr-marketplace on GitHub."""
     from ..marketplace.registry import sync_registry
 

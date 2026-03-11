@@ -221,6 +221,27 @@ class MarketplaceStore:
         if "tags" in filtered:
             filtered["tags"] = json.dumps(filtered["tags"])
 
+        # Normalize enum fields to their .value for DB storage
+        if "category" in filtered:
+            val = filtered["category"]
+            if hasattr(val, "value"):
+                filtered["category"] = val.value
+            else:
+                try:
+                    filtered["category"] = MarketplaceCategory(val).value
+                except ValueError:
+                    pass  # store as-is, will be caught on read
+
+        if "pricing_model" in filtered:
+            val = filtered["pricing_model"]
+            if hasattr(val, "value"):
+                filtered["pricing_model"] = val.value
+
+        if "status" in filtered:
+            val = filtered["status"]
+            if hasattr(val, "value"):
+                filtered["status"] = val.value
+
         filtered["updated_at"] = datetime.now(timezone.utc).isoformat()
 
         set_clause = ", ".join(f"{k} = ?" for k in filtered)

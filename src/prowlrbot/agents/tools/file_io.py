@@ -244,6 +244,7 @@ async def write_file(
         )
 
     try:
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
         return ToolResponse(
@@ -363,6 +364,7 @@ async def append_file(
         )
 
     try:
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "a", encoding="utf-8") as file:
             file.write(content)
         return ToolResponse(

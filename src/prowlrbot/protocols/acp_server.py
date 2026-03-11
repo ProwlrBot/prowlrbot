@@ -117,8 +117,11 @@ class ACPServer:
 
     async def run_stdio(self) -> None:
         """Run the ACP server reading JSON-RPC from stdin, writing to stdout."""
+        import asyncio
+
+        loop = asyncio.get_event_loop()
         while True:
-            line = sys.stdin.readline()
+            line = await loop.run_in_executor(None, sys.stdin.readline)
             if not line:
                 break
             line = line.strip()

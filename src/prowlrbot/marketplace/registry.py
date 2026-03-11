@@ -11,7 +11,7 @@ from typing import Optional
 
 import httpx
 
-from .models import MarketplaceCategory, MarketplaceListing, PricingModel
+from .models import ListingStatus, MarketplaceCategory, MarketplaceListing, PricingModel
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ def sync_registry(
         title = raw.get("title", raw.get("name", dir_name))
         description = raw.get("description", "")
         version = raw.get("version", "1.0.0")
-        author = raw.get("author", raw.get("author_id", "mcpcentral"))
+        author = raw.get("author", raw.get("author_id", "unknown"))
         tags = raw.get("tags", raw.get("keywords", []))
         pricing = raw.get("pricing_model", "free")
         price = float(raw.get("price", 0))
@@ -205,17 +205,23 @@ def sync_registry(
             })
             updated += 1
         else:
+            try:
+                pm = PricingModel(pricing)
+            except ValueError:
+                logger.warning("Unknown pricing model '%s' for %s, defaulting to free", pricing, dir_name)
+                pm = PricingModel.free
+
             listing = MarketplaceListing(
                 id=listing_id,
-                author_id=author if isinstance(author, str) else author.get("name", "mcpcentral"),
+                author_id=author if isinstance(author, str) else author.get("name", "unknown"),
                 title=title,
                 description=description,
                 category=cat,
                 version=version,
-                pricing_model=PricingModel(pricing) if pricing in PricingModel.__members__ else PricingModel.free,
+                pricing_model=pm,
                 price=price,
                 tags=tags if isinstance(tags, list) else [],
-                status="approved",
+                status=ListingStatus.approved,
             )
             store.publish_listing(listing)
             added += 1

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 
 class MarketplaceCategory(StrEnum):
-    """The 6 marketplace listing categories (aligned with mcpcentral/prowlr-marketplace)."""
+    """The 6 marketplace listing categories (aligned with ProwlrBot/prowlr-marketplace)."""
 
     skills = "skills"
     agents = "agents"

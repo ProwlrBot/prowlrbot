@@ -182,9 +182,9 @@ export function Footer({ lang: _lang }: { lang: Lang }) {
               gap: "var(--space-2)",
             }}
           >
-            <span>Privacy</span>
+            <Link to="/docs/privacy" style={{ color: "inherit", textDecoration: "none" }}>Privacy</Link>
             <span>&middot;</span>
-            <span>Terms</span>
+            <Link to="/docs/terms" style={{ color: "inherit", textDecoration: "none" }}>Terms</Link>
           </div>
         </div>
       </div>
