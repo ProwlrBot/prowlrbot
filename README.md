@@ -365,7 +365,8 @@ Connect any MCP server — tools appear instantly:
 ```
 ~/.prowlrbot/config.json
 ```
-```json
+
+```
 {
   "mcp": {
     "servers": {
