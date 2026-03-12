@@ -59,16 +59,16 @@ require_buildx_imagetools() {
 
 require_buildx_imagetools
 
-ACR_REGISTRY="agentscope-registry.ap-southeast-1.cr.aliyuncs.com"
-IMAGE="prowlr/prowlrbot"
+GHCR_REGISTRY="ghcr.io"
+IMAGE="prowlrbot/prowlrbot"
 
-ACR_PRE="${ACR_REGISTRY}/${IMAGE}:pre"
-ACR_LATEST="${ACR_REGISTRY}/${IMAGE}:latest"
+GHCR_PRE="${GHCR_REGISTRY}/${IMAGE}:pre"
+GHCR_LATEST="${GHCR_REGISTRY}/${IMAGE}:latest"
 DH_PRE="docker.io/${IMAGE}:pre"
 DH_LATEST="docker.io/${IMAGE}:latest"
 
-log "ACR: ${ACR_PRE} -> ${ACR_LATEST}"
-docker buildx imagetools create -t "$ACR_LATEST" "$ACR_PRE"
+log "GHCR: ${GHCR_PRE} -> ${GHCR_LATEST}"
+docker buildx imagetools create -t "$GHCR_LATEST" "$GHCR_PRE"
 
 log "Docker Hub: ${DH_PRE} -> ${DH_LATEST}"
 docker buildx imagetools create -t "$DH_LATEST" "$DH_PRE"

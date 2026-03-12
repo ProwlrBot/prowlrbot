@@ -1,0 +1,45 @@
+# fly.toml — Fly.io configuration for ProwlrBot
+# Deploy: flyctl deploy
+# Docs:   https://fly.io/docs/reference/configuration/
+
+app = "prowlrbot"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "deploy/Dockerfile.fly"
+
+[env]
+  PROWLRBOT_PORT = "8088"
+  PROWLRBOT_WORKING_DIR = "/data"
+  PROWLRBOT_RUNNING_IN_CONTAINER = "1"
+  NODE_ENV = "production"
+
+# Persistent volume for config, SQLite databases, chat history, skills
+[mounts]
+  source = "prowlrbot_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8088
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+[[http_service.checks]]
+  grace_period = "30s"
+  interval = "15s"
+  method = "GET"
+  path = "/api/health"
+  timeout = "5s"
+
+# Machine sizing — shared-cpu-2x is a good balance for an AI agent server.
+# Scale up to performance-2x if running heavy workloads.
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "1gb"

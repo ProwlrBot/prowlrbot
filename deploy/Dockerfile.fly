@@ -1,0 +1,60 @@
+# -----------------------------------------------------------------------------
+# Fly.io-optimized Dockerfile for ProwlrBot
+# Lean build: no desktop environment, headless-only browser support.
+# -----------------------------------------------------------------------------
+
+# Stage 1: Build console frontend
+# -----------------------------------------------------------------------------
+FROM node:20-slim AS console-builder
+WORKDIR /app/console
+COPY console/package.json console/package-lock.json ./
+RUN npm ci --include=dev
+COPY console/ ./
+RUN npm run build
+
+# Stage 2: Runtime
+# -----------------------------------------------------------------------------
+FROM python:3.12-slim
+
+ENV NODE_ENV=production \
+    PYTHONUNBUFFERED=1 \
+    PROWLRBOT_WORKING_DIR=/data \
+    PROWLRBOT_RUNNING_IN_CONTAINER=1 \
+    PROWLRBOT_PORT=8088
+
+# Install only what's needed: git (for skills), curl (healthcheck), chromium (headless browser tool)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    chromium \
+    fonts-liberation \
+  && rm -rf /var/lib/apt/lists/*
+
+# Playwright: use system Chromium in headless mode
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
+WORKDIR /app
+
+# Install Python package
+COPY pyproject.toml setup.py README.md ./
+COPY src ./src
+COPY --from=console-builder /app/console/dist/ ./src/prowlrbot/console/
+RUN pip install --no-cache-dir .
+
+# Create non-root user with home at /data (so ~/.prowlrbot resolves inside volume)
+RUN groupadd -r prowlr && useradd -r -g prowlr -d /data -s /bin/sh prowlr \
+  && mkdir -p /data/.prowlrbot /data/.prowlrbot.secret \
+  && chown -R prowlr:prowlr /data
+
+# Init default config into the volume path
+ENV HOME=/data
+RUN prowlr init --defaults --accept-security \
+  && chown -R prowlr:prowlr /data
+
+USER prowlr
+
+EXPOSE 8088
+
+# Fly.io expects a single foreground process
+CMD ["prowlr", "app", "--host", "0.0.0.0", "--port", "8088"]

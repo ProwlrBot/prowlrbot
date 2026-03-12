@@ -1,0 +1,15 @@
+# wrangler.toml — Cloudflare Pages configuration for ProwlrBot website
+# Deploy: npx wrangler pages deploy dist --project-name prowlrbot
+# Docs:   https://developers.cloudflare.com/pages/
+
+name = "prowlrbot"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "dist"
+
+[build]
+  command = "npm run build"
+
+# Environment variables for the build
+[build.environment]
+  NODE_VERSION = "20"
+  VITE_BASE_PATH = "/"
