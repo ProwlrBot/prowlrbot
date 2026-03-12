@@ -27,8 +27,8 @@
       "cwd": "/Users/nunu/prowlrbot/prowlrbot",
       "env": {
         "PYTHONPATH": "/Users/nunu/prowlrbot/prowlrbot/src",
-        "PROWLR_AGENT_NAME": "",
-        "PROWLR_CAPABILITIES": ""
+        "PROWLR_AGENT_NAME": "prowlr",
+        "PROWLR_CAPABILITIES": "code,design,review,architecture"
       }
     }
   }

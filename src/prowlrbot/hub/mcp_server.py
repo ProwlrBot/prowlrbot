@@ -67,10 +67,11 @@ def _auto_register() -> Dict[str, str]:
             _get_engine().heartbeat(_agent_id)
         return {"agent_id": _agent_id, "room_id": _room_id}
 
-    # Generate agent name from environment
-    terminal_id = os.environ.get("PROWLR_AGENT_NAME", "")
-    if not terminal_id:
-        terminal_id = f"claude-{platform.node().split('.')[0]}-{os.getpid()}"
+    # Generate agent name from environment — always append PID for uniqueness
+    base_name = os.environ.get("PROWLR_AGENT_NAME", "")
+    if not base_name:
+        base_name = f"claude-{platform.node().split('.')[0]}"
+    terminal_id = f"{base_name}-{os.getpid()}"
 
     capabilities = os.environ.get("PROWLR_CAPABILITIES", "").split(",")
     capabilities = [c.strip() for c in capabilities if c.strip()]
