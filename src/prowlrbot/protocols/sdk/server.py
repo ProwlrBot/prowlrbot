@@ -154,9 +154,9 @@ class ROARServer:
                 context={"in_reply_to": msg.id},
             )
 
-        import asyncio
+        import inspect
 
-        if asyncio.iscoroutinefunction(handler):
+        if inspect.iscoroutinefunction(handler):
             return await handler(msg)
         return handler(msg)  # type: ignore[return-value]
 

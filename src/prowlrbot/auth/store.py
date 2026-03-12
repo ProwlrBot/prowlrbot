@@ -168,6 +168,11 @@ class UserStore:
                 updates[key] = value
         if not updates:
             return self.get_user_by_id(user_id)
+        # Validate column names to prevent SQL injection via dynamic keys
+        import re
+        for k in updates:
+            if not re.match(r"^[a-z_]+$", k):
+                raise ValueError(f"Invalid column name: {k}")
         set_clause = ", ".join(f"{k} = ?" for k in updates)
         values = list(updates.values()) + [user_id]
         self._conn.execute(

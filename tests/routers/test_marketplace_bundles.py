@@ -56,8 +56,14 @@ def store():
 @pytest.fixture
 def client(store):
     marketplace_mod = _load_marketplace_module()
+    from prowlrbot.auth.middleware import get_current_user
+    from prowlrbot.auth.models import User, Role
+
     app = FastAPI()
     app.include_router(marketplace_mod.router)
+    app.dependency_overrides[get_current_user] = lambda: User(
+        id="test-user", username="tester", role=Role.admin,
+    )
     original = marketplace_mod._get_store
 
     def _fake_get_store():

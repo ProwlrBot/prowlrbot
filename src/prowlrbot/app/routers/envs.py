@@ -5,21 +5,22 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from ...auth.middleware import get_current_user
 from ...envs import load_envs, save_envs, delete_env_var
 
 router = APIRouter(prefix="/envs", tags=["envs"])
 
 
 def mask_env_value(value: str) -> str:
-    """Mask a secret value, showing only first 4 chars."""
+    """Mask a secret value, showing only first 2 chars."""
     if not value:
         return ""
-    if len(value) <= 4:
+    if len(value) <= 2:
         return "***"
-    return value[:4] + "***"
+    return value[:2] + "***"
 
 
 # ------------------------------------------------------------------
@@ -59,6 +60,7 @@ async def list_envs() -> List[EnvVar]:
 )
 async def batch_save_envs(
     body: Dict[str, str],
+    _user=Depends(get_current_user),
 ) -> List[EnvVar]:
     """Batch save – full replacement of all env vars."""
     # Validate keys
@@ -78,7 +80,7 @@ async def batch_save_envs(
     response_model=List[EnvVar],
     summary="Delete an environment variable",
 )
-async def delete_env(key: str) -> List[EnvVar]:
+async def delete_env(key: str, _user=Depends(get_current_user)) -> List[EnvVar]:
     """Delete a single env var."""
     envs = load_envs()
     if key not in envs:

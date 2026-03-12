@@ -15,7 +15,7 @@ class TestReplayBuffer(unittest.TestCase):
 
     def _run(self, coro):
         """Helper to run async tests."""
-        return asyncio.get_event_loop().run_until_complete(coro)
+        return asyncio.run(coro)
 
     def test_replay_disabled_by_default(self):
         """Subscribers without replay=True get no buffered events."""

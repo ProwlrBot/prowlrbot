@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing
 from prowlrbot.marketplace.store import MarketplaceStore
+from prowlrbot.auth.models import User, Role
 
 
 def _load_marketplace_module():
@@ -25,6 +26,9 @@ def _load_marketplace_module():
     sys.modules[module_name] = mod
     spec.loader.exec_module(mod)
     return mod
+
+
+_TEST_USER = User(id="test-user", username="tester", role=Role.admin)
 
 
 @pytest.fixture
@@ -47,8 +51,11 @@ def client(store):
     mod = _load_marketplace_module()
     router = mod.router
     from fastapi import FastAPI
+    from prowlrbot.auth.middleware import get_current_user
+
     app = FastAPI()
     app.include_router(router)
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     with patch.object(mod, "_get_store", return_value=store):
         yield TestClient(app)
 

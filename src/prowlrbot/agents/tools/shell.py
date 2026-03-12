@@ -32,7 +32,7 @@ class ShellPolicy:
             # Navigation & inspection
             "ls", "pwd", "cat", "head", "tail", "wc", "file", "stat",
             "find", "grep", "rg", "awk", "sed", "sort", "uniq", "diff",
-            "tree", "which", "whereis", "echo", "printf", "date", "env",
+            "tree", "which", "whereis", "echo", "printf", "date",
             # Development (python/python3 excluded — use pip for installs,
             # agent tools for code execution)
             "pip", "pip3", "node", "npm", "npx",
@@ -83,8 +83,11 @@ class ShellPolicy:
             r"\$\(",  # $(command substitution)
             r"`",  # backtick substitution
             r"\$\{",  # ${variable expansion}
-            r"<\(",  # <(process substitution)
+            r"<\(",  # <(process substitution input)
+            r">\(",  # >(process substitution output)
             r"\$'",  # $'...' ANSI-C quoting (hex/octal escapes)
+            r"\s+>{1,2}\s*/",  # redirect to absolute path (> /path, >> /path)
+            r"\s+2>\s*/",  # stderr redirect to absolute path
         ]
     )
 

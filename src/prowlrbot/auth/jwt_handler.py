@@ -63,6 +63,7 @@ class JWTHandler:
             iat=now,
             exp=now + self._expiry_minutes * 60,
             iss="prowlrbot",
+            aud="prowlrbot-api",
         )
         header_b64 = _b64url_encode(json.dumps(header, separators=(",", ":")).encode())
         payload_b64 = _b64url_encode(
@@ -104,6 +105,10 @@ class JWTHandler:
         # Validate issuer
         if payload.iss != "prowlrbot":
             raise ValueError("Invalid JWT issuer")
+
+        # Validate audience
+        if payload.aud != "prowlrbot-api":
+            raise ValueError("Invalid JWT audience")
 
         return payload
 

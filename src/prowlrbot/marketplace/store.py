@@ -9,6 +9,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+def _escape_like(value: str) -> str:
+    """Escape SQL LIKE wildcards in user input."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 from .models import (
     Bundle,
     CreditBalance,
@@ -273,8 +278,11 @@ class MarketplaceStore:
         params: list[object] = []
 
         if query:
-            conditions.append("(title LIKE ? OR description LIKE ? OR tags LIKE ?)")
-            like = f"%{query}%"
+            conditions.append(
+                "(title LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\'"
+                " OR tags LIKE ? ESCAPE '\\')"
+            )
+            like = f"%{_escape_like(query)}%"
             params.extend([like, like, like])
 
         if category:
@@ -282,13 +290,13 @@ class MarketplaceStore:
             params.append(category)
 
         if tags:
-            tag_clauses = ["tags LIKE ?" for _ in tags]
+            tag_clauses = ["tags LIKE ? ESCAPE '\\'" for _ in tags]
             conditions.append(f"({' OR '.join(tag_clauses)})")
-            params.extend(f"%{t}%" for t in tags)
+            params.extend(f"%{_escape_like(t)}%" for t in tags)
 
         if persona:
-            conditions.append("persona_tags LIKE ?")
-            params.append(f"%{persona}%")
+            conditions.append("persona_tags LIKE ? ESCAPE '\\'")
+            params.append(f"%{_escape_like(persona)}%")
 
         if difficulty:
             conditions.append("difficulty = ?")
@@ -390,6 +398,11 @@ class MarketplaceStore:
 
         filtered["updated_at"] = datetime.now(timezone.utc).isoformat()
 
+        # Validate column names to prevent SQL injection via dynamic keys
+        import re
+        for k in filtered:
+            if not re.match(r"^[a-z_]+$", k):
+                raise ValueError(f"Invalid column name: {k}")
         set_clause = ", ".join(f"{k} = ?" for k in filtered)
         params = list(filtered.values()) + [listing_id]
         self._conn.execute(f"UPDATE listings SET {set_clause} WHERE id = ?", params)

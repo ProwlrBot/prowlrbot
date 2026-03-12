@@ -69,11 +69,11 @@ def validate_file_path(file_path: str) -> bool:
     except (ValueError, OSError):
         return False
 
-    # Check blocked paths first
+    # Check blocked paths first (component-level matching, not string prefix)
     for blocked in _BLOCKED_PREFIXES:
         try:
             blocked_resolved = blocked.resolve()
-            if str(resolved).startswith(str(blocked_resolved)):
+            if resolved == blocked_resolved or resolved.is_relative_to(blocked_resolved):
                 return False
         except (ValueError, OSError):
             continue
@@ -82,7 +82,7 @@ def validate_file_path(file_path: str) -> bool:
     for allowed in _ALLOWED_PREFIXES:
         try:
             allowed_resolved = allowed.resolve()
-            if str(resolved).startswith(str(allowed_resolved)):
+            if resolved == allowed_resolved or resolved.is_relative_to(allowed_resolved):
                 return True
         except (ValueError, OSError):
             continue
@@ -90,7 +90,7 @@ def validate_file_path(file_path: str) -> bool:
     # Allow WORKING_DIR
     try:
         wd = WORKING_DIR.resolve()
-        if str(resolved).startswith(str(wd)):
+        if resolved == wd or resolved.is_relative_to(wd):
             return True
     except (ValueError, OSError):
         pass

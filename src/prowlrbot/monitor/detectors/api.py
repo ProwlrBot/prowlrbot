@@ -49,6 +49,12 @@ class APIDetector(BaseDetector):
 
     async def detect(self, last_content: Optional[str] = None) -> DetectionResult:
         try:
+            from prowlrbot.security.url_validator import validate_outbound_url
+
+            allowed, reason = validate_outbound_url(self.url)
+            if not allowed:
+                return DetectionResult(changed=False, content=None, error=f"URL blocked: {reason}")
+
             client = self._client or httpx.AsyncClient()
             try:
                 resp = await client.request(

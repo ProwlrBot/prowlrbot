@@ -126,7 +126,7 @@ class MonitorEngine:
         """Run all enabled monitors on their intervals."""
         # Track next-run times
         next_run: Dict[str, float] = {}
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         for name, config in self._configs.items():
             if config.enabled:
                 next_run[name] = loop.time()
@@ -227,7 +227,7 @@ class MonitorEngine:
                 logger.exception("Scheduled monitor %s failed", name)
 
         def _run_check() -> None:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             loop.create_task(_check())
 
         trigger = IntervalTrigger(minutes=interval_minutes)

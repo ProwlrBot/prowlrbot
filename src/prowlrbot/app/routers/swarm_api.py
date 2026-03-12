@@ -43,9 +43,14 @@ def _check_docker() -> bool:
 def _check_redis() -> bool:
     """Check if Redis is reachable."""
     try:
+        import os
         import redis
 
-        r = redis.Redis(host="localhost", port=6379, socket_timeout=2)
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            socket_timeout=2,
+        )
         return r.ping()
     except Exception:
         return False

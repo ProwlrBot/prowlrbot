@@ -211,6 +211,12 @@ class WebhookExecutor:
         if not url:
             raise ValueError("send_webhook action requires a 'url' in config")
 
+        from prowlrbot.security.url_validator import validate_outbound_url
+
+        allowed, reason = validate_outbound_url(url)
+        if not allowed:
+            raise ValueError(f"Webhook URL blocked: {reason}")
+
         method = config.get("method", "POST").upper()
         headers = config.get("headers", {})
         body = config.get("body", trigger_data)

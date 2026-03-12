@@ -95,9 +95,14 @@ def _atexit_cleanup() -> None:
     if _state.get("browser") is None:
         return
     try:
-        loop = asyncio.get_event_loop()
-        if not loop.is_running() and not loop.is_closed():
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if loop and not loop.is_closed():
             loop.run_until_complete(_action_stop())
+        else:
+            asyncio.run(_action_stop())
     except Exception:
         pass
 

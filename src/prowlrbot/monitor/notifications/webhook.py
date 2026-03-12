@@ -37,6 +37,12 @@ class WebhookNotifier(BaseNotifier):
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         try:
+            from prowlrbot.security.url_validator import validate_outbound_url
+
+            allowed, reason = validate_outbound_url(self.url)
+            if not allowed:
+                return False
+
             client = self._client or httpx.AsyncClient()
             try:
                 resp = await client.post(

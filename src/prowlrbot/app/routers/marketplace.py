@@ -5,8 +5,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel as PydanticBaseModel
+
+from prowlrbot.auth.middleware import get_current_user
 
 
 class TipRequest(PydanticBaseModel):
@@ -46,7 +48,7 @@ def _get_store() -> MarketplaceStore:
 
 
 @router.post("/listings", response_model=MarketplaceListing)
-async def publish_listing(listing: MarketplaceListing) -> MarketplaceListing:
+async def publish_listing(listing: MarketplaceListing, _user=Depends(get_current_user)) -> MarketplaceListing:
     """Publish a new listing to the marketplace."""
     return _get_store().publish_listing(listing)
 
@@ -105,7 +107,7 @@ async def get_bundle(bundle_id: str) -> dict:
 
 
 @router.post("/bundles/{bundle_id}/install")
-async def install_bundle(bundle_id: str) -> dict:
+async def install_bundle(bundle_id: str, _user=Depends(get_current_user)) -> dict:
     """Install all listings in a bundle. Continues on failure."""
     store = _get_store()
     bundle = store.get_bundle(bundle_id)
@@ -180,7 +182,7 @@ async def get_listing_detail(listing_id: str) -> dict:
 
 
 @router.put("/listings/{listing_id}", response_model=MarketplaceListing)
-async def update_listing(listing_id: str, updates: dict) -> MarketplaceListing:
+async def update_listing(listing_id: str, updates: dict, _user=Depends(get_current_user)) -> MarketplaceListing:
     """Partially update a listing."""
     listing = _get_store().update_listing(listing_id, updates)
     if listing is None:
@@ -200,7 +202,7 @@ async def list_by_author(author_id: str) -> list[MarketplaceListing]:
 
 
 @router.post("/listings/{listing_id}/reviews", response_model=ReviewEntry)
-async def add_review(listing_id: str, review: ReviewEntry) -> ReviewEntry:
+async def add_review(listing_id: str, review: ReviewEntry, _user=Depends(get_current_user)) -> ReviewEntry:
     """Add a review to a listing."""
     listing = _get_store().get_listing(listing_id)
     if listing is None:
@@ -221,7 +223,7 @@ async def get_reviews(listing_id: str, limit: int = 50) -> list[ReviewEntry]:
 
 
 @router.post("/listings/{listing_id}/install", response_model=InstallRecord)
-async def record_install(listing_id: str, record: InstallRecord) -> InstallRecord:
+async def record_install(listing_id: str, record: InstallRecord, _user=Depends(get_current_user)) -> InstallRecord:
     """Record an installation of a listing."""
     listing = _get_store().get_listing(listing_id)
     if listing is None:
@@ -282,7 +284,7 @@ async def get_listings_for_persona(persona: str, limit: int = 20) -> list[Market
 
 
 @router.post("/listings/{listing_id}/tip")
-async def tip_author(listing_id: str, tip_req: TipRequest) -> dict:
+async def tip_author(listing_id: str, tip_req: TipRequest, _user=Depends(get_current_user)) -> dict:
     """Create a Stripe checkout session for tipping, or record locally."""
     import os
 
@@ -417,6 +419,7 @@ async def add_credits(
     amount: int,
     transaction_type: str = "purchased",
     description: str = "",
+    _user=Depends(get_current_user),
 ) -> CreditBalance:
     """Add credits to a user's balance."""
     if amount <= 0:
@@ -436,6 +439,7 @@ async def spend_credits(
     transaction_type: str = "listing_purchase",
     reference_id: str = "",
     description: str = "",
+    _user=Depends(get_current_user),
 ) -> CreditBalance:
     """Spend credits from a user's balance."""
     if amount <= 0:
@@ -453,7 +457,7 @@ async def spend_credits(
 
 
 @router.post("/credits/{user_id}/unlock/{content_key}", response_model=CreditBalance)
-async def unlock_content(user_id: str, content_key: str) -> CreditBalance:
+async def unlock_content(user_id: str, content_key: str, _user=Depends(get_current_user)) -> CreditBalance:
     """Unlock premium content with credits."""
     if content_key not in PREMIUM_CONTENT_PRICES:
         raise HTTPException(status_code=404, detail=f"Unknown content: {content_key}")

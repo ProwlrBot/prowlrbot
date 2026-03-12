@@ -67,6 +67,7 @@ class TokenPayload(BaseModel):
     exp: float
     iat: float
     iss: str = "prowlrbot"
+    aud: str = "prowlrbot-api"
 
 
 class AuthResponse(BaseModel):
