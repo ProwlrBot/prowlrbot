@@ -233,6 +233,41 @@ export default function WarRoomPage() {
     setSelectedTask(task);
   }, []);
 
+  if (error && agents.length === 0 && tasks.length === 0) {
+    return (
+      <div style={{ padding: 24, background: "var(--pb-wr-bg-deep)", minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🎯</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: "var(--pb-wr-text)" }}>
+            Could not connect to the War Room
+          </div>
+          <div style={{ fontSize: 13, color: "var(--pb-wr-text-tertiary)", maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+            Make sure the ProwlrBot server is running with &apos;prowlr app&apos;. The War Room engine initializes automatically at startup.
+          </div>
+          <details style={{ marginTop: 8, fontSize: 11, color: "var(--pb-wr-text-faint)" }}>
+            <summary style={{ cursor: "pointer" }}>Technical details</summary>
+            <code style={{ display: "block", marginTop: 4, padding: 8, background: "var(--pb-wr-bg-card)", borderRadius: 4, color: "var(--pb-wr-text-secondary)" }}>{error}</code>
+          </details>
+          <button
+            onClick={refresh}
+            style={{
+              marginTop: 12,
+              padding: "6px 16px",
+              background: "var(--pb-wr-bg-card)",
+              border: "1px solid var(--pb-wr-border-strong)",
+              borderRadius: 6,
+              color: "var(--pb-wr-text)",
+              cursor: "pointer",
+              fontSize: 13,
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: 24, background: "var(--pb-wr-bg-deep)", minHeight: "100%" }}>
       {/* Header */}
