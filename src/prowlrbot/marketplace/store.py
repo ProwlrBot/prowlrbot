@@ -673,6 +673,52 @@ class MarketplaceStore:
         return self.get_balance(user_id)
 
     # ------------------------------------------------------------------
+    # Gamification Credit Helpers
+    # ------------------------------------------------------------------
+
+    def award_publish_credits(self, author_id: str, listing_id: str) -> None:
+        """Award +100 credits for publishing a listing."""
+        self.add_credits(
+            user_id=author_id,
+            amount=100,
+            transaction_type=CreditTransactionType.publish_bonus,
+            reference_id=listing_id,
+            description="Published a listing",
+        )
+
+    def award_install_credits(self, listing_id: str, installer_user_id: str) -> None:
+        """Award +5 credits to listing author per unique install."""
+        # Dedup: check if this user already triggered credits for this listing
+        existing = self._conn.execute(
+            "SELECT 1 FROM credit_transactions WHERE transaction_type = ? "
+            "AND reference_id = ? AND description LIKE ?",
+            ("download_milestone", listing_id, f"%{installer_user_id}%"),
+        ).fetchone()
+        if existing:
+            return
+
+        listing = self.get_listing(listing_id)
+        if listing is None:
+            return
+        self.add_credits(
+            user_id=listing.author_id,
+            amount=5,
+            transaction_type=CreditTransactionType.download_milestone,
+            reference_id=listing_id,
+            description=f"Install by {installer_user_id}",
+        )
+
+    def award_review_credits(self, reviewer_id: str, review_id: str) -> None:
+        """Award +5 credits to reviewer for writing a review."""
+        self.add_credits(
+            user_id=reviewer_id,
+            amount=5,
+            transaction_type=CreditTransactionType.review_bonus,
+            reference_id=review_id,
+            description="Wrote a review",
+        )
+
+    # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
 
