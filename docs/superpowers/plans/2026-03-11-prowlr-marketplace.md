@@ -1,6 +1,6 @@
 # Prowlr Marketplace Redesign — Implementation Plan
 
-> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Transform the marketplace from a basic card grid into a curated, trust-tiered marketplace with bundles, Stripe tips, gamification credits, and ~118 verified listings across 7 categories.
 
@@ -21,7 +21,7 @@
 - Modify: `src/prowlrbot/marketplace/models.py` (add TrustTier enum after line 23)
 - Test: `tests/marketplace/test_models.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/marketplace/` directory and test file:
 
@@ -72,12 +72,12 @@ def test_listing_has_v3_fields():
     assert listing.license == "MIT"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_models.py -v`
 Expected: FAIL — `specs` not in enum, `TrustTier` doesn't exist, `trust_tier` field missing
 
-- [ ] **Step 3: Add `specs` to MarketplaceCategory, create TrustTier enum, add v3 fields to MarketplaceListing**
+- [x] **Step 3: Add `specs` to MarketplaceCategory, create TrustTier enum, add v3 fields to MarketplaceListing**
 
 In `src/prowlrbot/marketplace/models.py`:
 
@@ -106,12 +106,12 @@ Add v3 fields to `MarketplaceListing` class (after `hero_animation`):
     compatibility: str = ""
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_models.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/marketplace/test_models.py src/prowlrbot/marketplace/models.py
@@ -130,7 +130,7 @@ git commit -m "feat(marketplace): add specs category, TrustTier enum, v3 listing
 - Modify: `src/prowlrbot/marketplace/store.py:612-632` (update `_row_to_listing()`)
 - Test: `tests/marketplace/test_store.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/marketplace/test_store.py
@@ -213,12 +213,12 @@ def test_update_listing_v3_fields():
     store.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_store.py -v`
 Expected: FAIL — v3 columns don't exist, `publish_listing` doesn't handle v3 fields
 
-- [ ] **Step 3: Implement v3 migration and update store methods**
+- [x] **Step 3: Implement v3 migration and update store methods**
 
 In `store.py`, add `_migrate_v3()` method after `_migrate_v2()`:
 
@@ -260,12 +260,12 @@ Update `update_listing()` — add v3 field names to `allowed` set:
 
 No change needed to `_row_to_listing()` — Pydantic will accept the new fields from the row dict since they're strings with defaults.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_store.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/marketplace/test_store.py src/prowlrbot/marketplace/store.py
@@ -281,7 +281,7 @@ git commit -m "feat(marketplace): v3 migration — trust_tier, author metadata, 
 - Modify: `src/prowlrbot/marketplace/store.py` (add bundles table + CRUD)
 - Test: `tests/marketplace/test_bundles.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/marketplace/test_bundles.py
@@ -345,12 +345,12 @@ def test_increment_bundle_install_count():
     store.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_bundles.py -v`
 Expected: FAIL — `Bundle` class doesn't exist, store methods don't exist
 
-- [ ] **Step 3: Add Bundle model and store methods**
+- [x] **Step 3: Add Bundle model and store methods**
 
 In `models.py`, add after `MarketplaceListing`:
 
@@ -442,12 +442,12 @@ Add bundle CRUD methods to `MarketplaceStore` (before `close()`):
         return Bundle(**row)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_bundles.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/marketplace/models.py src/prowlrbot/marketplace/store.py tests/marketplace/test_bundles.py
@@ -465,7 +465,7 @@ git commit -m "feat(marketplace): Bundle model, bundles table, CRUD methods"
 - Modify: `src/prowlrbot/app/routers/marketplace.py:47-63` (add sort param, accept q alias)
 - Test: `tests/routers/test_marketplace_api.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/routers/test_marketplace_api.py
@@ -534,12 +534,12 @@ def test_q_alias_for_query(client):
     assert any("Alpha" in l["title"] for l in resp.json())
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/routers/test_marketplace_api.py -v`
 Expected: FAIL — sort param ignored, q not recognized
 
-- [ ] **Step 3: Add sort parameter to store and API**
+- [x] **Step 3: Add sort parameter to store and API**
 
 In `store.py`, update `search_listings()` signature to add `sort: str = "popular"`:
 
@@ -595,12 +595,12 @@ async def search_listings(
     )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/routers/test_marketplace_api.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/marketplace/store.py src/prowlrbot/app/routers/marketplace.py tests/routers/test_marketplace_api.py
@@ -615,7 +615,7 @@ git commit -m "fix(marketplace): add sort parameter, accept q alias for query"
 - Modify: `src/prowlrbot/app/routers/marketplace.py` (add bundle routes)
 - Test: `tests/routers/test_marketplace_bundles.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/routers/test_marketplace_bundles.py
@@ -694,12 +694,12 @@ def test_install_bundle(client):
     assert data["total"] == 2
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/routers/test_marketplace_bundles.py -v`
 Expected: FAIL — bundle endpoints don't exist
 
-- [ ] **Step 3: Add bundle endpoints to router**
+- [x] **Step 3: Add bundle endpoints to router**
 
 In `marketplace.py`, add imports for `Bundle` and add new endpoints:
 
@@ -765,12 +765,12 @@ async def install_bundle(bundle_id: str) -> dict:
 
 **Important:** Place bundle routes BEFORE the `@router.get("/listings/{listing_id}")` route to avoid path conflict (FastAPI matches routes in order, and `/bundles` could be mismatched as a listing_id).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/routers/test_marketplace_bundles.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/marketplace.py tests/routers/test_marketplace_bundles.py
@@ -785,7 +785,7 @@ git commit -m "feat(marketplace): add bundle list, detail, and install endpoints
 - Modify: `src/prowlrbot/app/routers/marketplace.py` (add detail endpoint)
 - Test: `tests/routers/test_marketplace_detail.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/routers/test_marketplace_detail.py
@@ -858,12 +858,12 @@ def test_detail_not_found(client):
     assert resp.status_code == 404
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/routers/test_marketplace_detail.py -v`
 Expected: FAIL — detail endpoint doesn't exist
 
-- [ ] **Step 3: Add detail endpoint**
+- [x] **Step 3: Add detail endpoint**
 
 In `marketplace.py`, add before the reviews section:
 
@@ -906,12 +906,12 @@ async def get_listing_detail(listing_id: str) -> dict:
     }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/routers/test_marketplace_detail.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/marketplace.py tests/routers/test_marketplace_detail.py
@@ -927,7 +927,7 @@ git commit -m "feat(marketplace): listing detail endpoint with computed fields"
 - Modify: `src/prowlrbot/marketplace/registry.py:178-236` (update sync_registry for trust tiers)
 - Test: `tests/marketplace/test_registry.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/marketplace/test_registry.py
@@ -946,12 +946,12 @@ def test_all_seven_categories_mapped():
     assert set(CATEGORY_DIR_MAP.keys()) == expected
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_registry.py -v`
 Expected: FAIL — `specs` not in map
 
-- [ ] **Step 3: Add specs to CATEGORY_DIR_MAP and update sync_registry**
+- [x] **Step 3: Add specs to CATEGORY_DIR_MAP and update sync_registry**
 
 In `registry.py`, add `"specs": "specs"` to `CATEGORY_DIR_MAP`.
 
@@ -1000,12 +1000,12 @@ store.update_listing(
 )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_registry.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/marketplace/registry.py tests/marketplace/test_registry.py
@@ -1023,7 +1023,7 @@ git commit -m "feat(marketplace): add specs to category map, trust tier in regis
 - Modify: `src/prowlrbot/app/routers/marketplace.py` (add Stripe webhook endpoint)
 - Test: `tests/routers/test_marketplace_stripe.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/routers/test_marketplace_stripe.py
@@ -1088,12 +1088,12 @@ def test_tip_not_found_listing(client):
     assert resp.status_code == 404
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/routers/test_marketplace_stripe.py -v`
 Expected: FAIL — current tip endpoint doesn't validate amounts or check Stripe config
 
-- [ ] **Step 3: Rewrite tip endpoint with Stripe checkout and degradation**
+- [x] **Step 3: Rewrite tip endpoint with Stripe checkout and degradation**
 
 Replace the existing tip endpoint in `marketplace.py`:
 
@@ -1173,12 +1173,12 @@ async def stripe_webhook() -> dict:
     return {"status": "received"}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/routers/test_marketplace_stripe.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/marketplace.py tests/routers/test_marketplace_stripe.py
@@ -1195,7 +1195,7 @@ git commit -m "feat(marketplace): Stripe tip jar with amount validation and grac
 - Create: `console/src/pages/Marketplace/types.ts`
 - Create: `console/src/pages/Marketplace/utils.ts`
 
-- [ ] **Step 1: Create the types file**
+- [x] **Step 1: Create the types file**
 
 ```typescript
 // console/src/pages/Marketplace/types.ts
@@ -1253,7 +1253,7 @@ export interface ReviewEntry {
 }
 ```
 
-- [ ] **Step 2: Create the transformListing utility**
+- [x] **Step 2: Create the transformListing utility**
 
 ```typescript
 // console/src/pages/Marketplace/utils.ts
@@ -1316,7 +1316,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
 };
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/types.ts console/src/pages/Marketplace/utils.ts
@@ -1330,7 +1330,7 @@ git commit -m "feat(marketplace): shared types and transformListing utility"
 **Files:**
 - Create: `console/src/pages/Marketplace/components/TrustBadge.tsx`
 
-- [ ] **Step 1: Create the component**
+- [x] **Step 1: Create the component**
 
 ```tsx
 // console/src/pages/Marketplace/components/TrustBadge.tsx
@@ -1375,7 +1375,7 @@ export default function TrustBadge({ tier, size = "small" }: TrustBadgeProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/components/TrustBadge.tsx
@@ -1389,7 +1389,7 @@ git commit -m "feat(marketplace): TrustBadge component (Official gold / Verified
 **Files:**
 - Create: `console/src/pages/Marketplace/components/CategoryPills.tsx`
 
-- [ ] **Step 1: Create the component**
+- [x] **Step 1: Create the component**
 
 ```tsx
 // console/src/pages/Marketplace/components/CategoryPills.tsx
@@ -1452,7 +1452,7 @@ export default function CategoryPills({
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/components/CategoryPills.tsx
@@ -1466,7 +1466,7 @@ git commit -m "feat(marketplace): CategoryPills filterable pill bar with counts"
 **Files:**
 - Create: `console/src/pages/Marketplace/components/BundleCard.tsx`
 
-- [ ] **Step 1: Create the component**
+- [x] **Step 1: Create the component**
 
 ```tsx
 // console/src/pages/Marketplace/components/BundleCard.tsx
@@ -1548,7 +1548,7 @@ export default function BundleCard({ bundle, onInstalled }: BundleCardProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/components/BundleCard.tsx
@@ -1564,11 +1564,11 @@ git commit -m "feat(marketplace): BundleCard component with 1-click install"
 **Files:**
 - Modify: `console/src/pages/Marketplace/components/ListingCard.tsx` (full rewrite)
 
-- [ ] **Step 1: Read current ListingCard**
+- [x] **Step 1: Read current ListingCard**
 
 Already read. Current issues: stale `CATEGORY_COLORS`, uses `name` not `title`, no trust badge, no author, no version, no license.
 
-- [ ] **Step 2: Rewrite ListingCard**
+- [x] **Step 2: Rewrite ListingCard**
 
 ```tsx
 // console/src/pages/Marketplace/components/ListingCard.tsx
@@ -1653,7 +1653,7 @@ export default function ListingCard({ listing, onInstall, onClick }: ListingCard
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/components/ListingCard.tsx
@@ -1667,7 +1667,7 @@ git commit -m "feat(marketplace): rewrite ListingCard with trust badges, version
 **Files:**
 - Create: `console/src/pages/Marketplace/components/ListingListItem.tsx`
 
-- [ ] **Step 1: Create the component**
+- [x] **Step 1: Create the component**
 
 ```tsx
 // console/src/pages/Marketplace/components/ListingListItem.tsx
@@ -1732,7 +1732,7 @@ export default function ListingListItem({ listing, onInstall, onClick }: Listing
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/components/ListingListItem.tsx
@@ -1746,7 +1746,7 @@ git commit -m "feat(marketplace): ListingListItem compact row for list view"
 **Files:**
 - Modify: `console/src/pages/Marketplace/index.tsx` (full rewrite)
 
-- [ ] **Step 1: Rewrite the page with hero, pills, bundles, grid/list toggle, sort selector**
+- [x] **Step 1: Rewrite the page with hero, pills, bundles, grid/list toggle, sort selector**
 
 ```tsx
 // console/src/pages/Marketplace/index.tsx
@@ -2020,7 +2020,7 @@ function MarketplacePage() {
 export default MarketplacePage;
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/index.tsx
@@ -2035,7 +2035,7 @@ git commit -m "feat(marketplace): rewrite index with hero, bundles, pills, grid/
 - Create: `console/src/pages/Marketplace/ListingDetail.tsx`
 - Modify: `console/src/layouts/MainLayout/index.tsx` (add route)
 
-- [ ] **Step 1: Create the detail page**
+- [x] **Step 1: Create the detail page**
 
 ```tsx
 // console/src/pages/Marketplace/ListingDetail.tsx
@@ -2232,7 +2232,7 @@ export default function ListingDetailPage() {
 }
 ```
 
-- [ ] **Step 2: Add route to MainLayout**
+- [x] **Step 2: Add route to MainLayout**
 
 In `console/src/layouts/MainLayout/index.tsx`, add import and route for `ListingDetailPage`:
 
@@ -2243,7 +2243,7 @@ import ListingDetailPage from "../pages/Marketplace/ListingDetail";
 { path: "/marketplace/:id", element: <ListingDetailPage /> }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/ListingDetail.tsx console/src/layouts/MainLayout/index.tsx
@@ -2260,7 +2260,7 @@ git commit -m "feat(marketplace): listing detail page with tabs, reviews, relate
 - Modify: `src/prowlrbot/cli/market_cmd.py` (add bundles, detail, install-bundle commands)
 - Modify: `src/prowlrbot/cli/market_cmd.py:93-144` (wire install to skills_hub delivery)
 
-- [ ] **Step 1: Add new CLI commands after existing commands**
+- [x] **Step 1: Add new CLI commands after existing commands**
 
 Add `bundles` command:
 
@@ -2356,7 +2356,7 @@ def market_detail(listing_id: str):
     store.close()
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add src/prowlrbot/cli/market_cmd.py
@@ -2372,7 +2372,7 @@ git commit -m "feat(marketplace): add bundles, install-bundle, detail CLI comman
 **Files:**
 - Create: `src/prowlrbot/marketplace/seed.py`
 
-- [ ] **Step 1: Create seed script**
+- [x] **Step 1: Create seed script**
 
 ```python
 # src/prowlrbot/marketplace/seed.py
@@ -2446,7 +2446,7 @@ def seed_bundles(store: MarketplaceStore) -> int:
     return created
 ```
 
-- [ ] **Step 2: Add seed CLI command to market_cmd.py**
+- [x] **Step 2: Add seed CLI command to market_cmd.py**
 
 ```python
 @market_group.command(name="seed")
@@ -2462,7 +2462,7 @@ def market_seed():
     store.close()
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/prowlrbot/marketplace/seed.py src/prowlrbot/cli/market_cmd.py
@@ -2473,21 +2473,21 @@ git commit -m "feat(marketplace): seed script with 4 launch bundles"
 
 ### Task 19: Run all tests and verify nothing is broken
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `pytest -x -v`
 Expected: All existing tests pass, all new marketplace tests pass
 
-- [ ] **Step 2: Run frontend build**
+- [x] **Step 2: Run frontend build**
 
 Run: `cd console && npm run build`
 Expected: Build succeeds with no TypeScript errors
 
-- [ ] **Step 3: Fix any issues found**
+- [x] **Step 3: Fix any issues found**
 
 Address any test failures or build errors.
 
-- [ ] **Step 4: Final commit if fixes were needed**
+- [x] **Step 4: Final commit if fixes were needed**
 
 ```bash
 git add -A
@@ -2505,7 +2505,7 @@ git commit -m "fix(marketplace): address test/build issues from marketplace rede
 - Modify: `src/prowlrbot/cli/market_cmd.py:93-144` (update CLI install)
 - Test: `tests/marketplace/test_install_delivery.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/marketplace/test_install_delivery.py
@@ -2555,12 +2555,12 @@ def test_cli_install_creates_skill_directory():
     store.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_install_delivery.py -v`
 Expected: Passes (current install writes manifest). This is a baseline — the real delivery wiring happens in step 3.
 
-- [ ] **Step 3: Update install endpoint and CLI to call SkillService**
+- [x] **Step 3: Update install endpoint and CLI to call SkillService**
 
 In `marketplace.py` install endpoint, add skill delivery after `record_install`:
 
@@ -2588,12 +2588,12 @@ async def record_install(listing_id: str, record: InstallRecord) -> InstallRecor
 
 **Note:** Full file delivery from GitHub (`skills_hub.py`) requires the listing's `source_repo` to point to actual skill files. For v1, this creates a local skill stub. Full GitHub download integration is deferred to the content population phase.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_install_delivery.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/marketplace.py src/prowlrbot/cli/market_cmd.py tests/marketplace/test_install_delivery.py
@@ -2608,7 +2608,7 @@ git commit -m "feat(marketplace): wire install endpoint to SkillService for file
 - Modify: `src/prowlrbot/app/routers/marketplace.py` (tip endpoint and webhook)
 - Test: `tests/routers/test_marketplace_stripe.py` (update)
 
-- [ ] **Step 1: Update tip endpoint to NOT record tip before payment**
+- [x] **Step 1: Update tip endpoint to NOT record tip before payment**
 
 Move `store.add_tip()` out of the tip endpoint. The tip endpoint should only create a Stripe checkout session. The webhook should record the tip after payment confirmation.
 
@@ -2673,7 +2673,7 @@ async def tip_author(listing_id: str, tip_req: TipRequest) -> dict:
         return {"checkout_url": None, "tip_id": tip.id, "note": "Stripe SDK not installed"}
 ```
 
-- [ ] **Step 2: Implement real Stripe webhook**
+- [x] **Step 2: Implement real Stripe webhook**
 
 ```python
 from fastapi import Request
@@ -2718,7 +2718,7 @@ async def stripe_webhook(request: Request) -> dict:
     return {"status": "received"}
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/marketplace.py tests/routers/test_marketplace_stripe.py
@@ -2734,7 +2734,7 @@ git commit -m "fix(marketplace): record tip in Stripe webhook, not before paymen
 - Modify: `src/prowlrbot/marketplace/store.py` (add credit-on-action helpers)
 - Test: `tests/marketplace/test_credits.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/marketplace/test_credits.py
@@ -2813,12 +2813,12 @@ def test_review_awards_5_credits_to_reviewer():
     store.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/marketplace/test_credits.py -v`
 Expected: FAIL — `award_publish_credits`, `award_install_credits`, `award_review_credits` don't exist
 
-- [ ] **Step 3: Add credit-on-action helper methods to store**
+- [x] **Step 3: Add credit-on-action helper methods to store**
 
 ```python
     # ------------------------------------------------------------------
@@ -2865,12 +2865,12 @@ Expected: FAIL — `award_publish_credits`, `award_install_credits`, `award_revi
         )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/marketplace/test_credits.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/prowlrbot/marketplace/store.py tests/marketplace/test_credits.py
@@ -2884,7 +2884,7 @@ git commit -m "feat(marketplace): gamification credit helpers — publish, insta
 **Files:**
 - Test: `tests/cli/test_market_cli.py`
 
-- [ ] **Step 1: Write CLI tests**
+- [x] **Step 1: Write CLI tests**
 
 ```python
 # tests/cli/test_market_cli.py
@@ -2957,12 +2957,12 @@ def test_market_install_bundle_command():
     store.close()
 ```
 
-- [ ] **Step 2: Run tests**
+- [x] **Step 2: Run tests**
 
 Run: `pytest tests/cli/test_market_cli.py -v`
 Expected: PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/cli/test_market_cli.py
@@ -2976,7 +2976,7 @@ git commit -m "test(marketplace): CLI command tests for bundles, detail, install
 **Files:**
 - Create: `console/src/pages/Marketplace/__tests__/utils.test.ts`
 
-- [ ] **Step 1: Write utility tests**
+- [x] **Step 1: Write utility tests**
 
 ```typescript
 // console/src/pages/Marketplace/__tests__/utils.test.ts
@@ -3044,12 +3044,12 @@ describe("CATEGORY_COLORS", () => {
 });
 ```
 
-- [ ] **Step 2: Run frontend tests**
+- [x] **Step 2: Run frontend tests**
 
 Run: `cd console && npx vitest run src/pages/Marketplace/__tests__/utils.test.ts`
 Expected: PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add console/src/pages/Marketplace/__tests__/utils.test.ts
@@ -3060,22 +3060,22 @@ git commit -m "test(marketplace): frontend utility tests for transformListing, f
 
 ### Task 25: Final integration test and verification
 
-- [ ] **Step 1: Run full backend test suite**
+- [x] **Step 1: Run full backend test suite**
 
 Run: `pytest -x -v`
 Expected: All tests pass including new marketplace tests
 
-- [ ] **Step 2: Run frontend build**
+- [x] **Step 2: Run frontend build**
 
 Run: `cd console && npm run build`
 Expected: Build succeeds
 
-- [ ] **Step 3: Run frontend tests**
+- [x] **Step 3: Run frontend tests**
 
 Run: `cd console && npx vitest run`
 Expected: All tests pass
 
-- [ ] **Step 4: Verify new test file inventory**
+- [x] **Step 4: Verify new test file inventory**
 
 All new test files that should exist:
 - `tests/marketplace/test_models.py`
@@ -3091,7 +3091,7 @@ All new test files that should exist:
 - `tests/cli/test_market_cli.py`
 - `console/src/pages/Marketplace/__tests__/utils.test.ts`
 
-- [ ] **Step 5: Final commit if needed**
+- [x] **Step 5: Final commit if needed**
 
 ```bash
 git commit -m "chore(marketplace): final verification pass"

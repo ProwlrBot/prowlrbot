@@ -1,6 +1,6 @@
 # Prowlr-Studio Phase 1 Implementation Plan
 
-> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Transform ShipSec Studio fork into Prowlr-Studio with rebranding, security fixes, CLI integration, ProwlrBot JWT auth, Agent Hub page, and Agent Workspace with live streaming.
 
@@ -25,7 +25,7 @@ Automated find-and-replace across the prowrl-studio repository. Run scripts, ver
 **Files:**
 - Create: `prowrl-studio/scripts/rebrand.sh`
 
-- [ ] **Step 1: Write the rebranding shell script**
+- [x] **Step 1: Write the rebranding shell script**
 
 ```bash
 #!/usr/bin/env bash
@@ -108,7 +108,7 @@ echo "  4. Run: bun run typecheck"
 echo "  5. Run: bun run test"
 ```
 
-- [ ] **Step 2: Make script executable and run it**
+- [x] **Step 2: Make script executable and run it**
 
 Run:
 ```bash
@@ -118,7 +118,7 @@ chmod +x scripts/rebrand.sh
 ```
 Expected: Each replacement pair logs its line. No errors.
 
-- [ ] **Step 3: Verify replacement count**
+- [x] **Step 3: Verify replacement count**
 
 Run:
 ```bash
@@ -128,7 +128,7 @@ grep -ri "shipsec" --include="*.ts" --include="*.tsx" --include="*.json" --inclu
 ```
 Expected: 100+ files changed. Zero remaining "shipsec" references (case-insensitive).
 
-- [ ] **Step 4: Rename directories and files**
+- [x] **Step 4: Rename directories and files**
 
 Run:
 ```bash
@@ -149,11 +149,11 @@ find . -type f -name "*shipsec*" -not -path "*/node_modules/*" -not -path "*/.gi
 done
 ```
 
-- [ ] **Step 5: Update root package.json name**
+- [x] **Step 5: Update root package.json name**
 
 Verify `/tmp/prowrl-studio-full/package.json` has `"name": "prowlrbot-studio"` (should be done by script, verify manually).
 
-- [ ] **Step 6: Reinstall dependencies and verify build**
+- [x] **Step 6: Reinstall dependencies and verify build**
 
 Run:
 ```bash
@@ -163,7 +163,7 @@ bun run typecheck
 ```
 Expected: Install succeeds. Typecheck passes (or shows pre-existing errors only).
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 Run:
 ```bash
@@ -172,7 +172,7 @@ bun run test 2>&1 | tail -20
 ```
 Expected: Tests pass (or only pre-existing failures).
 
-- [ ] **Step 8: Commit rebranding**
+- [x] **Step 8: Commit rebranding**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -203,7 +203,7 @@ Fix all 4 Critical and 6 High findings from the security audit before deploying.
 - Modify: `prowrl-studio/backend/src/auth/auth.guard.ts`
 - Modify: `prowrl-studio/backend/src/app.controller.ts`
 
-- [ ] **Step 1: Remove default credentials from auth config**
+- [x] **Step 1: Remove default credentials from auth config**
 
 In `backend/src/config/auth.config.ts`, find the `ADMIN_USERNAME` and `ADMIN_PASSWORD` defaults (currently `admin`/`admin`). Change to:
 
@@ -222,7 +222,7 @@ ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? (() => {
 })(),
 ```
 
-- [ ] **Step 2: Add startup validation in main.ts**
+- [x] **Step 2: Add startup validation in main.ts**
 
 In `backend/src/main.ts`, before `app.listen()`, add:
 
@@ -236,7 +236,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "fix(security): C1 — remove default admin credentials in production"
@@ -247,7 +247,7 @@ git add -A && git commit -m "fix(security): C1 — remove default admin credenti
 **Files:**
 - Modify: `prowrl-studio/backend/src/secrets/secrets.service.ts` (or wherever SECRET_STORE_MASTER_KEY is used)
 
-- [ ] **Step 1: Find and remove fallback keys**
+- [x] **Step 1: Find and remove fallback keys**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -266,13 +266,13 @@ if (!masterKey) {
 }
 ```
 
-- [ ] **Step 2: Add .env.docker to .gitignore**
+- [x] **Step 2: Add .env.docker to .gitignore**
 
 ```bash
 echo ".env.docker" >> /tmp/prowrl-studio-full/.gitignore
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "fix(security): C2 — remove hardcoded encryption keys, require in production"
@@ -284,14 +284,14 @@ git add -A && git commit -m "fix(security): C2 — remove hardcoded encryption k
 - Modify: `prowrl-studio/docker/docker-compose.infra.yml`
 - Modify: Any DinD service definitions
 
-- [ ] **Step 1: Find DinD configuration**
+- [x] **Step 1: Find DinD configuration**
 
 ```bash
 cd /tmp/prowrl-studio-full
 grep -rn "dind\|docker:dind\|privileged" docker/ --include="*.yml" --include="*.yaml" -l
 ```
 
-- [ ] **Step 2: Enable TLS for DinD services**
+- [x] **Step 2: Enable TLS for DinD services**
 
 In any docker-compose file with DinD, change:
 
@@ -327,7 +327,7 @@ networks:
     internal: true
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "fix(security): C3 — enable TLS for Docker-in-Docker, isolate network"
@@ -338,7 +338,7 @@ git add -A && git commit -m "fix(security): C3 — enable TLS for Docker-in-Dock
 **Files:**
 - Modify: `prowrl-studio/backend/src/auth/auth.guard.ts`
 
-- [ ] **Step 1: Replace string comparison with timingSafeEqual**
+- [x] **Step 1: Replace string comparison with timingSafeEqual**
 
 Find all `!==` comparisons on tokens/secrets in `auth.guard.ts`. Replace with:
 
@@ -353,11 +353,11 @@ function safeCompare(a: string, b: string): boolean {
 
 Use `safeCompare()` wherever internal tokens, API keys, or session tokens are compared.
 
-- [ ] **Step 2: Apply same fix to session.utils.ts**
+- [x] **Step 2: Apply same fix to session.utils.ts**
 
 Check `backend/src/auth/session.utils.ts` for any string comparisons on session tokens and replace.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "fix(security): C4 — use timingSafeEqual for all token comparisons"
@@ -371,7 +371,7 @@ git add -A && git commit -m "fix(security): C4 — use timingSafeEqual for all t
 - Modify: Upload handling files (H4)
 - Modify: Session/cookie config (H5)
 
-- [ ] **Step 1: H1 — Hash JWT token in logs**
+- [x] **Step 1: H1 — Hash JWT token in logs**
 
 Find any `console.log` or logger calls that output JWT tokens. Replace with:
 
@@ -386,7 +386,7 @@ function tokenFingerprint(token: string): string {
 // Use: logger.debug(`Token fingerprint: ${tokenFingerprint(token)}`)
 ```
 
-- [ ] **Step 2: H2 — Default to MEMBER role**
+- [x] **Step 2: H2 — Default to MEMBER role**
 
 In `auth.guard.ts`, find where `org_role` is read. Change fallback from ADMIN to MEMBER:
 
@@ -396,7 +396,7 @@ In `auth.guard.ts`, find where `org_role` is read. Change fallback from ADMIN to
 const role = orgRole ?? 'MEMBER';
 ```
 
-- [ ] **Step 3: H3 — Secure ensure-tenant endpoint**
+- [x] **Step 3: H3 — Secure ensure-tenant endpoint**
 
 Find the `ensure-tenant` or tenant provisioning endpoint. Add:
 
@@ -409,7 +409,7 @@ if (!safeCompare(providedToken, process.env.INTERNAL_SERVICE_TOKEN)) {
 }
 ```
 
-- [ ] **Step 4: H4 — File upload validation**
+- [x] **Step 4: H4 — File upload validation**
 
 Find upload handlers (likely in storage module). Add:
 
@@ -433,7 +433,7 @@ function validateUpload(file: Express.Multer.File): void {
 }
 ```
 
-- [ ] **Step 5: H5 — Force secure cookies on HTTPS**
+- [x] **Step 5: H5 — Force secure cookies on HTTPS**
 
 In session/cookie configuration:
 
@@ -447,7 +447,7 @@ res.cookie('x-session-token', token, {
 });
 ```
 
-- [ ] **Step 6: H6 — Add security headers via helmet**
+- [x] **Step 6: H6 — Add security headers via helmet**
 
 In `backend/src/main.ts`:
 
@@ -471,7 +471,7 @@ app.use(helmet({
 
 Run: `cd /tmp/prowrl-studio-full && bun add helmet --cwd backend`
 
-- [ ] **Step 7: Commit all High fixes**
+- [x] **Step 7: Commit all High fixes**
 
 ```bash
 git add -A && git commit -m "fix(security): H1-H6 — token logging, role defaults, upload validation, security headers"
@@ -489,7 +489,7 @@ Add `prowlr studio` CLI command and new API endpoints for Studio integration.
 - Create: `src/prowlrbot/cli/studio_cmd.py`
 - Modify: `src/prowlrbot/cli/main.py`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Create: `tests/cli/test_studio_cmd.py`
 
@@ -513,12 +513,12 @@ def test_studio_status():
     assert "Studio" in result.output
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/cli/test_studio_cmd.py -v`
 Expected: FAIL - no "studio" command registered
 
-- [ ] **Step 3: Write studio_cmd.py**
+- [x] **Step 3: Write studio_cmd.py**
 
 Create: `src/prowlrbot/cli/studio_cmd.py`
 
@@ -634,7 +634,7 @@ def _find_studio_dir() -> Path | None:
     return None
 ```
 
-- [ ] **Step 4: Register in main.py**
+- [x] **Step 4: Register in main.py**
 
 In `src/prowlrbot/cli/main.py`, add after other command imports:
 
@@ -643,12 +643,12 @@ from .studio_cmd import studio_cmd
 cli.add_command(studio_cmd)
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/cli/test_studio_cmd.py -v`
 Expected: PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/prowlrbot/cli/studio_cmd.py src/prowlrbot/cli/main.py tests/cli/test_studio_cmd.py
@@ -662,7 +662,7 @@ git commit -m "feat(cli): add 'prowlr studio' command for Studio management"
 - Modify: `src/prowlrbot/app/routers/__init__.py`
 - Create: `tests/app/test_studio_router.py`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Create: `tests/app/test_studio_router.py`
 
@@ -694,12 +694,12 @@ async def test_studio_health(client):
     assert "status" in data
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/app/test_studio_router.py -v`
 Expected: FAIL - 404 on /api/studio/* endpoints
 
-- [ ] **Step 3: Write the studio router**
+- [x] **Step 3: Write the studio router**
 
 Create: `src/prowlrbot/app/routers/studio.py`
 
@@ -940,7 +940,7 @@ def _sse_event(event_type: str, data: dict) -> str:
     return f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
 ```
 
-- [ ] **Step 4: Register the router**
+- [x] **Step 4: Register the router**
 
 In `src/prowlrbot/app/routers/__init__.py`, add:
 
@@ -949,17 +949,17 @@ from .studio import router as studio_router
 router.include_router(studio_router)
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/app/test_studio_router.py -v`
 Expected: PASS
 
-- [ ] **Step 6: Run full test suite**
+- [x] **Step 6: Run full test suite**
 
 Run: `pytest --tb=short 2>&1 | tail -10`
 Expected: 713+ tests pass, no regressions
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/prowlrbot/app/routers/studio.py src/prowlrbot/app/routers/__init__.py tests/app/test_studio_router.py
@@ -979,7 +979,7 @@ Add a new auth provider to Studio's NestJS backend that validates JWTs against P
 - Modify: `prowrl-studio/backend/src/auth/auth.guard.ts`
 - Modify: `prowrl-studio/backend/src/config/auth.config.ts`
 
-- [ ] **Step 1: Add ProwlrBot auth config**
+- [x] **Step 1: Add ProwlrBot auth config**
 
 In `backend/src/config/auth.config.ts`, add new env vars:
 
@@ -988,7 +988,7 @@ PROWLRBOT_API_URL: process.env.PROWLRBOT_API_URL ?? 'http://localhost:8088',
 PROWLRBOT_JWT_CACHE_TTL: parseInt(process.env.JWT_CACHE_TTL ?? '300000', 10), // 5 min
 ```
 
-- [ ] **Step 2: Create ProwlrBot auth provider**
+- [x] **Step 2: Create ProwlrBot auth provider**
 
 Create: `prowrl-studio/backend/src/auth/providers/prowlrbot.provider.ts`
 
@@ -1068,7 +1068,7 @@ export class ProwlrBotAuthProvider {
 }
 ```
 
-- [ ] **Step 3: Integrate into AuthGuard**
+- [x] **Step 3: Integrate into AuthGuard**
 
 In `backend/src/auth/auth.guard.ts`, add the ProwlrBot provider path. In the `canActivate` method, before the Clerk/local checks:
 
@@ -1107,11 +1107,11 @@ if (this.configService.get('AUTH_PROVIDER') === 'prowlrbot') {
 }
 ```
 
-- [ ] **Step 4: Register provider in AuthModule**
+- [x] **Step 4: Register provider in AuthModule**
 
 In `backend/src/auth/auth.module.ts`, add `ProwlrBotAuthProvider` to providers and exports.
 
-- [ ] **Step 5: Add frontend auth provider**
+- [x] **Step 5: Add frontend auth provider**
 
 Create: `prowrl-studio/frontend/src/auth/providers/prowlrbot.ts`
 
@@ -1163,7 +1163,7 @@ export const prowlrbotAuthProvider: FrontendAuthProvider = {
 };
 ```
 
-- [ ] **Step 6: Wire up provider selection in AuthProvider.tsx**
+- [x] **Step 6: Wire up provider selection in AuthProvider.tsx**
 
 In `frontend/src/auth/AuthProvider.tsx`, add:
 
@@ -1175,7 +1175,7 @@ case 'prowlrbot':
   return prowlrbotAuthProvider;
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -1205,7 +1205,7 @@ New frontend page showing all agents as visual cards with status, capabilities, 
 - Create: `prowrl-studio/frontend/src/api/agents.ts`
 - Modify: `prowrl-studio/frontend/src/App.tsx` (add route)
 
-- [ ] **Step 1: Create the agent API client**
+- [x] **Step 1: Create the agent API client**
 
 Create: `prowrl-studio/frontend/src/api/agents.ts`
 
@@ -1265,7 +1265,7 @@ export async function fetchTeams(): Promise<Team[]> {
 }
 ```
 
-- [ ] **Step 2: Create the Zustand store**
+- [x] **Step 2: Create the Zustand store**
 
 Create: `prowrl-studio/frontend/src/store/agentHubStore.ts`
 
@@ -1319,7 +1319,7 @@ export const useAgentHubStore = create<AgentHubState>((set) => ({
 }));
 ```
 
-- [ ] **Step 3: Create AgentCard component**
+- [x] **Step 3: Create AgentCard component**
 
 Create: `prowrl-studio/frontend/src/components/agent-hub/AgentCard.tsx`
 
@@ -1400,7 +1400,7 @@ export function AgentCard({ agent, onRun, onView, onConfigure }: AgentCardProps)
 }
 ```
 
-- [ ] **Step 4: Create TeamCard component**
+- [x] **Step 4: Create TeamCard component**
 
 Create: `prowrl-studio/frontend/src/components/agent-hub/TeamCard.tsx`
 
@@ -1436,7 +1436,7 @@ export function TeamCard({ team, agentCount, onManage }: TeamCardProps) {
 }
 ```
 
-- [ ] **Step 5: Create AgentHub page**
+- [x] **Step 5: Create AgentHub page**
 
 Create: `prowrl-studio/frontend/src/pages/AgentHubPage.tsx`
 
@@ -1577,7 +1577,7 @@ export function AgentHubPage() {
 }
 ```
 
-- [ ] **Step 6: Add route to App.tsx**
+- [x] **Step 6: Add route to App.tsx**
 
 In `prowrl-studio/frontend/src/App.tsx`, add:
 
@@ -1591,7 +1591,7 @@ import { AgentHubPage } from './pages/AgentHubPage';
 
 Also add the nav link to the sidebar layout.
 
-- [ ] **Step 7: Verify build**
+- [x] **Step 7: Verify build**
 
 Run:
 ```bash
@@ -1600,7 +1600,7 @@ bun run typecheck
 ```
 Expected: No new type errors.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -1627,7 +1627,7 @@ The flagship feature: per-agent workspace with live streaming tabs.
 - Create: `prowrl-studio/frontend/src/store/agentWorkspaceStore.ts`
 - Create: `prowrl-studio/frontend/src/api/agentStream.ts`
 
-- [ ] **Step 1: Create SSE client**
+- [x] **Step 1: Create SSE client**
 
 Create: `prowrl-studio/frontend/src/api/agentStream.ts`
 
@@ -1735,7 +1735,7 @@ export class AgentEventStream {
 }
 ```
 
-- [ ] **Step 2: Create workspace store**
+- [x] **Step 2: Create workspace store**
 
 Create: `prowrl-studio/frontend/src/store/agentWorkspaceStore.ts`
 
@@ -1955,7 +1955,7 @@ export const useAgentWorkspaceStore = create<AgentWorkspaceState>((set, get) => 
 }));
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -1979,7 +1979,7 @@ git commit -m "feat(workspace): add agent workspace store and SSE event stream c
 - Create: `prowrl-studio/frontend/src/components/workspace/WorkspaceControls.tsx`
 - Modify: `prowrl-studio/frontend/src/App.tsx`
 
-- [ ] **Step 1: Create WorkspaceTabBar**
+- [x] **Step 1: Create WorkspaceTabBar**
 
 Create: `prowrl-studio/frontend/src/components/workspace/WorkspaceTabBar.tsx`
 
@@ -2034,7 +2034,7 @@ export function WorkspaceTabBar({ activeTab, onTabChange, notifications }: Works
 }
 ```
 
-- [ ] **Step 2: Create individual tab components**
+- [x] **Step 2: Create individual tab components**
 
 Create the following tab components. Each reads from the workspace store.
 
@@ -2385,7 +2385,7 @@ export function ChatTab({ agentId }: { agentId: string }) {
 }
 ```
 
-- [ ] **Step 3: Create WorkspaceControls (bottom bar)**
+- [x] **Step 3: Create WorkspaceControls (bottom bar)**
 
 Create: `prowrl-studio/frontend/src/components/workspace/WorkspaceControls.tsx`
 
@@ -2459,7 +2459,7 @@ export function WorkspaceControls({ agentId, agentName }: WorkspaceControlsProps
 }
 ```
 
-- [ ] **Step 4: Create AgentWorkspacePage**
+- [x] **Step 4: Create AgentWorkspacePage**
 
 Create: `prowrl-studio/frontend/src/pages/AgentWorkspacePage.tsx`
 
@@ -2543,7 +2543,7 @@ export function AgentWorkspacePage() {
 }
 ```
 
-- [ ] **Step 5: Update App.tsx route**
+- [x] **Step 5: Update App.tsx route**
 
 In `prowrl-studio/frontend/src/App.tsx`, replace the placeholder workspace route:
 
@@ -2554,7 +2554,7 @@ import { AgentWorkspacePage } from './pages/AgentWorkspacePage';
 <Route path="/workspace/:agentId" element={<ProtectedRoute><AgentWorkspacePage /></ProtectedRoute>} />
 ```
 
-- [ ] **Step 6: Verify build**
+- [x] **Step 6: Verify build**
 
 Run:
 ```bash
@@ -2563,7 +2563,7 @@ bun run typecheck
 ```
 Expected: No new type errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd /tmp/prowrl-studio-full
@@ -2590,7 +2590,7 @@ cost display, model info."
 **Files:**
 - Create: `prowrl-studio/frontend/src/components/workspace/tabs/TerminalTab.tsx`
 
-- [ ] **Step 1: Create TerminalTab with xterm.js**
+- [x] **Step 1: Create TerminalTab with xterm.js**
 
 Create: `prowrl-studio/frontend/src/components/workspace/tabs/TerminalTab.tsx`
 
@@ -2659,7 +2659,7 @@ export function TerminalTab({ agentId }: { agentId: string }) {
 }
 ```
 
-- [ ] **Step 2: Verify xterm deps exist**
+- [x] **Step 2: Verify xterm deps exist**
 
 Run:
 ```bash
@@ -2667,7 +2667,7 @@ cd /tmp/prowrl-studio-full
 grep -q "xterm" frontend/package.json && echo "xterm found" || bun add @xterm/xterm @xterm/addon-fit --cwd frontend
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "feat(workspace): add Terminal tab with xterm.js"
@@ -2678,7 +2678,7 @@ git add -A && git commit -m "feat(workspace): add Terminal tab with xterm.js"
 **Files:**
 - Create: `prowrl-studio/frontend/src/components/workspace/tabs/CodeTab.tsx`
 
-- [ ] **Step 1: Create CodeTab with Monaco**
+- [x] **Step 1: Create CodeTab with Monaco**
 
 Create: `prowrl-studio/frontend/src/components/workspace/tabs/CodeTab.tsx`
 
@@ -2794,7 +2794,7 @@ export function CodeTab({ agentId }: { agentId: string }) {
 }
 ```
 
-- [ ] **Step 2: Verify Monaco dep exists**
+- [x] **Step 2: Verify Monaco dep exists**
 
 Run:
 ```bash
@@ -2802,7 +2802,7 @@ cd /tmp/prowrl-studio-full
 grep -q "monaco" frontend/package.json && echo "monaco found" || bun add @monaco-editor/react --cwd frontend
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "feat(workspace): add Code tab with Monaco editor (read-only file viewer)"
@@ -2815,7 +2815,7 @@ git add -A && git commit -m "feat(workspace): add Code tab with Monaco editor (r
 - Create: `prowrl-studio/frontend/src/components/workspace/TileLayout.tsx`
 - Modify: `prowrl-studio/frontend/src/pages/AgentWorkspacePage.tsx`
 
-- [ ] **Step 1: Create LayoutSwitcher**
+- [x] **Step 1: Create LayoutSwitcher**
 
 Create: `prowrl-studio/frontend/src/components/workspace/LayoutSwitcher.tsx`
 
@@ -2851,7 +2851,7 @@ export function LayoutSwitcher() {
 }
 ```
 
-- [ ] **Step 2: Create TileLayout**
+- [x] **Step 2: Create TileLayout**
 
 Create: `prowrl-studio/frontend/src/components/workspace/TileLayout.tsx`
 
@@ -2916,7 +2916,7 @@ export function TileLayout({ agentIds }: TileLayoutProps) {
 }
 ```
 
-- [ ] **Step 3: Update AgentWorkspacePage to support layouts**
+- [x] **Step 3: Update AgentWorkspacePage to support layouts**
 
 Replace the `AgentWorkspacePage` in the plan to use layout modes:
 
@@ -2948,7 +2948,7 @@ if (layoutMode === 'tile' && activeAgents.length > 1) {
 // Otherwise render single-agent stack mode (existing code)
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(workspace): add Tile and Stack layout modes with LayoutSwitcher"
@@ -2961,7 +2961,7 @@ git add -A && git commit -m "feat(workspace): add Tile and Stack layout modes wi
 - Create: `prowrl-studio/frontend/src/store/canvasStore.ts`
 - Modify: `prowrl-studio/frontend/src/App.tsx` (add route)
 
-- [ ] **Step 1: Create canvas store**
+- [x] **Step 1: Create canvas store**
 
 Create: `prowrl-studio/frontend/src/store/canvasStore.ts`
 
@@ -3026,7 +3026,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 }));
 ```
 
-- [ ] **Step 2: Create CollaborationCanvasPage**
+- [x] **Step 2: Create CollaborationCanvasPage**
 
 Create: `prowrl-studio/frontend/src/pages/CollaborationCanvasPage.tsx`
 
@@ -3168,7 +3168,7 @@ function FindingCard({ finding, onApprove, onReject }: { finding: Finding; onApp
 }
 ```
 
-- [ ] **Step 3: Add route and nav**
+- [x] **Step 3: Add route and nav**
 
 In `prowrl-studio/frontend/src/App.tsx`:
 
@@ -3179,7 +3179,7 @@ import { CollaborationCanvasPage } from './pages/CollaborationCanvasPage';
 <Route path="/canvas" element={<ProtectedRoute><CollaborationCanvasPage /></ProtectedRoute>} />
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(canvas): add read-only Collaboration Canvas with findings timeline"
@@ -3191,7 +3191,7 @@ git add -A && git commit -m "feat(canvas): add read-only Collaboration Canvas wi
 
 ### Task 7.1: ProwlrBot Test Suite Verification
 
-- [ ] **Step 1: Run full ProwlrBot test suite**
+- [x] **Step 1: Run full ProwlrBot test suite**
 
 Run:
 ```bash
@@ -3200,7 +3200,7 @@ pytest --tb=short 2>&1 | tail -15
 ```
 Expected: 713+ tests pass, no regressions from studio router additions.
 
-- [ ] **Step 2: Run Studio typecheck**
+- [x] **Step 2: Run Studio typecheck**
 
 Run:
 ```bash
@@ -3209,7 +3209,7 @@ bun run typecheck
 ```
 Expected: No errors.
 
-- [ ] **Step 3: Run Studio tests**
+- [x] **Step 3: Run Studio tests**
 
 Run:
 ```bash
@@ -3218,7 +3218,7 @@ bun run test 2>&1 | tail -20
 ```
 Expected: Existing tests pass.
 
-- [ ] **Step 4: Verify Studio starts**
+- [x] **Step 4: Verify Studio starts**
 
 Run:
 ```bash
@@ -3227,7 +3227,7 @@ timeout 10 bun run --cwd backend start 2>&1 | head -20 || true
 ```
 Expected: NestJS starts on port 3211.
 
-- [ ] **Step 5: Verify ProwlrBot starts and Studio endpoints work**
+- [x] **Step 5: Verify ProwlrBot starts and Studio endpoints work**
 
 Run:
 ```bash
@@ -3240,14 +3240,14 @@ kill %1
 ```
 Expected: Health returns `{"status": "ok", ...}`. Agents returns `[]` or list of agents.
 
-- [ ] **Step 6: Push ProwlrBot changes**
+- [x] **Step 6: Push ProwlrBot changes**
 
 ```bash
 cd /Users/nunu/prowlrbot/prowlrbot
 git push origin main
 ```
 
-- [ ] **Step 7: Push Studio changes**
+- [x] **Step 7: Push Studio changes**
 
 ```bash
 cd /tmp/prowrl-studio-full
