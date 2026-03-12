@@ -135,6 +135,44 @@ async def get_listing(listing_id: str) -> MarketplaceListing:
     return listing
 
 
+@router.get("/listings/{listing_id}/detail")
+async def get_listing_detail(listing_id: str) -> dict:
+    """Full detail: listing, reviews, computed fields, related listings."""
+    store = _get_store()
+    listing = store.get_listing(listing_id)
+    if listing is None:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    reviews = store.get_reviews(listing_id, limit=50)
+    tip_total = store.get_tip_total(listing.author_id)
+
+    # Bundle membership
+    bundles = [
+        b.name for b in store.list_bundles()
+        if listing_id in b.listing_ids
+    ]
+
+    # Related listings: same category, max 4, excluding current
+    related = store.search_listings(
+        category=listing.category.value, sort="popular", limit=5,
+    )
+    related = [r for r in related if r.id != listing_id][:4]
+
+    # Author's other listings
+    author_listings = store.list_by_author(listing.author_id)
+    author_others = [l for l in author_listings if l.id != listing_id][:4]
+
+    return {
+        "listing": listing.model_dump(),
+        "install_command": f"prowlr market install {listing_id}",
+        "tip_total": tip_total,
+        "reviews": [r.model_dump() for r in reviews],
+        "bundles": bundles,
+        "related": [r.model_dump() for r in related],
+        "author_listings": [l.model_dump() for l in author_others],
+    }
+
+
 @router.put("/listings/{listing_id}", response_model=MarketplaceListing)
 async def update_listing(listing_id: str, updates: dict) -> MarketplaceListing:
     """Partially update a listing."""
