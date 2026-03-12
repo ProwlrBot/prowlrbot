@@ -41,10 +41,12 @@ def test_default_policy_allows_grep():
     assert allowed is True
 
 
-def test_default_policy_allows_python():
+def test_default_policy_blocks_python():
+    """python/python3 are excluded from the allowlist for security —
+    agent tools handle code execution, pip is allowed for installs."""
     policy = ShellPolicy()
     allowed, _ = policy.check("python script.py")
-    assert allowed is True
+    assert allowed is False
 
 
 def test_blocks_pipe_to_dangerous():
