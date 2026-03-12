@@ -141,6 +141,11 @@ from .studio_cmd import studio_cmd  # noqa: E402
 
 _record(".studio_cmd", time.perf_counter() - _t)
 
+_t = time.perf_counter()
+from .doctor_cmd import doctor_cmd  # noqa: E402
+
+_record(".doctor_cmd", time.perf_counter() - _t)
+
 _total = time.perf_counter() - _t0_main
 _init_timings.append(("(total imports)", _total))
 logger.debug("%.3fs (total imports)", _total)
@@ -200,3 +205,4 @@ cli.add_command(market_group)
 cli.add_command(agent_group)
 cli.add_command(team_group)
 cli.add_command(studio_cmd)
+cli.add_command(doctor_cmd)
