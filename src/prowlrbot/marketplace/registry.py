@@ -67,6 +67,11 @@ ECOSYSTEM_REPOS = {
         "description": "Official ProwlrBot documentation (en + zh)",
         "url": "https://github.com/ProwlrBot/prowlr-docs",
     },
+    "prowlr-doctor": {
+        "owner": "ProwlrBot",
+        "description": "Claude Code environment auditor — token waste detection, security checks, interactive TUI",
+        "url": "https://github.com/ProwlrBot/prowlr-doctor",
+    },
 }
 
 

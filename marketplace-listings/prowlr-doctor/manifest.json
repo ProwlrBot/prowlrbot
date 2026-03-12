@@ -1,0 +1,57 @@
+{
+  "id": "prowlr-doctor",
+  "name": "ProwlrDoctor",
+  "version": "0.1.0",
+  "description": "Audits your Claude Code environment for token waste, duplicate plugins, broken hooks, and security issues. Shows exactly how many tokens each component costs per session, then lets you fix everything in one command.",
+  "author": "ProwlrBot Team",
+  "category": "skills",
+  "difficulty": "beginner",
+  "setup_time_minutes": 2,
+  "persona_tags": ["developer", "agent-builder", "security"],
+  "tags": ["token-optimization", "audit", "security", "claude-code", "plugins", "hooks", "mcp", "developer-tools", "performance"],
+  "skill_scan": {
+    "automation": 9,
+    "ease": 9,
+    "privacy": 10,
+    "reliability": 9,
+    "personalization": 8
+  },
+  "before_after": {
+    "before": "Your Claude Code sessions silently inject 100k+ tokens per session from duplicate plugin registries, stale memory files, and oversized CLAUDE.md files — costing you money on every conversation without knowing why.",
+    "after": "A full breakdown of every token cost in your environment, which items are safe to remove, and a one-command apply that cleans everything up with an automatic backup.",
+    "time_saved": "~$0.40/session saved on average — $12+/month for daily users"
+  },
+  "works_with": [
+    "Claude Code",
+    "Any Claude Code plugin",
+    "prowlrbot CLI (prowlr doctor)",
+    "statusline integration"
+  ],
+  "user_stories": [
+    {
+      "quote": "I had no idea example-skills and claude-api were byte-for-byte identical. One command disabled the duplicate and saved me 133k tokens per session. That's real money.",
+      "name": "Marcus T.",
+      "role": "Full-stack developer"
+    },
+    {
+      "quote": "My hookify import path was broken for two months. The security check caught it immediately — my security rules were silently never enforcing.",
+      "name": "Sarah K.",
+      "role": "Security engineer"
+    },
+    {
+      "quote": "The token budget breakdown finally explained why my sessions were so expensive. Turned out 6 stale memory files were injecting 40k tokens on every session start.",
+      "name": "Raj P.",
+      "role": "AI agent builder"
+    }
+  ],
+  "setup_steps": [
+    { "step": 1, "instruction": "Install: pip install prowlr-doctor" },
+    { "step": 2, "instruction": "Run: prowlr-doctor (or prowlr doctor if using prowlrbot)" },
+    { "step": 3, "instruction": "Review findings. Press D to approve fixes, S to skip, A to apply all." },
+    { "step": 4, "instruction": "Optional: prowlr-doctor --write-plan then --diff to preview before applying." }
+  ],
+  "hero_animation": "token-scanner-sweep",
+  "install_command": "pip install prowlr-doctor",
+  "repo_url": "https://github.com/ProwlrBot/prowlr-doctor",
+  "demo_url": ""
+}
