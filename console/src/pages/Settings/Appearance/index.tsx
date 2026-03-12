@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button, message } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { request } from "../../../api";
+import { useTheme } from "../../../contexts/ThemeContext";
 import styles from "./index.module.less";
 
 /* ------------------------------------------------------------------ */
@@ -34,6 +35,7 @@ interface Theme {
 /* ------------------------------------------------------------------ */
 
 function AppearancePage() {
+  const { setMode: applyMode, setColorTheme: applyColorTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -77,16 +79,24 @@ function AppearancePage() {
   const handleSelectTheme = async (themeId: string) => {
     const prev = activeTheme;
     setActiveTheme(themeId);
+    const selectedTheme = themes.find((t) => t.id === themeId);
+    if (selectedTheme) {
+      applyColorTheme(themeId, selectedTheme.colors);
+    }
     try {
       await request("/settings/color-theme", {
         method: "PUT",
         body: JSON.stringify({ color_theme: themeId }),
       });
       message.success(
-        `Theme set to ${themes.find((t) => t.id === themeId)?.name}`,
+        `Theme set to ${selectedTheme?.name}`,
       );
     } catch {
       setActiveTheme(prev);
+      if (prev) {
+        const prevTheme = themes.find((t) => t.id === prev);
+        if (prevTheme) applyColorTheme(prev, prevTheme.colors);
+      }
       message.error("Failed to save theme selection");
     }
   };
@@ -96,6 +106,7 @@ function AppearancePage() {
   const handleSelectMode = async (newMode: string) => {
     const prev = mode;
     setMode(newMode);
+    applyMode(newMode as "light" | "dark" | "system");
     try {
       await request("/settings/theme", {
         method: "PUT",
@@ -104,6 +115,7 @@ function AppearancePage() {
       message.success(`Display mode set to ${newMode}`);
     } catch {
       setMode(prev);
+      applyMode(prev as "light" | "dark" | "system");
       message.error("Failed to save display mode");
     }
   };
