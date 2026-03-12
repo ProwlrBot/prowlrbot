@@ -16,8 +16,7 @@
     "preview:test": "vite preview --mode test"
   },
   "dependencies": {
-    "@agentscope-ai/chat": "^1.1.51",
-
+    "@prowlrbot/chat": "github:ProwlrBot/prowlr-chat",
     "@ant-design/x-markdown": "^2.2.2",
     "@hello-pangea/dnd": "^18.0.1",
     "ahooks": "^3.9.6",

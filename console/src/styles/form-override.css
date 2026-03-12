@@ -1,6 +1,6 @@
 /**
  * Form required mark style protection
- * Prevent CSS-in-JS styles from third-party components (e.g., @agentscope-ai/chat) from overriding
+ * Prevent CSS-in-JS styles from third-party components (e.g., @prowlrbot/chat) from overriding
  */
 
 /* Protect red asterisk for Ant Design form required marks */

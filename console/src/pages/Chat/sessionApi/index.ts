@@ -2,7 +2,7 @@ import {
   IAgentScopeRuntimeWebUISession,
   IAgentScopeRuntimeWebUISessionAPI,
   IAgentScopeRuntimeWebUIMessage,
-} from "@agentscope-ai/chat";
+} from "@prowlrbot/chat";
 import api, { type ChatSpec, type Message } from "../../../api";
 
 interface CustomWindow extends Window {
@@ -142,7 +142,7 @@ function buildResponseCard(
 
 /**
  * Convert flat backend messages into the card-based format expected by
- * the @agentscope-ai/chat component.
+ * the @prowlrbot/chat component.
  *
  * - User messages → AgentScopeRuntimeRequestCard
  * - Consecutive non-user messages (assistant / system / tool) → grouped
