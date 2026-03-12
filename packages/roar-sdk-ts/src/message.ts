@@ -37,32 +37,65 @@ export function createMessage(
  * Compute the canonical string for signing.
  *
  * MUST match Python's signing canonical body exactly:
- *   JSON.stringify({id, intent, payload}, sort_keys=True)
+ *   json.dumps({context, from, id, intent, payload, timestamp, to}, sort_keys=True)
  *
- * Python uses json.dumps with sort_keys=True which sorts all keys
- * recursively. We replicate this with a recursive key-sorting replacer.
+ * - "from" and "to" are DID strings, not identity objects.
+ * - "timestamp" is the auth.timestamp value set during signing.
+ * - All keys sorted alphabetically (Python sort_keys=True).
+ *
+ * The golden fixture at tests/conformance/golden/signature.json defines
+ * the expected HMAC for fixed inputs — any compliant SDK must match it.
  */
-function canonicalize(message: ROARMessage): string {
+function canonicalize(message: ROARMessage, authTimestamp: number): string {
   const obj = {
+    context: message.context,
+    from: message.from_identity.did,
     id: message.id,
     intent: message.intent,
     payload: message.payload,
+    timestamp: authTimestamp,
+    to: message.to_identity.did,
   };
-  return JSON.stringify(obj, sortKeysReplacer);
+  return pythonJsonDumps(obj);
 }
 
 /**
- * JSON replacer that sorts object keys to match Python's sort_keys=True.
+ * Python-compatible JSON serializer.
+ *
+ * Replicates `json.dumps(obj, sort_keys=True)` from Python's stdlib:
+ * - Keys sorted alphabetically (recursive)
+ * - Separator convention: `", "` between items, `": "` between key and value
+ * - Numbers: integer-valued numbers get ".0" suffix to match Python float repr
+ *
+ * Limitation: Python distinguishes int (no decimal) from float (with .0).
+ * TypeScript has only Number. We treat all numbers as Python floats — if a
+ * payload contains Python int values, they will differ. For the signing body
+ * this only matters for `timestamp`, which is always a float.
  */
-function sortKeysReplacer(_key: string, value: unknown): unknown {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    const sorted: Record<string, unknown> = {};
-    for (const k of Object.keys(value as Record<string, unknown>).sort()) {
-      sorted[k] = (value as Record<string, unknown>)[k];
-    }
-    return sorted;
+function pythonJsonDumps(value: unknown): string {
+  if (value === null || value === undefined) return "null";
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return "null";
+    // Replicate Python float serialization: e.g. 1710000000.0 → "1710000000.0"
+    if (Number.isInteger(value)) return `${value}.0`;
+    return String(value);
   }
-  return value;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "[]";
+    return "[" + value.map(pythonJsonDumps).join(", ") + "]";
+  }
+  if (typeof value === "object" && value !== null) {
+    const obj = value as Record<string, unknown>;
+    const keys = Object.keys(obj).sort();
+    if (keys.length === 0) return "{}";
+    const pairs = keys.map(
+      (k) => `${JSON.stringify(k)}: ${pythonJsonDumps(obj[k])}`,
+    );
+    return "{" + pairs.join(", ") + "}";
+  }
+  return String(value);
 }
 
 /**
@@ -78,7 +111,9 @@ export function signMessage(
   message: ROARMessage,
   secret: string,
 ): ROARMessage {
-  const body = canonicalize(message);
+  // auth.timestamp is part of the canonical body — set it before hashing.
+  const authTimestamp = Date.now() / 1000;
+  const body = canonicalize(message, authTimestamp);
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(body);
   const sig = hmac.digest("hex");
@@ -87,7 +122,7 @@ export function signMessage(
     auth: {
       signature: `hmac-sha256:${sig}`,
       signer: message.from_identity.did,
-      timestamp: Date.now() / 1000,
+      timestamp: authTimestamp,
     },
   };
 }
@@ -107,8 +142,12 @@ export function verifyMessage(
   if (typeof sigValue !== "string" || !sigValue.startsWith("hmac-sha256:")) {
     return false;
   }
-  const expectedSig = sigValue.split(":")[1];
-  const body = canonicalize(message);
+  const authTimestamp = message.auth?.timestamp;
+  if (typeof authTimestamp !== "number") {
+    return false;
+  }
+  const expectedSig = (sigValue as string).split(":")[1];
+  const body = canonicalize(message, authTimestamp);
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(body);
   const actualSig = hmac.digest("hex");

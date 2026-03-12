@@ -1,6 +1,6 @@
 {
   "name": "@roar-protocol/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ROAR Protocol TypeScript SDK — Unified agent communication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
