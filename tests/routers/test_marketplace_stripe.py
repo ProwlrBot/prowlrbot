@@ -53,13 +53,16 @@ def client(store):
         yield TestClient(app)
 
 
-def test_tip_returns_503_when_stripe_not_configured(client):
-    """Without STRIPE_SECRET_KEY, tip returns 503."""
+def test_tip_records_locally_when_stripe_not_configured(client):
+    """Without STRIPE_SECRET_KEY, tip records locally and returns 200."""
     import os
     env = {k: v for k, v in os.environ.items() if k != "STRIPE_SECRET_KEY"}
     with patch.dict("os.environ", env, clear=True):
         resp = client.post("/marketplace/listings/tippable/tip", json={"amount": 5})
-        assert resp.status_code == 503
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["checkout_url"] is None
+        assert "tip_id" in data
 
 
 def test_tip_validates_amount_range(client):

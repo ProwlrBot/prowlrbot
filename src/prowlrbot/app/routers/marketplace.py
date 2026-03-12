@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel as PydanticBaseModel
 
 
@@ -293,52 +293,110 @@ async def tip_author(listing_id: str, tip_req: TipRequest) -> dict:
 
     # Validate amount range
     if tip_req.amount < 1 or tip_req.amount > 100:
-        raise HTTPException(status_code=400, detail="Tip amount must be between $1 and $100")
+        raise HTTPException(
+            status_code=400, detail="Tip amount must be between $1 and $100"
+        )
 
     stripe_key = os.environ.get("STRIPE_SECRET_KEY")
     if not stripe_key:
-        raise HTTPException(status_code=503, detail="Tipping not configured")
+        # No Stripe configured — record tip locally as fallback
+        tip = TipRecord(
+            listing_id=listing_id,
+            author_id=listing.author_id,
+            amount=tip_req.amount,
+            message=tip_req.message,
+        )
+        store.add_tip(tip)
+        return {
+            "checkout_url": None,
+            "tip_id": tip.id,
+            "note": "Tip recorded locally (Stripe not configured)",
+        }
 
-    # Record tip locally
-    tip = TipRecord(
-        listing_id=listing_id,
-        author_id=listing.author_id,
-        amount=tip_req.amount,
-        message=tip_req.message,
-    )
-    store.add_tip(tip)
-
-    # Try Stripe checkout
+    # Create Stripe checkout — tip recorded in webhook after payment
     try:
         import stripe
+
         stripe.api_key = stripe_key
         session = stripe.checkout.Session.create(
             mode="payment",
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "unit_amount": int(tip_req.amount * 100),
-                    "product_data": {
-                        "name": f"Tip for {listing.title}",
-                        "description": f"Supporting {listing.author_name or listing.author_id}",
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "unit_amount": int(tip_req.amount * 100),
+                        "product_data": {
+                            "name": f"Tip for {listing.title}",
+                        },
                     },
-                },
-                "quantity": 1,
-            }],
+                    "quantity": 1,
+                }
+            ],
             success_url=f"/marketplace/listings/{listing_id}?tipped=true",
             cancel_url=f"/marketplace/listings/{listing_id}",
-            metadata={"listing_id": listing_id, "tip_id": tip.id},
+            metadata={
+                "listing_id": listing_id,
+                "author_id": listing.author_id,
+                "amount": str(tip_req.amount),
+                "message": tip_req.message,
+            },
         )
-        return {"checkout_url": session.url, "tip_id": tip.id}
+        return {"checkout_url": session.url}
     except ImportError:
-        return {"checkout_url": None, "tip_id": tip.id, "note": "Tip recorded locally (Stripe SDK not installed)"}
-    except Exception as e:
-        return {"checkout_url": None, "tip_id": tip.id, "note": f"Stripe unavailable: {e}"}
+        # stripe package not installed — record locally
+        tip = TipRecord(
+            listing_id=listing_id,
+            author_id=listing.author_id,
+            amount=tip_req.amount,
+            message=tip_req.message,
+        )
+        store.add_tip(tip)
+        return {
+            "checkout_url": None,
+            "tip_id": tip.id,
+            "note": "Stripe SDK not installed",
+        }
 
 
 @router.post("/webhook/stripe")
-async def stripe_webhook() -> dict:
-    """Stripe webhook receiver. Validates signature and records confirmed tips."""
+async def stripe_webhook(request: Request) -> dict:
+    """Stripe webhook — records tip after successful payment."""
+    import os
+
+    webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+    if not webhook_secret:
+        raise HTTPException(status_code=503, detail="Webhook not configured")
+
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        import stripe
+
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ImportError:
+        raise HTTPException(status_code=503, detail="Stripe SDK not installed")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        metadata = session.get("metadata", {})
+        listing_id = metadata.get("listing_id")
+        author_id = metadata.get("author_id")
+        amount = float(metadata.get("amount", 0))
+        message = metadata.get("message", "")
+
+        if listing_id and author_id and amount > 0:
+            store = _get_store()
+            tip = TipRecord(
+                listing_id=listing_id,
+                author_id=author_id,
+                amount=amount,
+                message=message,
+            )
+            store.add_tip(tip)
+
     return {"status": "received"}
 
 
