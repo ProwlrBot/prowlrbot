@@ -1,0 +1,64 @@
+# docker/docker-compose.cloudflare-mcp.yml
+# Cloudflare MCP Server — exposes Cloudflare platform tools to ProwlrBot
+#
+# This runs the official @cloudflare/mcp-server-cloudflare package as an
+# SSE server that ProwlrBot connects to via its HTTP MCP transport.
+#
+# Prerequisites:
+#   1. Get a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens
+#      Minimum scopes needed:
+#        • Account:Read (account info)
+#        • Workers Scripts:Edit
+#        • Workers KV Storage:Edit
+#        • D1:Edit
+#        • R2:Edit
+#
+#   2. Find your Account ID at dash.cloudflare.com (right sidebar)
+#
+# Usage:
+#   cp docker/.env.cloudflare.example docker/.env.cloudflare
+#   # edit .env.cloudflare with your token + account ID
+#   docker compose -f docker/docker-compose.cloudflare-mcp.yml up -d
+#
+# Then add this to ProwlrBot's MCP config (Settings → MCP):
+#   Transport: sse
+#   URL:       http://localhost:8976/sse
+#
+# Available tools (after connecting):
+#   cloudflare_workers_list / create / delete / deploy
+#   cloudflare_kv_namespace_list / get / put / delete
+#   cloudflare_d1_database_list / query / create
+#   cloudflare_r2_bucket_list / create / delete
+#   cloudflare_ai_run (Workers AI inference)
+#   cloudflare_account_info, cloudflare_zone_list
+
+services:
+  cloudflare-mcp:
+    image: node:22-alpine
+    container_name: prowlr-cloudflare-mcp
+    working_dir: /app
+    command: >
+      sh -c "
+        npx --yes @cloudflare/mcp-server-cloudflare@latest
+        --transport sse
+        --port 8976
+      "
+    ports:
+      - "8976:8976"
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
+      # Optional: restrict to a specific zone
+      # - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8976/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

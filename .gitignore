@@ -31,6 +31,7 @@ providers.json
 envs.json
 !.env.example
 !.env.template
+!**/.env.*.example
 __pycache__/
 *.db
 *.rdb
