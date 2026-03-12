@@ -13,6 +13,8 @@ import defaultConfig, { DefaultConfig } from "./OptionsPanel/defaultConfig";
 import Weather from "./Weather";
 import { getApiUrl, getApiToken } from "../../api/config";
 import { providerApi } from "../../api/modules/provider";
+import { getCsrfToken } from "../../api/request";
+import { useTheme } from "../../contexts/ThemeContext";
 import "./index.module.less";
 
 interface CustomWindow extends Window {
@@ -28,14 +30,12 @@ type OptionsConfig = DefaultConfig;
 export default function ChatPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isDark, colors } = useTheme();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
-  const [optionsConfig] = useLocalStorageState<OptionsConfig>(
-    "agent-scope-runtime-webui-options",
-    {
-      defaultValue: defaultConfig,
-      listenStorageChange: true,
-    },
-  );
+  const [optionsConfig] = useLocalStorageState<OptionsConfig>("agent-scope-runtime-webui-options", {
+    defaultValue: defaultConfig,
+    listenStorageChange: true,
+  });
 
   const handleConfigureModel = () => {
     setShowModelPrompt(false);
@@ -62,8 +62,8 @@ export default function ChatPage() {
     };
 
     const customFetch = async (data: {
-      input: any[];
-      biz_params?: any;
+      input: unknown[];
+      biz_params?: Record<string, unknown>;
       signal?: AbortSignal;
     }): Promise<Response> => {
       try {
@@ -82,7 +82,7 @@ export default function ChatPage() {
 
       const { input, biz_params } = data;
 
-      const lastMessage = input[input.length - 1];
+      const lastMessage = input[input.length - 1] as any;
       const session = lastMessage?.session || {};
 
       const session_id = window.currentSessionId || session?.session_id || "";
@@ -107,6 +107,11 @@ export default function ChatPage() {
         (headers as Record<string, string>).Authorization = `Bearer ${token}`;
       }
 
+      const csrf = getCsrfToken();
+      if (csrf) {
+        (headers as Record<string, string>)["x-csrf-token"] = csrf;
+      }
+
       const url = optionsConfig?.api?.baseURL || getApiUrl("/agent/process");
       return fetch(url, {
         method: "POST",
@@ -116,15 +121,20 @@ export default function ChatPage() {
       });
     };
 
+    const resolvedTheme: DefaultConfig["theme"] = {
+      ...optionsConfig.theme,
+      darkMode: isDark,
+      // Align chat primary color with global appearance when available.
+      colorPrimary: colors?.primary ?? optionsConfig.theme.colorPrimary,
+    };
+
     return {
       ...optionsConfig,
       session: {
         multiple: true,
         api: sessionApi,
       },
-      theme: {
-        ...optionsConfig.theme,
-      },
+      theme: resolvedTheme,
       api: {
         ...optionsConfig.api,
         fetch: customFetch,
@@ -136,7 +146,7 @@ export default function ChatPage() {
         "weather search mock": Weather,
       },
     } as unknown as IAgentScopeRuntimeWebUIOptions;
-  }, [optionsConfig]);
+  }, [optionsConfig, isDark, colors]);
 
   return (
     <div style={{ height: "100%", width: "100%" }}>

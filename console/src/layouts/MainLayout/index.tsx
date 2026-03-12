@@ -26,6 +26,10 @@ import MonitoringPage from "../../pages/Monitoring";
 import MemoryPage from "../../pages/Memory";
 import SwarmPage from "../../pages/Swarm";
 import TeamBuilderPage from "../../pages/Agent/TeamBuilder";
+import CreditsPage from "../../pages/Credits";
+import StatusLine from "../../components/StatusLine";
+import ReplayPage from "../../pages/Replay";
+import TerminalPage from "../../pages/Terminal";
 
 const { Content } = Layout;
 
@@ -51,6 +55,9 @@ const pathToKey: Record<string, string> = {
   "/memory": "memory",
   "/swarm": "swarm",
   "/team-builder": "team-builder",
+  "/credits": "credits",
+  "/replay": "replay",
+  "/terminal": "terminal",
 };
 
 export default function MainLayout() {
@@ -96,10 +103,14 @@ export default function MainLayout() {
               <Route path="/memory" element={<MemoryPage />} />
               <Route path="/swarm" element={<SwarmPage />} />
               <Route path="/team-builder" element={<TeamBuilderPage />} />
+              <Route path="/credits" element={<CreditsPage />} />
+              <Route path="/replay" element={<ReplayPage />} />
+              <Route path="/terminal" element={<TerminalPage />} />
               <Route path="/" element={<Dashboard />} />
             </Routes>
           </div>
         </Content>
+        <StatusLine />
       </Layout>
     </Layout>
   );

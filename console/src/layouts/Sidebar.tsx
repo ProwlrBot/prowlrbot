@@ -50,6 +50,9 @@ const keyToPath: Record<string, string> = {
   memory: "/memory",
   swarm: "/swarm",
   "team-builder": "/team-builder",
+  credits: "/credits",
+  replay: "/replay",
+  terminal: "/terminal",
 };
 
 interface SidebarProps {
@@ -160,6 +163,16 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           label: "Team Builder",
           icon: <UsersRound size={16} />,
         },
+        {
+          key: "replay",
+          label: "Replay",
+          icon: <Box size={16} />,
+        },
+        {
+          key: "terminal",
+          label: "Terminal",
+          icon: <Cpu size={16} />,
+        },
       ],
     },
     {
@@ -181,6 +194,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "swarm",
           label: "Swarm",
           icon: <Globe size={16} />,
+        },
+        {
+          key: "credits",
+          label: "Credits",
+          icon: <Zap size={16} />,
         },
       ],
     },

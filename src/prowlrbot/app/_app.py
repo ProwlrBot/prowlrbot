@@ -297,6 +297,13 @@ roar_server = ROARServer(
 )
 app.include_router(create_roar_router(roar_server), dependencies=[Depends(auth_dep)])
 
+# Terminal WebSocket (PTY) — Unix only
+try:
+    from .routers.terminal import router as _terminal_router
+    app.include_router(_terminal_router)
+except ImportError:
+    pass  # pty not available (Windows)
+
 # Wire ROAR EventBus into A2A SSE streaming
 from ..protocols.a2a_server import set_event_bus as _a2a_set_event_bus
 

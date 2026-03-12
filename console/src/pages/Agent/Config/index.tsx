@@ -4,10 +4,14 @@ import {
   InputNumber,
   Button,
   Card,
+  Divider,
+  Segmented,
+  Typography,
   message,
 } from "antd";
 import { useTranslation } from "react-i18next";
 import api from "../../../api";
+import { getPolicy, setPolicy } from "../../../api/modules/autonomy";
 import styles from "./index.module.less";
 import type { AgentsRunningConfig } from "../../../api/types";
 
@@ -17,9 +21,14 @@ function AgentConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autonomyLevel, setAutonomyLevel] = useState<string>("guide");
+  const [savingAutonomy, setSavingAutonomy] = useState(false);
 
   useEffect(() => {
     fetchConfig();
+    getPolicy("default")
+      .then((p: any) => { if (p?.level) setAutonomyLevel(p.level); })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,6 +67,24 @@ function AgentConfigPage() {
 
   const handleReset = () => {
     fetchConfig();
+  };
+
+  const handleSaveAutonomy = async () => {
+    setSavingAutonomy(true);
+    try {
+      await setPolicy("default", { level: autonomyLevel, agent_id: "default" });
+      message.success("Autonomy settings saved");
+    } catch {
+      message.error("Failed to save autonomy settings");
+    } finally {
+      setSavingAutonomy(false);
+    }
+  };
+
+  const autonomyDescriptions: Record<string, string> = {
+    observe: "Watches and reports only. Never takes action.",
+    guide: "Suggests actions and waits for your approval.",
+    act: "Fully autonomous. Acts without asking.",
   };
 
   return (
@@ -144,6 +171,30 @@ function AgentConfigPage() {
               </Button>
             </Form.Item>
           </Form>
+        </Card>
+
+        <Divider orientation="left">Autonomy</Divider>
+
+        <Card className={styles.formCard}>
+          <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+            Control how independently the agent acts. This applies to the default agent.
+          </Typography.Paragraph>
+          <Segmented
+            options={[
+              { label: "Observe", value: "observe" },
+              { label: "Guide", value: "guide" },
+              { label: "Act", value: "act" },
+            ]}
+            value={autonomyLevel}
+            onChange={(v) => setAutonomyLevel(v as string)}
+            style={{ marginBottom: 12 }}
+          />
+          <Typography.Paragraph type="secondary" style={{ minHeight: 22, marginBottom: 16 }}>
+            {autonomyDescriptions[autonomyLevel]}
+          </Typography.Paragraph>
+          <Button type="primary" onClick={handleSaveAutonomy} loading={savingAutonomy}>
+            Save Autonomy Settings
+          </Button>
         </Card>
       </div>
     </div>
