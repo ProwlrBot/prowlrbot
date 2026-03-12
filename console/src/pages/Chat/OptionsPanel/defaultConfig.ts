@@ -20,10 +20,10 @@ const defaultConfig = {
     avatar: `${import.meta.env.BASE_URL}prowlrbot-symbol.svg`,
     prompts: [
       {
-        value: "让我们开启一段新的旅程吧！",
+        value: "Let's get started — what can you help me with?",
       },
       {
-        value: "能告诉我你有哪些技能吗？",
+        value: "What skills do you have?",
       },
     ],
   },

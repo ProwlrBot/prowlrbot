@@ -12,7 +12,6 @@ import {
   Wifi,
   UsersRound,
   CalendarClock,
-  Activity,
   Sparkles,
   Briefcase,
   Cpu,
@@ -21,15 +20,9 @@ import {
   Settings,
   Plug,
   Store,
-  Gamepad2,
-  Trophy,
   Shield,
   Eye,
   Palette,
-  Rocket,
-  FileText,
-  Search,
-  Play,
   Bot,
 } from "lucide-react";
 
@@ -41,7 +34,6 @@ const keyToPath: Record<string, string> = {
   channels: "/channels",
   sessions: "/sessions",
   "cron-jobs": "/cron-jobs",
-  heartbeat: "/heartbeat",
   skills: "/skills",
   mcp: "/mcp",
   workspace: "/workspace",
@@ -50,21 +42,13 @@ const keyToPath: Record<string, string> = {
   "agent-config": "/agent-config",
   marketplace: "/marketplace",
   agentverse: "/agentverse",
-  gamification: "/gamification",
-  leaderboard: "/leaderboard",
   security: "/security",
   privacy: "/privacy",
   appearance: "/appearance",
-  templates: "/templates",
-  research: "/research",
-  replay: "/replay",
-  "external-agents": "/external-agents",
-  onboarding: "/onboarding",
   warroom: "/warroom",
   monitoring: "/monitoring",
   memory: "/memory",
   swarm: "/swarm",
-  "soul-editor": "/soul-editor",
   "team-builder": "/team-builder",
 };
 
@@ -80,7 +64,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
     "control-group",
     "agent-group",
     "explore-group",
-    "social-group",
     "settings-group",
   ]);
   const [version, setVersion] = useState<string>("");
@@ -102,11 +85,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       key: "warroom",
       label: "War Room",
       icon: <Radio size={16} />,
-    },
-    {
-      key: "swarm",
-      label: "Swarm",
-      icon: <Globe size={16} />,
     },
     {
       key: "chat-group",
@@ -139,11 +117,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "cron-jobs",
           label: t("nav.cronJobs"),
           icon: <CalendarClock size={16} />,
-        },
-        {
-          key: "heartbeat",
-          label: t("nav.heartbeat"),
-          icon: <Activity size={16} />,
         },
         {
           key: "monitoring",
@@ -183,11 +156,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           icon: <Cpu size={16} />,
         },
         {
-          key: "soul-editor",
-          label: "Soul Editor",
-          icon: <Sparkles size={16} />,
-        },
-        {
           key: "team-builder",
           label: "Team Builder",
           icon: <UsersRound size={16} />,
@@ -197,7 +165,7 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
     {
       key: "explore-group",
       label: "Explore",
-      icon: <Rocket size={16} />,
+      icon: <Globe size={16} />,
       children: [
         {
           key: "marketplace",
@@ -210,41 +178,9 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           icon: <Bot size={16} />,
         },
         {
-          key: "templates",
-          label: "Templates",
-          icon: <FileText size={16} />,
-        },
-        {
-          key: "research",
-          label: "Research",
-          icon: <Search size={16} />,
-        },
-        {
-          key: "external-agents",
-          label: "External Agents",
-          icon: <Plug size={16} />,
-        },
-      ],
-    },
-    {
-      key: "social-group",
-      label: "Social",
-      icon: <Trophy size={16} />,
-      children: [
-        {
-          key: "gamification",
-          label: "Achievements",
-          icon: <Gamepad2 size={16} />,
-        },
-        {
-          key: "leaderboard",
-          label: "Leaderboard",
-          icon: <Trophy size={16} />,
-        },
-        {
-          key: "replay",
-          label: "Replay",
-          icon: <Play size={16} />,
+          key: "swarm",
+          label: "Swarm",
+          icon: <Globe size={16} />,
         },
       ],
     },
@@ -277,11 +213,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "appearance",
           label: "Appearance",
           icon: <Palette size={16} />,
-        },
-        {
-          key: "onboarding",
-          label: "Onboarding",
-          icon: <Rocket size={16} />,
         },
       ],
     },
