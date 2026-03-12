@@ -1,7 +1,7 @@
 # ProwlrBot Ecosystem Roadmap — What Goes Where
 
-> Last updated: 2026-03-11
-> Status: Active — Week 1 complete, moving to Week 2
+> Last updated: 2026-03-12
+> Status: Active — Weeks 1-4 complete. Security audit done. Entering "Make It Work" phase.
 
 ---
 
@@ -30,6 +30,73 @@ agentverse
 
 ---
 
+## Production Readiness Audit (2026-03-12)
+
+### Feature Status Matrix
+
+| Area | Backend | API | Frontend | Tests | Verdict |
+|------|---------|-----|----------|-------|---------|
+| **Chat + Agent** | ✅ AgentScope | ✅ `/agent/*` | ✅ Full UI | ✅ | WORKING |
+| **Marketplace** | ✅ SQLite store | ✅ Full CRUD | ✅ Grid/list/bundles | ✅ | WORKING |
+| **Monitoring** | ✅ Engine + detectors | ✅ `/monitors/*` | ✅ DiffViewer | ✅ | WORKING |
+| **War Room** | ✅ Engine + bridge | ✅ `/warroom/*` + WS | ✅ Kanban + feed | ✅ 44 tests | WORKING |
+| **Swarm** | ✅ Docker/Redis detect | ✅ `/swarm/*` | ✅ Status UI | ⚠️ | WORKING |
+| **Settings** | ✅ Config store | ✅ Full CRUD | ✅ Full UI | ✅ | WORKING |
+| **Credits/Tiers** | ✅ SQLite economy | ✅ In marketplace | ⚠️ No purchase UI | ⚠️ | PARTIAL |
+| **CLI** | ✅ 24 commands | N/A | N/A | ⚠️ | WORKING |
+| **Memory** | ✅ Tier manager | ✅ In `/agent/*` | ✅ Memory page | ⚠️ | NEEDS WIRING |
+| **AgentVerse** | ✅ World + zones | ✅ 15+ endpoints | ✅ Full UI | ⚠️ | WORKING |
+| **Learning** | ⚠️ DB schema only | ❌ No routes | ❌ No UI | ❌ | NOT READY |
+| **ACP Protocol** | ⚠️ Skeleton | ⚠️ Handshake only | N/A | ⚠️ | STUB |
+| **A2A Protocol** | ✅ 8 endpoints | ✅ Task lifecycle | N/A | ⚠️ | PARTIAL |
+| **ROAR Protocol** | ⚠️ SDK exists | ⚠️ Replay buffer | N/A | ✅ | PARTIAL |
+| **Autonomy** | ⚠️ Controller exists | ✅ Routes | ⚠️ No slider | ❌ | NOT WIRED |
+| **Teams** | ✅ Store + CLI | ✅ Routes | ⚠️ TeamBuilder stub | ⚠️ | PARTIAL |
+| **External Agents** | ⚠️ Manager | ⚠️ Register/list | ❌ Empty page | ❌ | STUB |
+| **Replay** | ❌ No backend | ❌ No routes | ❌ Empty page | ❌ | NOT STARTED |
+| **Research** | ✅ Engine + store | ✅ Routes | ❌ Empty page | ❌ | NEEDS UI |
+| **Terminal Streaming** | ❌ No PTY | ❌ No WS pipe | ❌ No xterm.js | ❌ | NOT STARTED |
+| **StatusLine** | ❌ | ❌ | ❌ | ❌ | NOT STARTED |
+
+### Commit Status (2026-03-12)
+
+| Repo | Committed | Pushed | Details |
+|------|-----------|--------|---------|
+| **prowlrbot** (main) | ✅ All changes | ⚠️ 1 ahead | `5313213` — 14 audit findings closed |
+| **prowlr-marketplace** | ✅ | ✅ | CI injection fix, stale org refs |
+| **prowlr-studio** | ✅ | ✅ | DOMPurify XSS, volume sanitize, .env.docker |
+| **agentscope-runtime** | ✅ | ✅ | Hardcoded token removed, timing-safe auth |
+| **agentverse** | ✅ | ✅ | Org refs, SECURITY.md, CI perms |
+| **roar-protocol** | ✅ | ✅ | Org refs, SECURITY.md, CI perms |
+| **prowlr-docs** | ✅ | ✅ | Deploy scope, CoPaw rebrand |
+
+### Security Audit Summary (2026-03-12)
+
+**54 vulnerabilities found across 9 repos, 43 fixed:**
+
+| Severity | Found | Fixed | Remaining |
+|----------|-------|-------|-----------|
+| Critical | 3 | 3 | 0 |
+| High | 6 | 6 | 0 |
+| Medium | 9 | 9 | 0 |
+| Low | 4 | 4 | 0 |
+| Upstream (agentscope) | 3 | 0 | 3 (unsandboxed exec, SQL injection) |
+
+**Key fixes committed:**
+- CSRF bypass on first request → 403 rejection
+- Privilege escalation via self-assigned admin role → hardcoded viewer
+- X-Forwarded-For rate limit bypass → use ASGI client IP only
+- JWT issuer claim validation added
+- Shell command newline injection blocked
+- SSRF in monitors/webhooks → URL validator with private IP blocking
+- Auth DB moved to secret directory
+- Path traversal in file_io blocked
+- Marketplace SQL injection in sort param fixed
+- WebSocket auth + rate limiting added
+- Python/curl/wget/docker removed from shell allowlist
+
+---
+
 ## 1. ProwlrBot/prowlrbot (Core Platform)
 
 **Status:** Active development, main codebase
@@ -46,15 +113,27 @@ agentverse
 
 | Priority | Task | Status |
 |----------|------|--------|
-| ~~P0~~ | ~~Verify CI workflows pass after StrEnum + path traversal fixes~~ | **done** — StrEnum `__str__` fixed, Black target-version py310, flaky lock test relaxed |
-| ~~P0~~ | ~~Dependabot alerts — pip deps need lockfile regeneration in CI~~ | **done** — npm overrides added, pip alerts dismissed (minimums already safe), 0 open alerts |
+| ~~P0~~ | ~~Verify CI workflows pass after StrEnum + path traversal fixes~~ | **done** |
+| ~~P0~~ | ~~Dependabot alerts — pip deps need lockfile regeneration in CI~~ | **done** |
+| ~~P0~~ | ~~Security audit — CRITICAL/HIGH/MEDIUM/LOW vulnerabilities~~ | **done** — 22 findings fixed in 4 commits |
 | ~~P1~~ | ~~`prowlr market update` — test against real prowlr-marketplace repo content~~ | **done** |
 | ~~P1~~ | ~~Privacy and Terms pages — create placeholder content for Footer links~~ | **done** |
-| ~~P1~~ | ~~Blog posts reference old 12-category marketplace — update to 6 categories~~ | **done** (already clean) |
+| ~~P1~~ | ~~Blog posts reference old 12-category marketplace — update to 6 categories~~ | **done** |
 | ~~P1~~ | ~~On-site blog — render markdown posts at /blog instead of linking to GitHub~~ | **done** |
 | ~~P1~~ | ~~Fix dead links — Nav blog, Footer Discord/Twitter~~ | **done** |
 | ~~P1~~ | ~~Security: JWT secret persistence + CORS whitelist~~ | **done** |
-| P2 | Website TechStack component — visual QA | todo |
+| ~~P1~~ | ~~SSRF protection — URL validator for monitors, webhooks, marketplace~~ | **done** |
+| ~~P1~~ | ~~Shell hardening — remove python/curl/wget/docker, block newline injection~~ | **done** |
+| P1 | Memory API wiring — connect tier manager to agent execution | **todo** |
+| P1 | Hide empty pages (ExternalAgents, Replay, Research) from nav | **todo** |
+| P1 | Push 1 unpushed commit to origin | **todo** |
+| P2 | Wire autonomy slider to agent behavior | **todo** |
+| P2 | Wire ACP protocol to actual agent execution | **todo** |
+| P2 | Website TechStack component — visual QA | **todo** |
+| P2 | Credit purchase UI in console | **todo** |
+| P3 | Terminal streaming (PTY + xterm.js + WebSocket) | **todo** |
+| P3 | StatusLine component (agent status bar) | **todo** |
+| P3 | Session replay UI | **todo** |
 | ~~P2~~ | ~~`file_io.py` — legacy `.copaw.secret` backward compat: add deprecation warning~~ | **done** |
 | ~~P2~~ | ~~Add marketplace/credits/tiers documentation pages~~ | **done** |
 | ~~P2~~ | ~~Add team builder documentation pages~~ | **done** |
@@ -64,8 +143,8 @@ agentverse
 
 ## 2. ProwlrBot/prowlr-marketplace (Registry)
 
-**Status:** Populated with 12 starter listings, README rebranded
-**Priority:** 1 (highest)
+**Status:** Populated with 50 listings, fully secured
+**Priority:** Maintenance
 
 ### What lives here
 - Listing manifests (the "registry")
@@ -78,132 +157,105 @@ agentverse
 
 | Priority | Task | Status |
 |----------|------|--------|
-| ~~P0~~ | ~~README rebrand~~ | **done** — full personality rewrite with badges, Metcalfe's Law quote, category browser |
+| ~~P0~~ | ~~README rebrand~~ | **done** |
 | ~~P0~~ | ~~Populate category directories~~ | **done** — all 6 directories with real listings |
-| ~~P1~~ | ~~Default/starter listings~~ | **done** — 12 listings across all 6 categories |
-| ~~P1~~ | ~~Manifest schema alignment~~ | **done** — all manifests match MarketplaceListing model |
-| ~~P1~~ | ~~Add CONTRIBUTING.md~~ | **done** — links to main repo guide |
-| ~~P2~~ | ~~Verify templates~~ | **done** — 6 submission templates pushed (all categories) |
+| ~~P0~~ | ~~Security: CI injection fix (sys.argv interpolation)~~ | **done** |
+| ~~P1~~ | ~~Default/starter listings~~ | **done** — 50 listings across all 6 categories |
+| ~~P1~~ | ~~Manifest schema alignment~~ | **done** |
+| ~~P1~~ | ~~Add CONTRIBUTING.md~~ | **done** |
+| ~~P1~~ | ~~SECURITY.md + CODEOWNERS~~ | **done** |
+| ~~P2~~ | ~~Verify templates~~ | **done** — 6 submission templates pushed |
 | P2 | Revenue sharing docs | Match our tier system (70/30 split, credit earn rates) |
-
-### Starter listings (all done)
-
-```
-skills/
-  ├── code-review/manifest.json      ✅ Code review skill
-  ├── web-monitor/manifest.json      ✅ Web change detection
-  └── pdf-reader/manifest.json       ✅ PDF processing skill
-
-agents/
-  ├── prowlr-scout/manifest.json     ✅ Research agent
-  └── prowlr-guard/manifest.json     ✅ Security monitoring agent
-
-prompts/
-  ├── business-analyst/manifest.json ✅ Business analysis prompt pack
-  └── code-assistant/manifest.json   ✅ Coding prompt pack
-
-mcp-servers/
-  ├── prowlr-hub/manifest.json       ✅ War Room coordination MCP
-  └── prowlr-tools/manifest.json     ✅ File/shell/browser tools MCP
-
-themes/
-  ├── dark-prowler/manifest.json     ✅ Dark theme
-  └── light-sentinel/manifest.json   ✅ Light theme
-
-workflows/
-  ├── deploy-review/manifest.json    ✅ Code review → deploy pipeline
-  └── daily-standup/manifest.json    ✅ Daily status aggregation
-```
 
 ---
 
 ## 3. ProwlrBot/prowlr-docs (Documentation)
 
-**Status:** README rebranded, 17 topics en+zh
+**Status:** README rebranded, 23 topics, CoPaw refs cleaned
 **Priority:** 2
-
-### What lives here
-- All user-facing documentation (en + zh)
-- Getting started guides
-- API reference
-- Channel setup guides
-- Skill development guides
-- Architecture docs
 
 ### Work items
 
 | Priority | Task | Status |
 |----------|------|--------|
-| ~~P0~~ | ~~README rebrand~~ | **done** — Damian Conway quote, 17-topic table, contribution guide |
-| P0 | Verify all 17 topic files exist and are current | todo — audit against website/public/docs/ |
-| P1 | Docs sync strategy | todo — copy at build time vs fetch from GitHub at runtime |
-| P1 | Add marketplace documentation | todo — credits economy, tiers, publishing guide |
-| P1 | Add agent install docs | todo — `prowlr agent install`, external agents, backends |
-| P1 | Add team builder docs | todo — `prowlr team create`, coordination modes |
-| P2 | Add protocol documentation | todo — or link to roar-protocol repo |
-| P2 | Contributing guide as single source of truth | todo — main repo CONTRIBUTING.md links here |
-
-### Missing doc topics
-
-- ~~`marketplace.en.md`~~ **done** — Browsing, installing, publishing, credits, tiers
-- ~~`agents-external.en.md`~~ **done** — Installing external agents (Claude Code, Codex, custom)
-- ~~`teams.en.md`~~ **done** — Creating teams, coordination modes, config files
-- ~~`credits.en.md`~~ **done** — Credits economy, earning, spending, premium content
-- ~~`privacy.en.md`~~ **done** — Privacy policy
-- ~~`terms.en.md`~~ **done** — Terms of service
+| ~~P0~~ | ~~README rebrand~~ | **done** |
+| ~~P0~~ | ~~Remove CoPaw refs from HTML/SVG~~ | **done** |
+| ~~P0~~ | ~~Fix deploy scope, remove duplicate workflow~~ | **done** |
+| P0 | Verify all 23 topic files exist and are current | **todo** |
+| P1 | Docs sync strategy | **todo** |
+| P1 | Add marketplace documentation | **todo** |
+| P2 | Add protocol documentation | **todo** |
+| P2 | Contributing guide as single source of truth | **todo** |
 
 ---
 
 ## 4. ProwlrBot/roar-protocol (Protocol Spec)
 
-**Status:** README rebranded, specification stage
+**Status:** README rebranded, v0.1.0 spec versioned, CI secured
 **Priority:** 3
-
-### What lives here
-- Protocol specification documents (the "RFC")
-- Reference implementations or test vectors
-- Compliance test suites
-- Protocol versioning
 
 ### Work items
 
 | Priority | Task | Status |
 |----------|------|--------|
-| ~~P0~~ | ~~README rebrand~~ | **done** — Shaw quote, 5-layer ASCII diagram, MCP/A2A comparison |
-| P1 | Verify 5-layer spec alignment | todo — match against `src/prowlrbot/protocols/roar.py` and `protocols/sdk/` |
-| ~~P1~~ | ~~Version the spec~~ | **done** — spec/VERSION.json with layer-level semver (v0.1.0) |
-| P2 | Identity layer → agent install | todo — should work with `agent_cmd.py` and external agent registry |
-| P2 | Discovery layer → marketplace | todo — should work with marketplace search |
-| P2 | Connect/Exchange/Stream → hub | todo — should work with hub coordination |
-| P3 | Compliance test suite | todo — tests that verify a ROAR implementation is spec-compliant |
+| ~~P0~~ | ~~README rebrand~~ | **done** |
+| ~~P0~~ | ~~Security: org refs, SECURITY.md, CI permissions~~ | **done** |
+| ~~P1~~ | ~~Version the spec~~ | **done** — v0.1.0 |
+| P1 | Verify 5-layer spec alignment | **todo** |
+| P2 | Identity layer → agent install | **todo** |
+| P2 | Discovery layer → marketplace | **todo** |
+| P3 | Compliance test suite | **todo** |
 
 ---
 
 ## 5. ProwlrBot/agentverse (Virtual World)
 
-**Status:** README rebranded, early stage
+**Status:** README rebranded, 6 zones defined, CI secured
 **Priority:** 4
-
-### What lives here
-- Zone definitions and world map
-- XP/leveling mechanics
-- Guild/team configs
-- Battle/tournament rules
-- Agent avatar assets
-- AgentVerse-specific API
 
 ### Work items
 
 | Priority | Task | Status |
 |----------|------|--------|
-| ~~P0~~ | ~~README rebrand~~ | **done** — The Shining quote, Club Penguin analogy, zone map |
-| ~~P1~~ | ~~Zone definitions~~ | **done** — 6 zones (Workshop, Arena, Library, Garden, Vault, Nexus) + XP table + tier gating |
-| P1 | Credits integration | todo — XP/leveling ties into credits economy |
-| P2 | Guild → Team mapping | todo — guilds map to Team model (`team_cmd.py`) |
-| P2 | Trading system | todo — marketplace credits as currency |
-| P2 | Avatar system | todo — agent identity from ROAR protocol |
-| P3 | API endpoints | todo — design API that main prowlrbot app can call |
-| P3 | Tier-gated access | todo — Free=Basic, Pro=Full, Team=Premium zones + tournaments |
+| ~~P0~~ | ~~README rebrand~~ | **done** |
+| ~~P0~~ | ~~Security: org refs, SECURITY.md, CI permissions~~ | **done** |
+| ~~P1~~ | ~~Zone definitions~~ | **done** — 6 zones + XP table + tier gating |
+| P1 | Credits integration | **todo** |
+| P2 | Guild → Team mapping | **todo** |
+| P3 | API endpoints | **todo** |
+
+---
+
+## 6. ProwlrBot/prowlr-studio (IDE/Workspace)
+
+**Status:** Upstream fork, security patched
+**Priority:** 5
+
+### Work items
+
+| Priority | Task | Status |
+|----------|------|--------|
+| ~~P0~~ | ~~Security: DOMPurify XSS, volume sanitization, OpenSearch default password~~ | **done** |
+| ~~P0~~ | ~~.env.docker added to .gitignore~~ | **done** |
+| P2 | Integration with ProwlrBot console | **todo** |
+
+---
+
+## 7. ProwlrBot/agentscope-runtime (Fork)
+
+**Status:** Upstream fork, security patched, Chinese→English translated
+**Priority:** 5
+
+### Work items
+
+| Priority | Task | Status |
+|----------|------|--------|
+| ~~P0~~ | ~~Security: remove hardcoded default token~~ | **done** |
+| ~~P0~~ | ~~Timing-safe auth comparison~~ | **done** |
+| ~~P0~~ | ~~Exec parameter validation~~ | **done** |
+| ~~P1~~ | ~~Chinese→English translation (generation tools, search tools)~~ | **done** |
+| ⚠️ | Upstream: unsandboxed shell/python execution | **unfixable without architectural changes** |
+| ⚠️ | Upstream: SQL injection in log queries | **unfixable without architectural changes** |
 
 ---
 
@@ -211,17 +263,18 @@ workflows/
 
 Every ProwlrBot repo must have:
 
-- [x] `README.md` with ProwlrBot branding (not mcpcentral) — **done across all 5 repos**
-- [x] `CONTRIBUTING.md` or link to main repo's guide — **done across all 4 ecosystem repos**
-- [x] `LICENSE` (Apache 2.0, copyright "The ProwlrBot Authors") — **done across all 5 repos**
-- [x] `.github/ISSUE_TEMPLATE/` with bug report + feature request — **done across all 4 ecosystem repos**
-- [x] `.github/PULL_REQUEST_TEMPLATE.md` — **done across all 4 ecosystem repos**
-- [x] CI workflow (at minimum: lint, test if applicable) — **done across all 4 ecosystem repos**
-- [x] `SECURITY.md` or link to main repo's security policy — **done across all 4 ecosystem repos**
+- [x] `README.md` with ProwlrBot branding — **done across all 7 repos**
+- [x] `CONTRIBUTING.md` or link to main repo — **done across all repos**
+- [x] `LICENSE` (Apache 2.0, "The ProwlrBot Authors") — **done across all repos**
+- [x] `.github/ISSUE_TEMPLATE/` with bug report + feature request — **done**
+- [x] `.github/PULL_REQUEST_TEMPLATE.md` — **done**
+- [x] CI workflow with least-privilege permissions — **done**
+- [x] `SECURITY.md` or link to main repo — **done**
+- [x] No hardcoded secrets or default passwords — **done (verified in audit)**
 
 ---
 
-## Execution Priority
+## Execution Timeline
 
 ```
 Week 1:  ████████████████████████████████████████ 100%
@@ -240,13 +293,29 @@ Week 2:  ███████████████████████�
   ✅ prowlr-docs — sync audit complete (23 topics, all sidebar entries match files)
 
 Week 3:  ████████████████████████████████████████ 100%
-  ✅ prowlr-marketplace — 6 submission templates pushed (skill, agent, prompt, mcp-server, theme, workflow)
+  ✅ prowlr-marketplace — 6 submission templates pushed
   ✅ Core platform — on-site blog (6 posts, /blog + /blog/:slug routes)
-  ✅ Core platform — dead link fixes (Nav blog, Footer Discord/Twitter → Blog/Discussions)
-  ✅ Core platform — SPA fallback script updated (23 doc slugs + 6 blog slugs)
-  ✅ Security — JWT secret persistence to ~/.prowlrbot.secret/jwt_secret
-  ✅ Security — CORS methods/headers restricted to explicit whitelist
-  ✅ Security audit — full codebase review (0 critical, 2 high fixed, 1 medium fixed)
+  ✅ Core platform — dead link fixes
+  ✅ Security — JWT secret persistence, CORS whitelist
+
+Week 4:  ████████████████████████████████████████ 100%
+  ✅ Security audit — 54 vulnerabilities found, 43 fixed across 7 repos
+  ✅ Org-wide — CI injection, SSRF, auth bypass, shell hardening, XSS patches
+  ✅ @agentscope-ai/design → antd migration (44 files)
+  ✅ @agentscope-ai/icons → @ant-design/icons migration
+  ✅ Python 3.14 asyncio deprecation fixes
+  ✅ Chinese→English translation of generation/search tools
+  ✅ prowlr-marketplace populated to 50 listings
+
+Week 5:  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%  ← CURRENT
+  🎯 FOCUS: Make everything work end-to-end
+  [ ] Push unpushed main commit
+  [ ] Wire memory tier manager to agent execution
+  [ ] Hide empty/stub pages from nav (ExternalAgents, Replay, Research)
+  [ ] Wire autonomy slider to agent behavior
+  [ ] Connect ACP protocol to real agent execution
+  [ ] End-to-end test: install → init → run → chat → monitor → war room
+  [ ] Fix any broken page/API discovered during E2E testing
 ```
 
 ---
@@ -301,3 +370,19 @@ Week 3:  ███████████████████████�
 - [x] Full security audit (0 critical, 2 high fixed, 1 medium fixed)
 - [x] Marketplace submission templates (6 templates pushed to prowlr-marketplace)
 - [x] SPA fallback script updated (23 doc + 6 blog routes)
+
+### Session 5 — Week 4: Security Audit + Hardening
+- [x] Full OWASP security audit across all 9 ProwlrBot org repos
+- [x] 54 vulnerabilities found, 43 fixed in 7 repos (11 commits)
+- [x] CRITICAL: CSRF bypass, privilege escalation, X-Forwarded-For spoofing — all fixed
+- [x] HIGH: Shell injection, secret exposure, unauthenticated WS, JWT issuer — all fixed
+- [x] MEDIUM: SSRF, path traversal, SQL injection in sort, timing attacks — all fixed
+- [x] LOW: Error info disclosure, deprecated headers, console warnings — all fixed
+- [x] New url_validator.py module for SSRF protection (private IP blocking)
+- [x] @agentscope-ai/design → antd migration (44 files)
+- [x] @agentscope-ai/icons → @ant-design/icons migration
+- [x] Python 3.14 asyncio deprecation fixes (get_event_loop → get_running_loop)
+- [x] Chinese→English translation of agentscope-runtime tools
+- [x] prowlr-marketplace expanded to 50 listings
+- [x] War room enhancement audit completed
+- [x] Production readiness assessment delivered

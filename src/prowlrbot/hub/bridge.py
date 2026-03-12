@@ -43,8 +43,25 @@ logger = logging.getLogger(__name__)
 _MAX_LIMIT = 500
 _VALID_PRIORITIES = {"critical", "high", "normal", "low"}
 
-# Allowed origins for CSRF check on POST requests (open mode)
-_ALLOWED_ORIGINS = {"http://localhost:8088", "http://127.0.0.1:8088"}
+# Default allowed origins — override with PROWLR_CORS_ORIGINS env var
+# (comma-separated list of origins, e.g. "http://myhost:8088,http://myhost:5173")
+_DEFAULT_ORIGINS = [
+    "http://localhost:8088",
+    "http://127.0.0.1:8088",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+
+def _get_allowed_origins() -> list[str]:
+    custom = os.environ.get("PROWLR_CORS_ORIGINS", "")
+    if custom:
+        return [o.strip() for o in custom.split(",") if o.strip()]
+    return list(_DEFAULT_ORIGINS)
+
+
+# For CSRF check on POST requests (open mode)
+_ALLOWED_ORIGINS = set(_DEFAULT_ORIGINS[:2])  # only main app origins, not dev server
 
 # Rate limiter — created lazily in create_bridge_app() so env vars are checked at runtime
 limiter: Limiter = None  # type: ignore[assignment]
@@ -74,7 +91,8 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         if request.method == "POST" and not _get_hub_secret():
             origin = request.headers.get("origin", "")
             # Allow requests with no Origin (same-origin, curl, MCP clients)
-            if origin and origin not in _ALLOWED_ORIGINS:
+            allowed = set(_get_allowed_origins())
+            if origin and origin not in allowed:
                 return JSONResponse(
                     status_code=403,
                     content={"detail": "Cross-origin request blocked"},
@@ -219,12 +237,7 @@ def create_bridge_app() -> FastAPI:
     app.add_middleware(CSRFMiddleware)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:8088",
-            "http://127.0.0.1:8088",
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-        ],
+        allow_origins=_get_allowed_origins(),
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type", "Authorization"],
         allow_credentials=False,
