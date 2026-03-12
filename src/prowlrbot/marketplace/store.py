@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 from .models import (
+    Bundle,
     CreditBalance,
     CreditTransaction,
     CreditTransactionType,
@@ -124,6 +125,17 @@ class MarketplaceStore:
                 total_earned INTEGER NOT NULL DEFAULT 0,
                 total_spent  INTEGER NOT NULL DEFAULT 0,
                 tier         TEXT NOT NULL DEFAULT 'free'
+            );
+
+            CREATE TABLE IF NOT EXISTS bundles (
+                id            TEXT PRIMARY KEY,
+                name          TEXT NOT NULL,
+                description   TEXT NOT NULL,
+                emoji         TEXT DEFAULT '',
+                color         TEXT DEFAULT '#00e5ff',
+                listing_ids   TEXT DEFAULT '[]',
+                install_count INTEGER DEFAULT 0,
+                created_at    TEXT DEFAULT (datetime('now'))
             );
             """)
         self._conn.commit()
@@ -677,6 +689,58 @@ class MarketplaceStore:
                 except (json.JSONDecodeError, TypeError):
                     row[field] = json.loads(default)
         return MarketplaceListing(**row)
+
+    # ------------------------------------------------------------------
+    # Bundles
+    # ------------------------------------------------------------------
+
+    def create_bundle(self, bundle: Bundle) -> Bundle:
+        """Insert a new bundle."""
+        self._conn.execute(
+            "INSERT INTO bundles (id, name, description, emoji, color, listing_ids, install_count, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                bundle.id, bundle.name, bundle.description,
+                bundle.emoji, bundle.color, json.dumps(bundle.listing_ids),
+                bundle.install_count, bundle.created_at,
+            ),
+        )
+        self._conn.commit()
+        return bundle
+
+    def get_bundle(self, bundle_id: str) -> Optional[Bundle]:
+        """Fetch a single bundle by ID."""
+        row = self._conn.execute(
+            "SELECT * FROM bundles WHERE id = ?", (bundle_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        return self._row_to_bundle(row)
+
+    def list_bundles(self) -> list[Bundle]:
+        """Return all bundles."""
+        rows = self._conn.execute("SELECT * FROM bundles ORDER BY name").fetchall()
+        return [self._row_to_bundle(r) for r in rows]
+
+    def increment_bundle_installs(self, bundle_id: str) -> None:
+        """Increment a bundle's install count."""
+        self._conn.execute(
+            "UPDATE bundles SET install_count = install_count + 1 WHERE id = ?",
+            (bundle_id,),
+        )
+        self._conn.commit()
+
+    @staticmethod
+    def _row_to_bundle(row: dict) -> Bundle:
+        """Convert a DB row dict into a Bundle."""
+        row = dict(row)
+        raw = row.get("listing_ids", "[]")
+        if isinstance(raw, str):
+            try:
+                row["listing_ids"] = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                row["listing_ids"] = []
+        return Bundle(**row)
 
     def close(self) -> None:
         self._conn.close()

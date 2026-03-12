@@ -104,6 +104,21 @@ class MarketplaceListing(BaseModel):
     compatibility: str = ""
 
 
+class Bundle(BaseModel):
+    """A curated pack of related marketplace listings."""
+
+    id: str
+    name: str
+    description: str
+    emoji: str = ""
+    color: str = "#00e5ff"
+    listing_ids: list[str] = Field(default_factory=list)
+    install_count: int = 0
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+    )
+
+
 class ReviewEntry(BaseModel):
     """A user review on a marketplace listing."""
 
