@@ -1,4 +1,4 @@
-import { SparkPlusLine } from "@agentscope-ai/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import styles from "../index.module.less";
 
@@ -17,7 +17,7 @@ export function AddButton({ onClick, className }: AddButtonProps) {
         onClick={onClick}
         title={t("environments.addVariable")}
       >
-        <SparkPlusLine />
+        <PlusOutlined />
         <span>{t("environments.addVariable")}</span>
       </button>
     </div>

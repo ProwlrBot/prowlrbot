@@ -1,5 +1,5 @@
 import { Checkbox, Button } from "antd";
-import { SparkDeleteLine } from "@agentscope-ai/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import styles from "../index.module.less";
 
@@ -62,7 +62,7 @@ export function Toolbar({
           <Button
             danger
             size="small"
-            icon={<SparkDeleteLine />}
+            icon={<DeleteOutlined />}
             onClick={onRemoveSelected}
             disabled={saving}
           >

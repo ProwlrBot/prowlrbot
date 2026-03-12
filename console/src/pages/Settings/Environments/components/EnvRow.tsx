@@ -1,5 +1,5 @@
 import { Checkbox, Input } from "antd";
-import { SparkDeleteLine, SparkPlusLine } from "@agentscope-ai/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import styles from "../index.module.less";
 
@@ -74,14 +74,14 @@ export function EnvRow({
           onClick={() => onInsert(idx)}
           title={t("environments.insertRowBelow")}
         >
-          <SparkPlusLine />
+          <PlusOutlined />
         </button>
         <button
           className={`${styles.rowIconBtn} ${styles.rowIconBtnDanger}`}
           onClick={() => onRemove(idx)}
           title={t("environments.deleteRow")}
         >
-          <SparkDeleteLine />
+          <DeleteOutlined />
         </button>
       </div>
 

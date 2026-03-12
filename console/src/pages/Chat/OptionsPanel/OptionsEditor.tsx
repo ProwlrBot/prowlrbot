@@ -2,7 +2,7 @@ import React from "react";
 import { Form, Input, ColorPicker, Flex, Divider, InputNumber } from "antd";
 import { createStyles } from "antd-style";
 import { Button, Switch } from "antd";
-import { SparkDeleteLine, SparkPlusLine } from "@agentscope-ai/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import FormItem from "./FormItem";
 import defaultConfig from "./defaultConfig";
 
@@ -150,12 +150,12 @@ const OptionsEditor: React.FC<OptionsEditorProps> = ({ value, onChange }) => {
                       </Form.Item>
                       <Button
                         type="text"
-                        icon={<SparkPlusLine />}
+                        icon={<PlusOutlined />}
                         onClick={() => add({})}
                       />
                       <Button
                         type="text"
-                        icon={<SparkDeleteLine />}
+                        icon={<DeleteOutlined />}
                         onClick={() => remove(field.name)}
                       />
                     </Flex>

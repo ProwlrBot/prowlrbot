@@ -1,4 +1,4 @@
-import { SparkSettingLine } from "@agentscope-ai/icons";
+import { SettingOutlined } from "@ant-design/icons";
 import { Button, Drawer } from "antd";
 import { useState } from "react";
 import OptionsEditor from "./OptionsEditor";
@@ -16,7 +16,7 @@ export default function OptionsPanel(props: OptionsPanelProps) {
       <Button
         type="text"
         onClick={() => setOpen(true)}
-        icon={<SparkSettingLine />}
+        icon={<SettingOutlined />}
       />
       <Drawer
         destroyOnHidden
