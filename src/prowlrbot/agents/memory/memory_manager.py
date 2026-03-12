@@ -14,8 +14,12 @@ import json
 import logging
 import os
 import platform
+import uuid
 from pathlib import Path
 from typing import Any
+
+from .archive_db import ArchiveDB
+from .tier_manager import MemoryTierManager
 
 from agentscope._utils._common import _save_base64_data
 from agentscope.agent import ReActAgent
@@ -552,6 +556,9 @@ class MemoryManager(ReMeFb):
         self.chat_model: ChatModelBase | None = None
         self.formatter: FormatterBase | None = None
 
+        self._tier_manager: MemoryTierManager | None = None
+        self._archive_db: ArchiveDB | None = None
+
     @staticmethod
     def _safe_int(value: str | None, default: int) -> int:
         """Safely convert string to int, return default on failure."""
@@ -630,6 +637,62 @@ class MemoryManager(ReMeFb):
         self.default_embedding_model.max_cache_size = embedding_max_cache_size
         self.default_embedding_model.max_input_length = embedding_max_input_length
         self.default_embedding_model.max_batch_size = embedding_max_batch_size
+
+    def _init_tier_manager(self, agent_id: str) -> None:
+        """Lazily initialise ArchiveDB and MemoryTierManager for an agent.
+
+        Args:
+            agent_id: The agent identifier used to name the DB file.
+        """
+        if self._tier_manager is not None:
+            return
+        db_dir = Path.home() / ".prowlrbot"
+        db_dir.mkdir(parents=True, exist_ok=True)
+        db_path = db_dir / f"archive_{agent_id}.db"
+        self._archive_db = ArchiveDB(str(db_path))
+        self._tier_manager = MemoryTierManager(archive_db=self._archive_db)
+        logger.debug(
+            "Initialised MemoryTierManager for agent %s (db=%s)",
+            agent_id,
+            db_path,
+        )
+
+    def _maybe_promote(self, agent_id: str, topic: str, summary: str) -> None:
+        """Promote a compacted summary to long-term archive if warranted.
+
+        Creates a minimal entry dict, evaluates promotion criteria via
+        :class:`MemoryTierManager`, and stores in :class:`ArchiveDB` when
+        the entry qualifies.
+
+        Args:
+            agent_id: Owning agent identifier.
+            topic: Short topic description (first 200 chars of summary).
+            summary: Full compaction summary text.
+        """
+        try:
+            self._init_tier_manager(agent_id)
+            entry = {
+                "id": f"compact_{uuid.uuid4().hex[:12]}",
+                "agent_id": agent_id,
+                "topic": topic,
+                "summary": summary,
+                "access_count": 1,
+                "marked_important": False,
+            }
+            if self._tier_manager is not None and self._tier_manager.should_promote(
+                entry
+            ):
+                archive_id = self._tier_manager.promote(entry)
+                logger.debug(
+                    "Promoted compacted memory for agent %s -> archive entry %s",
+                    agent_id,
+                    archive_id,
+                )
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.debug(
+                "MemoryTierManager promotion skipped (non-fatal): %s",
+                exc,
+            )
 
     async def start(self):
         """Start the memory manager and initialize services."""
@@ -754,9 +817,16 @@ class MemoryManager(ReMeFb):
         else:
             turn_prefix_summary = ""
 
-        return "\n".join(
+        combined_summary = "\n".join(
             [x for x in [history_summary, turn_prefix_summary] if x.strip()],
         )
+
+        if combined_summary.strip():
+            agent_id = getattr(self, "agent_id", "unknown")
+            topic = combined_summary[:200]
+            self._maybe_promote(agent_id, topic, combined_summary)
+
+        return combined_summary
 
     async def summary_memory(
         self,
