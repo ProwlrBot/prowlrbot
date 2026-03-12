@@ -297,6 +297,54 @@ roar_server = ROARServer(
 )
 app.include_router(create_roar_router(roar_server), dependencies=[Depends(auth_dep)])
 
+# Wire EXECUTE and DELEGATE intents through AgentRunner
+from ..protocols.roar import MessageIntent, ROARMessage as _ROARMessage
+
+
+async def _roar_agent_handler(msg: _ROARMessage) -> _ROARMessage:
+    """Route ROAR EXECUTE/DELEGATE messages through ProwlrBot's AgentRunner.
+
+    Extracts the task text from the payload, runs it through the agent,
+    and returns a RESPOND message with the result.
+    """
+    from agentscope_runtime.engine.schemas.agent_schemas import (
+        AgentRequest,
+        Message,
+        TextContent,
+    )
+
+    task_text = (
+        msg.payload.get("task")
+        or msg.payload.get("prompt")
+        or msg.payload.get("text")
+        or str(msg.payload)
+    )
+
+    agent_request = AgentRequest(
+        input=[Message(role="user", content=[TextContent(text=str(task_text))])],
+        session_id=f"roar_{msg.id}",
+        user_id=msg.from_identity.did,
+    )
+
+    last_text = ""
+    async for agent_msg, _is_last in runner.stream_query(agent_request):
+        text = getattr(agent_msg, "content", None)
+        if isinstance(text, str):
+            last_text = text
+        elif hasattr(agent_msg, "get_text_content"):
+            last_text = agent_msg.get_text_content() or last_text
+
+    return _ROARMessage(
+        **{"from": roar_server.identity, "to": msg.from_identity},
+        intent=MessageIntent.RESPOND,
+        payload={"result": last_text},
+        context={"in_reply_to": msg.id},
+    )
+
+
+roar_server.on(MessageIntent.EXECUTE)(_roar_agent_handler)
+roar_server.on(MessageIntent.DELEGATE)(_roar_agent_handler)
+
 # Terminal WebSocket (PTY) — Unix only
 try:
     from .routers.terminal import router as _terminal_router
