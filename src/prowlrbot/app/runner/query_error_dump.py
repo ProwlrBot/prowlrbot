@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+import glob
 import json
 import logging
 import os
 import tempfile
+import time
 import traceback
 from datetime import datetime, timezone
 from typing import Any
@@ -101,3 +103,26 @@ def write_query_error_dump(
     except Exception as dump_err:
         logger.warning("Failed to write query error dump: %s", dump_err)
         return None
+
+
+def cleanup_old_error_dumps(max_age_hours: int = 72, max_files: int = 100) -> int:
+    """Remove stale error dump files to prevent disk accumulation.
+
+    Returns the number of files deleted.
+    """
+    pattern = os.path.join(tempfile.gettempdir(), "prowlrbot_query_error_*.json")
+    files = sorted(glob.glob(pattern), key=os.path.getmtime)
+    cutoff = time.time() - (max_age_hours * 3600)
+    deleted = 0
+
+    for path in files:
+        try:
+            if os.path.getmtime(path) < cutoff or len(files) - deleted > max_files:
+                os.unlink(path)
+                deleted += 1
+        except OSError:
+            pass
+
+    if deleted:
+        logger.info("Cleaned up %d stale error dump files", deleted)
+    return deleted

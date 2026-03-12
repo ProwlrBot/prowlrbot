@@ -142,6 +142,9 @@ def validate_shell_command(command: str) -> Tuple[bool, str]:
 
 
 # pylint: disable=too-many-branches
+MAX_OUTPUT_BYTES = 1_000_000  # 1 MB cap per stream (stdout/stderr)
+
+
 async def execute_shell_command(
     command: str,
     timeout: int = 60,
@@ -198,8 +201,14 @@ async def execute_shell_command(
             await asyncio.wait_for(proc.wait(), timeout=timeout)
             stdout, stderr = await proc.communicate()
             encoding = locale.getpreferredencoding(False) or "utf-8"
-            stdout_str = stdout.decode(encoding, errors="replace").strip("\n")
-            stderr_str = stderr.decode(encoding, errors="replace").strip("\n")
+            stdout_truncated = len(stdout) > MAX_OUTPUT_BYTES
+            stderr_truncated = len(stderr) > MAX_OUTPUT_BYTES
+            stdout_str = stdout[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
+            stderr_str = stderr[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
+            if stdout_truncated:
+                stdout_str += f"\n\n[output truncated — {len(stdout):,} bytes total, showing first {MAX_OUTPUT_BYTES:,}]"
+            if stderr_truncated:
+                stderr_str += f"\n\n[stderr truncated — {len(stderr):,} bytes total, showing first {MAX_OUTPUT_BYTES:,}]"
             returncode = proc.returncode
 
         except asyncio.TimeoutError:

@@ -69,6 +69,13 @@ agent_app = AgentApp(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # pylint: disable=too-many-statements
+    # Clean up stale temp files from previous runs
+    try:
+        from .runner.query_error_dump import cleanup_old_error_dumps
+        cleanup_old_error_dumps()
+    except Exception:
+        pass
+
     await runner.start()
 
     # --- MCP client manager init (independent module, hot-reloadable) ---

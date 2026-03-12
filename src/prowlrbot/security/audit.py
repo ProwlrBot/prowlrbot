@@ -69,6 +69,11 @@ class AuditLog:
         # Enable WAL mode for better concurrent read performance.
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._create_tables()
+        # Auto-cleanup on startup to prevent unbounded growth
+        try:
+            self.cleanup(older_than_days=90)
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------
     # Schema
