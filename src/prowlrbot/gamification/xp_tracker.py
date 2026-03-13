@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import sqlite3
 import time
 from pathlib import Path
@@ -17,6 +18,35 @@ from .models import (
     XPGain,
     level_from_xp,
 )
+
+
+async def _push_leaderboard_update(
+    entity_id: str, entity_type: str, new_xp: int, category: str
+) -> None:
+    """Broadcast a leaderboard_update event to all WebSocket clients. Best-effort."""
+    try:
+        from prowlrbot.dashboard.events import (
+            DashboardEvent,
+            EventType,
+            get_global_event_bus,
+        )
+
+        bus = get_global_event_bus()
+        if bus is None:
+            return
+        event = DashboardEvent(
+            type=EventType.LEADERBOARD_UPDATE,
+            session_id="*",  # sentinel — broadcast ignores session_id
+            data={
+                "entity_id": entity_id,
+                "entity_type": entity_type,
+                "new_xp": new_xp,
+                "category": category,
+            },
+        )
+        await bus.broadcast(event)
+    except Exception:
+        pass  # never let push failures affect XP recording
 
 
 class XPTracker:
@@ -84,7 +114,7 @@ class XPTracker:
             (entity_id, entity_type, amount, category, reason, ts),
         )
         self._conn.commit()
-        return XPGain(
+        gain = XPGain(
             entity_id=entity_id,
             entity_type=entity_type,
             amount=amount,
@@ -92,6 +122,20 @@ class XPTracker:
             reason=reason,
             timestamp=ts,
         )
+        # Fire-and-forget leaderboard push — only schedule if an async loop is running.
+        # If called from sync context (no loop), skip silently; the push is best-effort.
+        new_total = self.get_total_xp(entity_id, entity_type)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(
+                _push_leaderboard_update(entity_id, entity_type, new_total, category)
+            )
+        except RuntimeError:
+            # No running event loop — skip push (sync-only caller, e.g. tests/CLI)
+            pass
+        except Exception:
+            pass  # never block XP recording due to push failure
+        return gain
 
     def get_total_xp(self, entity_id: str, entity_type: str = "user") -> int:
         """Get total XP for an entity."""

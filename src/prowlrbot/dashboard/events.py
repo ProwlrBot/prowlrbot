@@ -21,6 +21,7 @@ class EventType(StrEnum):
     STREAM_TOKEN = "stream_token"
     AGENT_STATUS = "agent_status"
     ERROR = "error"
+    LEADERBOARD_UPDATE = "leaderboard_update"
 
 
 @dataclass
@@ -81,3 +82,22 @@ class EventBus:
                     await handler(event)
                 except Exception:
                     pass
+
+
+# ---------------------------------------------------------------------------
+# Global event bus singleton — set once by the app at startup so that
+# subsystems (e.g. XPTracker) can push events without circular imports.
+# ---------------------------------------------------------------------------
+
+_global_event_bus: "EventBus | None" = None
+
+
+def set_global_event_bus(bus: "EventBus") -> None:
+    """Inject the application-level EventBus. Called once from _app.py."""
+    global _global_event_bus
+    _global_event_bus = bus
+
+
+def get_global_event_bus() -> "EventBus | None":
+    """Return the global EventBus, or None if not yet initialised."""
+    return _global_event_bus

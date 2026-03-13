@@ -392,6 +392,10 @@ app.include_router(api_router, prefix="/api", dependencies=[Depends(auth_dep)])
 event_bus = EventBus()
 app.include_router(create_websocket_router(event_bus))
 
+# Register as global singleton so subsystems (e.g. XPTracker) can push events.
+from ..dashboard.events import set_global_event_bus as _set_global_event_bus
+_set_global_event_bus(event_bus)
+
 # --- War Room WebSocket (real-time war room events) ---
 from ..hub.websocket import warroom_ws
 
