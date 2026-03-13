@@ -21,3 +21,24 @@ kdairatchi and are provided under the same Apache License, Version 2.0.
 The agentscope and agentscope-runtime packages are maintained separately
 under the ProwlrBot organization (https://github.com/ProwlrBot) and are also
 licensed under the Apache License, Version 2.0.
+
+---
+
+THIRD-PARTY COMPONENTS WITH SEPARATE LICENSES
+
+The following built-in skills are bundled from Anthropic's Claude Code plugin
+system and are NOT covered by this project's Apache 2.0 license:
+
+  src/prowlrbot/agents/skills/docx/
+  src/prowlrbot/agents/skills/pdf/
+  src/prowlrbot/agents/skills/pptx/
+  src/prowlrbot/agents/skills/xlsx/
+
+Each of these directories contains a LICENSE.txt file with the following notice:
+  © 2025 Anthropic, PBC. All rights reserved.
+  Use is governed by your agreement with Anthropic regarding use of
+  Anthropic's services.
+
+These skills are provided as optional capabilities for use with Anthropic's
+services. Their inclusion does not alter the Apache 2.0 license of the
+ProwlrBot platform code.
