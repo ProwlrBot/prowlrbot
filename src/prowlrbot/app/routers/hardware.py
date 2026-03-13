@@ -100,7 +100,7 @@ def get_model_grades(
 
     Query params:
     - capability: filter to models with this capability tag
-    - min_grade:  if set, exclude grade "F" models
+    - min_grade:  if set, exclude models below this grade (e.g. "B" → returns S/A/B only)
     """
     profile = _detector.detect()
     scorer = ModelScorer(profile)
@@ -119,9 +119,13 @@ def get_model_grades(
         if capability is not None and capability not in model_entry.capability_tags:
             continue
 
-        # min_grade: exclude F models
-        if min_grade is not None and ms.grade.value == "F":
-            continue
+        # min_grade: exclude models below the requested grade threshold
+        if min_grade is not None:
+            _grade_order = ["S", "A", "B", "C", "D", "F"]
+            threshold = min_grade.upper()
+            if threshold in _grade_order:
+                if _grade_order.index(ms.grade.value) > _grade_order.index(threshold):
+                    continue
 
         result.append(
             ModelGradeResponse(

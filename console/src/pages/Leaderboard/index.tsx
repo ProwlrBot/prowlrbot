@@ -104,7 +104,7 @@ export const Leaderboard: React.FC = () => {
         <Table
           dataSource={entries}
           columns={columns}
-          rowKey="entity_id"
+          rowKey={(r) => `${r.entity_type}:${r.entity_id}`}
           pagination={false}
           size="small"
         />
