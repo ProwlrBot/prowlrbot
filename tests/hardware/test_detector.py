@@ -1,7 +1,6 @@
 # tests/hardware/test_detector.py
 """Tests for HardwareDetector — platform-agnostic unit tests with mocks."""
 import pytest
-from unittest.mock import patch, MagicMock
 from prowlrbot.hardware.detector import HardwareDetector, HardwareProfile
 
 
@@ -47,3 +46,17 @@ def test_detector_apple_silicon(monkeypatch):
     monkeypatch.setattr("platform.machine", lambda: "arm64")
     detector = HardwareDetector()
     assert detector._is_apple_silicon()
+
+
+def test_detect_returns_valid_profile_when_no_gpu(monkeypatch):
+    """All GPU subprocess calls fail → detect() still returns a valid HardwareProfile."""
+    def _raise(*a, **kw):
+        raise FileNotFoundError("not found")
+    monkeypatch.setattr("subprocess.run", _raise)
+    detector = HardwareDetector()
+    profile = detector.detect()
+    assert isinstance(profile, HardwareProfile)
+    assert profile.ram_gb > 0
+    assert profile.cpu_cores > 0
+    assert profile.gpu_name is None
+    assert profile.gpu_vendor == "unknown"
