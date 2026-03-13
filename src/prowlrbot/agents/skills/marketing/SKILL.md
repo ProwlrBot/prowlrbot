@@ -1,5 +1,7 @@
 ---
 name: marketing
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "Autonomous marketing agent for open-source projects. Drafts social media posts, generates release notes from git history, produces engagement reports, monitors competitors, and manages content pipelines across platforms."
 metadata:
   {

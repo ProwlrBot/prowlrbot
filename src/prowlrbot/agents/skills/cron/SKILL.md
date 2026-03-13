@@ -1,5 +1,7 @@
 ---
 name: cron
+author: "kdairatchi"
+license: "Apache-2.0"
 description: Manage scheduled tasks via the prowlr command — create, list, pause, resume, delete jobs
 metadata: { "prowlr": { "emoji": "⏰" } }
 ---

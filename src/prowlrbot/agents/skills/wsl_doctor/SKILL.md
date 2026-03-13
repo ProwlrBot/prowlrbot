@@ -1,5 +1,7 @@
 ---
 name: wsl_doctor
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "Diagnose and repair Windows Subsystem for Linux (WSL2) issues. Runs progressive checks from simple to deep — service state, VHDX health, NTFS compression, Hyper-V stack, networking, DNS, memory, GPU passthrough, and registry integrity. Use when WSL won't start, distros crash, networking fails, or performance is degraded."
 metadata:
   {

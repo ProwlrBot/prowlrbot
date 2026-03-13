@@ -1,5 +1,7 @@
 ---
 name: browser_visible
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "When the user wants to open a real, visible browser window (not headless mode), use the browser_use headed parameter to launch the browser, then proceed with open/snapshot/click etc. Useful for demos, debugging, or when the user wants to see the page."
 metadata:
   {

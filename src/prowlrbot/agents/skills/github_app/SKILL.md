@@ -1,5 +1,7 @@
 ---
 name: github_app
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "GitHub App integration for autonomous PR reviews, issue triage, release note generation, and repository health monitoring. Processes webhook events and provides actionable insights on pull requests, issues, and overall project health."
 metadata:
   {

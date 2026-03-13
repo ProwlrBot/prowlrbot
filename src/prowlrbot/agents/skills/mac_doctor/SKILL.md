@@ -1,5 +1,7 @@
 ---
 name: mac_doctor
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "Diagnose and repair macOS-specific issues with ProwlrBot and Python development environments. Covers Apple Silicon compatibility, Python version management, SSL certificates, port conflicts, Gatekeeper, networking, performance, and local model backends (MLX, llama.cpp, Ollama)."
 metadata:
   {

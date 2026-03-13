@@ -1,5 +1,7 @@
 ---
 name: dingtalk_channel_connect
+author: "kdairatchi"
+license: "Apache-2.0"
 description: "Use a visible browser to automate DingTalk channel setup for ProwlrBot. Applicable when the user mentions DingTalk, developer console, Client ID, Client Secret, bot, Stream mode, binding or configuring a channel. Supports pausing at login pages for user authentication."
 metadata:
   {
