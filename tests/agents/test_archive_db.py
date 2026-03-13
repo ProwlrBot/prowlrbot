@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for long-term agent memory archive."""
+
 import pytest
 
 from prowlrbot.agents.memory.archive_db import ArchiveDB
@@ -18,7 +19,12 @@ class TestStoreAndRetrieve:
         assert entry_id.startswith("arch_")
 
     def test_search_finds_stored_entry(self, db):
-        db.store("agent-1", "Python best practices", "Use type hints for clarity", importance=3)
+        db.store(
+            "agent-1",
+            "Python best practices",
+            "Use type hints for clarity",
+            importance=3,
+        )
         results = db.search("agent-1", "type hints")
         assert len(results) >= 1
         assert "type hints" in results[0]["summary"].lower()
@@ -54,7 +60,12 @@ class TestAgentIsolation:
 
 class TestPromotionTracking:
     def test_promoted_from_is_recorded(self, db):
-        db.store("agent-1", "Promoted knowledge", "important info", promoted_from="learning-123")
+        db.store(
+            "agent-1",
+            "Promoted knowledge",
+            "important info",
+            promoted_from="learning-123",
+        )
         results = db.search("agent-1", "Promoted")
         assert results[0]["promoted_from"] == "learning-123"
 

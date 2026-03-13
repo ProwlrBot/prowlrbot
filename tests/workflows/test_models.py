@@ -20,13 +20,18 @@ from prowlrbot.workflows.models import (
     WorkflowTrigger,
 )
 
-
 # ── StepType enum ────────────────────────────────────────────────────────────
 
 
 class TestStepType:
     def test_all_values(self):
-        expected = {"agent_query", "channel_send", "conditional", "parallel_group", "transform"}
+        expected = {
+            "agent_query",
+            "channel_send",
+            "conditional",
+            "parallel_group",
+            "transform",
+        }
         assert {v.value for v in StepType} == expected
 
     def test_str_representation(self):
@@ -298,7 +303,9 @@ class TestWorkflowRun:
             workflow_id="wf-1",
             status=WorkflowRunStatus.completed,
             step_results={
-                "s1": StepResult(step_id="s1", status=StepStatus.completed, output="ok"),
+                "s1": StepResult(
+                    step_id="s1", status=StepStatus.completed, output="ok"
+                ),
                 "s2": StepResult(step_id="s2", status=StepStatus.skipped),
             },
         )

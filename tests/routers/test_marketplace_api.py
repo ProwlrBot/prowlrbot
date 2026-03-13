@@ -1,4 +1,5 @@
 """Tests for marketplace API endpoint fixes."""
+
 import importlib.util
 import sys
 import tempfile
@@ -34,16 +35,18 @@ def store():
     s = MarketplaceStore(db_path=tmp.name)
     # Seed some listings
     for i, title in enumerate(["Alpha Tool", "Zeta Agent", "Beta Skill"]):
-        s.publish_listing(MarketplaceListing(
-            author_id="test",
-            title=title,
-            description=f"Description {i}",
-            category=MarketplaceCategory.skills,
-            downloads=100 - i * 30,
-            rating=4.0 + i * 0.3,
-            ratings_count=i + 1,
-            status="approved",
-        ))
+        s.publish_listing(
+            MarketplaceListing(
+                author_id="test",
+                title=title,
+                description=f"Description {i}",
+                category=MarketplaceCategory.skills,
+                downloads=100 - i * 30,
+                rating=4.0 + i * 0.3,
+                ratings_count=i + 1,
+                status="approved",
+            )
+        )
     yield s
     s.close()
 

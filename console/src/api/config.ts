@@ -14,9 +14,13 @@ export function getApiUrl(path: string): string {
 }
 
 /**
- * Get the API token
- * @returns API token string or empty string
+ * Get the API token.
+ *
+ * Checks for a JWT in localStorage first (set after login), then falls back
+ * to the build-time TOKEN constant for legacy API-token auth.
  */
 export function getApiToken(): string {
+  const jwt = localStorage.getItem("prowlrbot-jwt");
+  if (jwt) return jwt;
   return typeof TOKEN !== "undefined" ? TOKEN : "";
 }

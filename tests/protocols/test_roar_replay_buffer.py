@@ -22,8 +22,12 @@ class TestReplayBuffer(unittest.TestCase):
 
         async def _test():
             bus = EventBus(replay_size=50)
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1}))
-            await bus.publish(StreamEvent(type=StreamEventType.REASONING, data={"n": 2}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1})
+            )
+            await bus.publish(
+                StreamEvent(type=StreamEventType.REASONING, data={"n": 2})
+            )
 
             sub = bus.subscribe()  # replay defaults to False
             # Should have no events pre-filled
@@ -38,9 +42,15 @@ class TestReplayBuffer(unittest.TestCase):
 
         async def _test():
             bus = EventBus(replay_size=50)
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1}))
-            await bus.publish(StreamEvent(type=StreamEventType.REASONING, data={"n": 2}))
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 3}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1})
+            )
+            await bus.publish(
+                StreamEvent(type=StreamEventType.REASONING, data={"n": 2})
+            )
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 3})
+            )
 
             sub = bus.subscribe(replay=True)
             e1 = await sub.get(timeout=0.5)
@@ -62,9 +72,15 @@ class TestReplayBuffer(unittest.TestCase):
 
         async def _test():
             bus = EventBus(replay_size=50)
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1}))
-            await bus.publish(StreamEvent(type=StreamEventType.REASONING, data={"n": 2}))
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 3}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 1})
+            )
+            await bus.publish(
+                StreamEvent(type=StreamEventType.REASONING, data={"n": 2})
+            )
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": 3})
+            )
 
             filt = StreamFilter(event_types=[StreamEventType.TOOL_CALL])
             sub = bus.subscribe(filter_spec=filt, replay=True)
@@ -88,7 +104,9 @@ class TestReplayBuffer(unittest.TestCase):
         async def _test():
             bus = EventBus(replay_size=3)
             for i in range(5):
-                await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": i}))
+                await bus.publish(
+                    StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": i})
+                )
 
             sub = bus.subscribe(replay=True)
             events = []
@@ -112,7 +130,9 @@ class TestReplayBuffer(unittest.TestCase):
 
         async def _test():
             bus = EventBus(replay_size=50)
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": "replay"}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"n": "replay"})
+            )
 
             sub = bus.subscribe(replay=True)
 
@@ -122,7 +142,9 @@ class TestReplayBuffer(unittest.TestCase):
             assert e1.data == {"n": "replay"}
 
             # Publish a live event
-            await bus.publish(StreamEvent(type=StreamEventType.REASONING, data={"n": "live"}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.REASONING, data={"n": "live"})
+            )
             e2 = await sub.get(timeout=0.5)
             assert e2 is not None
             assert e2.data == {"n": "live"}
@@ -142,7 +164,9 @@ class TestReplayBuffer(unittest.TestCase):
             bus = EventBus()
             sub = bus.subscribe()
 
-            await bus.publish(StreamEvent(type=StreamEventType.TOOL_CALL, data={"x": 1}))
+            await bus.publish(
+                StreamEvent(type=StreamEventType.TOOL_CALL, data={"x": 1})
+            )
             e = await sub.get(timeout=0.5)
             assert e is not None
             assert e.data == {"x": 1}
@@ -168,10 +192,18 @@ class TestReplayBuffer(unittest.TestCase):
         async def _test():
             bus = EventBus(replay_size=50)
             await bus.publish(
-                StreamEvent(type=StreamEventType.TOOL_CALL, source="did:roar:agent:a", data={"from": "a"})
+                StreamEvent(
+                    type=StreamEventType.TOOL_CALL,
+                    source="did:roar:agent:a",
+                    data={"from": "a"},
+                )
             )
             await bus.publish(
-                StreamEvent(type=StreamEventType.TOOL_CALL, source="did:roar:agent:b", data={"from": "b"})
+                StreamEvent(
+                    type=StreamEventType.TOOL_CALL,
+                    source="did:roar:agent:b",
+                    data={"from": "b"},
+                )
             )
 
             filt = StreamFilter(source_dids=["did:roar:agent:a"])

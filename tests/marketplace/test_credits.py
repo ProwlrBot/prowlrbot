@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for simplified gamification credit rules per spec."""
+
 import tempfile
 
 from prowlrbot.marketplace.models import (

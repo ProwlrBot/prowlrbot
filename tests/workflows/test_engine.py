@@ -26,7 +26,6 @@ from prowlrbot.workflows.models import (
     WorkflowTrigger,
 )
 
-
 # ── _resolve_template ────────────────────────────────────────────────────────
 
 
@@ -424,7 +423,9 @@ class TestWorkflowEngineErrorStrategies:
         run = await engine.execute("wf-skip")
         assert run.status == WorkflowRunStatus.completed
         assert run.step_results["s1"].status == StepStatus.failed
-        assert run.step_results["s2"].status == StepStatus.failed  # also fails, same runner
+        assert (
+            run.step_results["s2"].status == StepStatus.failed
+        )  # also fails, same runner
 
     @pytest.mark.asyncio
     async def test_retry_strategy_retries_on_failure(self):
@@ -483,7 +484,9 @@ class TestWorkflowEngineErrorStrategies:
         spec = WorkflowSpec(
             id="wf-dur",
             name="Duration",
-            steps=[WorkflowStep(id="s1", type=StepType.transform, transform_expr="fast")],
+            steps=[
+                WorkflowStep(id="s1", type=StepType.transform, transform_expr="fast")
+            ],
         )
         engine.register(spec)
 

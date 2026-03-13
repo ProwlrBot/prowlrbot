@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for prowlr acp CLI command."""
+
 from click.testing import CliRunner
 from prowlrbot.cli.acp_cmd import acp_cmd
 

@@ -239,9 +239,7 @@ class A2ATaskStore:
         if task:
             allowed = _VALID_TRANSITIONS.get(task.status, set())
             if status not in allowed:
-                raise ValueError(
-                    f"Invalid transition: {task.status} -> {status}"
-                )
+                raise ValueError(f"Invalid transition: {task.status} -> {status}")
             task.status = status
             task.history.append(StatusEntry(status=status, message=message))
         return task
@@ -277,9 +275,23 @@ _MAX_TASKS = 10_000
 
 # Valid state transitions per A2A v0.3.0 spec.
 _VALID_TRANSITIONS: Dict[TaskStatus, set] = {
-    TaskStatus.SUBMITTED: {TaskStatus.WORKING, TaskStatus.REJECTED, TaskStatus.CANCELED, TaskStatus.FAILED},
-    TaskStatus.WORKING: {TaskStatus.COMPLETED, TaskStatus.INPUT_REQUIRED, TaskStatus.CANCELED, TaskStatus.FAILED},
-    TaskStatus.INPUT_REQUIRED: {TaskStatus.WORKING, TaskStatus.CANCELED, TaskStatus.FAILED},
+    TaskStatus.SUBMITTED: {
+        TaskStatus.WORKING,
+        TaskStatus.REJECTED,
+        TaskStatus.CANCELED,
+        TaskStatus.FAILED,
+    },
+    TaskStatus.WORKING: {
+        TaskStatus.COMPLETED,
+        TaskStatus.INPUT_REQUIRED,
+        TaskStatus.CANCELED,
+        TaskStatus.FAILED,
+    },
+    TaskStatus.INPUT_REQUIRED: {
+        TaskStatus.WORKING,
+        TaskStatus.CANCELED,
+        TaskStatus.FAILED,
+    },
     TaskStatus.COMPLETED: set(),
     TaskStatus.FAILED: set(),
     TaskStatus.CANCELED: set(),

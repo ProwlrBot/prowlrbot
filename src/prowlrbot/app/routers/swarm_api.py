@@ -88,7 +88,9 @@ def _get_docker_workers() -> list[dict[str, Any]]:
                         "id": w.get("id", ""),
                         "name": w.get("name", "unknown"),
                         "host": "localhost",
-                        "status": "working" if "Up" in w.get("status", "") else "offline",
+                        "status": (
+                            "working" if "Up" in w.get("status", "") else "offline"
+                        ),
                         "current_task": None,
                         "capabilities": ["code", "review"],
                         "last_heartbeat": "",
@@ -144,12 +146,16 @@ async def swarm_workers():
             "missing": missing,
             "workers": [],
             "setup_guide": {
-                "docker": "Install Docker Desktop or run: brew install docker"
-                if not docker_ok
-                else None,
-                "redis": "Run: brew install redis && brew services start redis"
-                if not redis_ok
-                else None,
+                "docker": (
+                    "Install Docker Desktop or run: brew install docker"
+                    if not docker_ok
+                    else None
+                ),
+                "redis": (
+                    "Run: brew install redis && brew services start redis"
+                    if not redis_ok
+                    else None
+                ),
             },
         }
 

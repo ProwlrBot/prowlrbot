@@ -5,6 +5,19 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import sentry_sdk
+
+_sentry_dsn = os.environ.get("SENTRY_DSN", "")
+if _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        send_default_pii=True,
+        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "1.0")),
+        profiles_sample_rate=float(
+            os.environ.get("SENTRY_PROFILES_SAMPLE_RATE", "1.0")
+        ),
+    )
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -41,6 +54,13 @@ from ..auth.csrf import CSRFMiddleware
 from .websocket import create_websocket_router
 from ..dashboard.events import EventBus
 from ..envs import load_envs_into_environ
+from ..auth.store import UserStore
+from ..auth.models import Role
+from ..providers.store import (
+    load_providers_json,
+    set_active_llm,
+    update_provider_settings,
+)
 
 # Apply log level on load so reload child process gets same level as CLI.
 logger = setup_logger(os.environ.get(LOG_LEVEL_ENV, "info"))
@@ -66,11 +86,125 @@ agent_app = AgentApp(
 )
 
 
+def _ensure_admin_user() -> None:
+    """Create an admin user on first run if no users exist.
+
+    Credentials come from env vars ``PROWLRBOT_ADMIN_USERNAME`` /
+    ``PROWLRBOT_ADMIN_PASSWORD``. If not set, a random password is
+    generated and printed to the log.
+    """
+    try:
+        store = UserStore()
+        if store.list_users():
+            return  # users already exist
+
+        import secrets as _secrets
+
+        username = os.environ.get("PROWLRBOT_ADMIN_USERNAME", "admin")
+        password = os.environ.get("PROWLRBOT_ADMIN_PASSWORD", "")
+        generated = False
+        if not password:
+            password = _secrets.token_urlsafe(16)
+            generated = True
+
+        store.create_user(
+            username=username,
+            password=password,
+            role=Role.admin,
+        )
+
+        logger.info("Created admin user '%s'", username)
+        if generated:
+            logger.info(
+                "Generated admin password (save it now!): %s",
+                password,
+            )
+            # Also print to stdout so it's visible in container logs
+            print(f"\n{'='*60}")
+            print(f"  Admin account created!")
+            print(f"  Username: {username}")
+            print(f"  Password: {password}")
+            print(f"  (Set PROWLRBOT_ADMIN_PASSWORD env var to choose your own)")
+            print(f"{'='*60}\n")
+    except Exception:
+        logger.exception("Failed to create initial admin user")
+
+
+def _auto_detect_provider() -> None:
+    """Auto-detect and activate an LLM provider from env vars on first run.
+
+    Checks for common API keys in the environment and configures the first
+    one found as the active provider. This ensures chat works out of the
+    box when deploying with API keys set as secrets.
+    """
+    try:
+        data = load_providers_json()
+        if data.active_llm.provider_id:
+            return  # already configured
+
+        # Priority order: Anthropic > OpenAI > Groq > Ollama
+        providers_to_check = [
+            ("anthropic", "ANTHROPIC_API_KEY", "claude-sonnet-4-6"),
+            ("openai", "OPENAI_API_KEY", "gpt-4o"),
+            ("groq", "GROQ_API_KEY", "llama-3.3-70b-versatile"),
+        ]
+
+        for provider_id, env_var, default_model in providers_to_check:
+            api_key = os.environ.get(env_var, "")
+            if not api_key:
+                continue
+
+            # Store the API key in providers.json
+            update_provider_settings(provider_id, api_key=api_key)
+            set_active_llm(provider_id, default_model)
+            logger.info(
+                "Auto-detected %s from %s — activated %s",
+                provider_id,
+                env_var,
+                default_model,
+            )
+            return
+
+        # Check for Ollama (local, no API key needed — just check connectivity)
+        ollama_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+        try:
+            import httpx
+
+            resp = httpx.get(f"{ollama_url}/api/tags", timeout=3)
+            if resp.status_code == 200:
+                models = resp.json().get("models", [])
+                if models:
+                    model_name = models[0].get("name", "llama3.1")
+                    set_active_llm("ollama", model_name)
+                    logger.info(
+                        "Auto-detected Ollama at %s — activated %s",
+                        ollama_url,
+                        model_name,
+                    )
+                    return
+        except Exception:
+            pass  # Ollama not running, that's fine
+
+        logger.warning(
+            "No LLM provider API key found in environment. "
+            "Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or configure via Settings > Models."
+        )
+    except Exception:
+        logger.exception("Failed to auto-detect LLM provider")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # pylint: disable=too-many-statements
+    # Ensure at least one admin user exists for fresh installs
+    _ensure_admin_user()
+
+    # Auto-detect and activate LLM provider from env vars
+    _auto_detect_provider()
+
     # Clean up stale temp files from previous runs
     try:
         from .runner.query_error_dump import cleanup_old_error_dumps
+
         cleanup_old_error_dumps()
     except Exception:
         pass
@@ -266,6 +400,7 @@ from ..hub.websocket import warroom_ws
 async def ws_warroom(ws):
     await warroom_ws(ws)
 
+
 app.include_router(
     agent_app.router,
     prefix="/api/agent",
@@ -348,6 +483,7 @@ roar_server.on(MessageIntent.DELEGATE)(_roar_agent_handler)
 # Terminal WebSocket (PTY) — Unix only
 try:
     from .routers.terminal import router as _terminal_router
+
     app.include_router(_terminal_router)
 except ImportError:
     pass  # pty not available (Windows)

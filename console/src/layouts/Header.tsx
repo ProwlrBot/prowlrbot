@@ -1,6 +1,8 @@
-import { Layout } from "antd";
+import { Avatar, Dropdown, Layout, Space, Tag } from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../contexts/AuthContext";
 
 const { Header: AntHeader } = Layout;
 
@@ -34,6 +36,27 @@ interface HeaderProps {
 
 export default function Header({ selectedKey }: HeaderProps) {
   const { t } = useTranslation();
+  const { user, onLogout } = useAuth();
+
+  const userMenuItems = [
+    {
+      key: "role",
+      label: (
+        <Space>
+          <span>{user?.username}</span>
+          <Tag color="blue">{user?.role}</Tag>
+        </Space>
+      ),
+      disabled: true,
+    },
+    { type: "divider" as const },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Sign Out",
+      onClick: onLogout,
+    },
+  ];
 
   return (
     <AntHeader
@@ -51,11 +74,20 @@ export default function Header({ selectedKey }: HeaderProps) {
         {(() => {
           const label = keyToLabel[selectedKey];
           if (!label) return t("nav.dashboard");
-          // i18n keys start with "nav.", raw strings don't
           return label.startsWith("nav.") ? t(label) : label;
         })()}
       </span>
-      <LanguageSwitcher />
+      <Space size="middle">
+        <LanguageSwitcher />
+        {user && (
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={["click"]}>
+            <Avatar
+              icon={<UserOutlined />}
+              style={{ cursor: "pointer", backgroundColor: "var(--prowlrbot-primary, #1677ff)" }}
+            />
+          </Dropdown>
+        )}
+      </Space>
     </AntHeader>
   );
 }

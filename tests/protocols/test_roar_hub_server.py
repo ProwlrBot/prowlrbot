@@ -84,7 +84,9 @@ class TestHubServerLookup(unittest.TestCase):
         # Register first
         reg = client.post(
             "/agents",
-            json=_agent_payload(did="did:roar:agent:lookup-test", display_name="lookup"),
+            json=_agent_payload(
+                did="did:roar:agent:lookup-test", display_name="lookup"
+            ),
         )
         did = reg.json()["did"]
 
@@ -135,8 +137,12 @@ class TestHubServerSearch(unittest.TestCase):
 
     def test_list_all_agents(self):
         client = _make_app()
-        client.post("/agents", json=_agent_payload(did="did:roar:agent:a-1", display_name="a"))
-        client.post("/agents", json=_agent_payload(did="did:roar:agent:b-1", display_name="b"))
+        client.post(
+            "/agents", json=_agent_payload(did="did:roar:agent:a-1", display_name="a")
+        )
+        client.post(
+            "/agents", json=_agent_payload(did="did:roar:agent:b-1", display_name="b")
+        )
 
         resp = client.get("/agents")
         assert resp.status_code == 200
@@ -151,7 +157,9 @@ class TestHubServerUnregister(unittest.TestCase):
         client = _make_app()
         client.post(
             "/agents",
-            json=_agent_payload(did="did:roar:agent:removable-1", display_name="removable"),
+            json=_agent_payload(
+                did="did:roar:agent:removable-1", display_name="removable"
+            ),
         )
 
         resp = client.delete("/agents/did:roar:agent:removable-1")

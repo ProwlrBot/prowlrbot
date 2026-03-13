@@ -19,7 +19,6 @@ from prowlrbot.workflows.models import (
     WorkflowSpec,
 )
 
-
 # ── parse_workflow_dict ───────────────────────────────────────────────────────
 
 
@@ -112,7 +111,12 @@ class TestLoadWorkflowFromFileJSON:
             "config": {"key": "value"},
             "steps": [
                 {"id": "a", "type": "agent_query", "prompt": "Do X"},
-                {"id": "b", "type": "transform", "transform_expr": "{{a.output}}", "depends_on": ["a"]},
+                {
+                    "id": "b",
+                    "type": "transform",
+                    "transform_expr": "{{a.output}}",
+                    "depends_on": ["a"],
+                },
             ],
         }
         path = tmp_path / "full.prowlr.json"

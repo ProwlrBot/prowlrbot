@@ -140,8 +140,7 @@ class RateLimiter:
         self._check_count += 1
         if self._check_count % 1000 == 0:
             stale_keys = [
-                k for k, v in self._windows.items()
-                if not v or max(v) < cutoff
+                k for k, v in self._windows.items() if not v or max(v) < cutoff
             ]
             for k in stale_keys:
                 del self._windows[k]
@@ -172,6 +171,7 @@ def _extract_client_key(request: Request) -> str:
     auth_header = request.headers.get("authorization", "")
     if auth_header.lower().startswith("bearer "):
         import hashlib
+
         token_hash = hashlib.sha256(auth_header[7:].encode()).hexdigest()[:16]
         return f"token:{token_hash}"
 
@@ -242,7 +242,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 retry_after = max(1, retry_after)
                 return JSONResponse(
                     status_code=429,
-                    content={"detail": "Too many authentication attempts. Please try again later."},
+                    content={
+                        "detail": "Too many authentication attempts. Please try again later."
+                    },
                     headers={"Retry-After": str(retry_after)},
                 )
 

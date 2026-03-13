@@ -59,7 +59,9 @@ async def terminal_ws(websocket: WebSocket, session_id: str) -> None:
     async def pty_to_ws() -> None:
         while True:
             try:
-                data = await loop.run_in_executor(None, lambda: os.read(master_fd, 4096))
+                data = await loop.run_in_executor(
+                    None, lambda: os.read(master_fd, 4096)
+                )
                 await websocket.send_bytes(data)
             except (OSError, WebSocketDisconnect, RuntimeError):
                 break

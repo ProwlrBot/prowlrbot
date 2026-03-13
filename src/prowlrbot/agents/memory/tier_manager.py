@@ -13,6 +13,7 @@ The ProwlrBot memory system has three conceptual tiers:
 medium-term to long-term and executes the promotion.  Demotion (pruning
 stale long-term entries) is also supported.
 """
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Tests for listing detail endpoint with computed fields."""
+
 import importlib.util
 import sys
 import tempfile
@@ -9,7 +10,11 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from prowlrbot.marketplace.models import (
-    Bundle, MarketplaceCategory, MarketplaceListing, ReviewEntry, TipRecord,
+    Bundle,
+    MarketplaceCategory,
+    MarketplaceListing,
+    ReviewEntry,
+    TipRecord,
 )
 from prowlrbot.marketplace.store import MarketplaceStore
 
@@ -34,28 +39,38 @@ def _load_marketplace_module():
 def store():
     tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
     s = MarketplaceStore(db_path=tmp.name)
-    s.publish_listing(MarketplaceListing(
-        id="test-skill",
-        author_id="author1",
-        title="Test Skill",
-        description="A skill",
-        category=MarketplaceCategory.skills,
-        trust_tier="official",
-        author_name="Author One",
-        status="approved",
-    ))
-    s.publish_listing(MarketplaceListing(
-        id="related-skill",
-        author_id="author1",
-        title="Related Skill",
-        description="Another skill",
-        category=MarketplaceCategory.skills,
-        tags=["testing"],
-        status="approved",
-    ))
-    s.add_review(ReviewEntry(listing_id="test-skill", reviewer_id="u1", rating=5, comment="Great"))
+    s.publish_listing(
+        MarketplaceListing(
+            id="test-skill",
+            author_id="author1",
+            title="Test Skill",
+            description="A skill",
+            category=MarketplaceCategory.skills,
+            trust_tier="official",
+            author_name="Author One",
+            status="approved",
+        )
+    )
+    s.publish_listing(
+        MarketplaceListing(
+            id="related-skill",
+            author_id="author1",
+            title="Related Skill",
+            description="Another skill",
+            category=MarketplaceCategory.skills,
+            tags=["testing"],
+            status="approved",
+        )
+    )
+    s.add_review(
+        ReviewEntry(
+            listing_id="test-skill", reviewer_id="u1", rating=5, comment="Great"
+        )
+    )
     s.add_tip(TipRecord(listing_id="test-skill", author_id="author1", amount=5.0))
-    s.create_bundle(Bundle(id="b1", name="B1", description="x", listing_ids=["test-skill"]))
+    s.create_bundle(
+        Bundle(id="b1", name="B1", description="x", listing_ids=["test-skill"])
+    )
     yield s
     s.close()
 

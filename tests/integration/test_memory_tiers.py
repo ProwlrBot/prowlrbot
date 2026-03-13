@@ -110,9 +110,7 @@ class TestArchiveAccess:
 
     def test_access_count_and_retrieval(self, archive):
         """Store, access, verify counts update correctly."""
-        entry_id = archive.store(
-            "agent-x", "Topic A", "Summary A", importance=2
-        )
+        entry_id = archive.store("agent-x", "Topic A", "Summary A", importance=2)
 
         # Access 5 times
         for _ in range(5):

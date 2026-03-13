@@ -1,4 +1,5 @@
 """Tests for Bundle model and store CRUD."""
+
 import tempfile
 
 from prowlrbot.marketplace.models import Bundle, MarketplaceCategory, MarketplaceListing

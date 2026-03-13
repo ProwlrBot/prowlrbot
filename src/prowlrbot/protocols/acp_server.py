@@ -34,7 +34,9 @@ class ACPServer:
         # Validate JSON-RPC 2.0 structure
         if request.get("jsonrpc") != "2.0":
             return self._error_response(
-                request.get("id"), -32600, "Invalid Request: missing or invalid jsonrpc version"
+                request.get("id"),
+                -32600,
+                "Invalid Request: missing or invalid jsonrpc version",
             )
 
         method = request.get("method", "")

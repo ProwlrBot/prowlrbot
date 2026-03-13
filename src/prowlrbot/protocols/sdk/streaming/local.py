@@ -186,7 +186,12 @@ class EventBus:
             bus=self,
         )
         self._subscriptions[sub_id] = sub
-        logger.debug("Subscription %s created (filter=%s, replay=%s)", sub_id, filter_spec, replay)
+        logger.debug(
+            "Subscription %s created (filter=%s, replay=%s)",
+            sub_id,
+            filter_spec,
+            replay,
+        )
         return sub
 
     async def publish(self, event: StreamEvent) -> int:

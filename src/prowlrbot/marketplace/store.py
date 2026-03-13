@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+
 def _escape_like(value: str) -> str:
     """Escape SQL LIKE wildcards in user input."""
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
@@ -151,8 +152,7 @@ class MarketplaceStore:
         """Add v3 trust-tier columns (safe to run multiple times)."""
         cur = self._conn.cursor()
         existing = {
-            row["name"]
-            for row in cur.execute("PRAGMA table_info(listings)").fetchall()
+            row["name"] for row in cur.execute("PRAGMA table_info(listings)").fetchall()
         }
         v3_columns = {
             "trust_tier": "TEXT NOT NULL DEFAULT 'verified'",
@@ -173,8 +173,7 @@ class MarketplaceStore:
         """Add v2 columns to existing databases (safe to run multiple times)."""
         cur = self._conn.cursor()
         existing = {
-            row["name"]
-            for row in cur.execute("PRAGMA table_info(listings)").fetchall()
+            row["name"] for row in cur.execute("PRAGMA table_info(listings)").fetchall()
         }
         v2_columns = {
             "difficulty": "TEXT NOT NULL DEFAULT 'beginner'",
@@ -241,7 +240,11 @@ class MarketplaceStore:
                 json.dumps(listing.setup_steps),
                 json.dumps(listing.user_stories),
                 listing.hero_animation,
-                listing.trust_tier.value if hasattr(listing.trust_tier, "value") else listing.trust_tier,
+                (
+                    listing.trust_tier.value
+                    if hasattr(listing.trust_tier, "value")
+                    else listing.trust_tier
+                ),
                 listing.author_name,
                 listing.author_url,
                 listing.author_avatar_url,
@@ -400,6 +403,7 @@ class MarketplaceStore:
 
         # Validate column names to prevent SQL injection via dynamic keys
         import re
+
         for k in filtered:
             if not re.match(r"^[a-z_]+$", k):
                 raise ValueError(f"Invalid column name: {k}")
@@ -767,9 +771,14 @@ class MarketplaceStore:
             "INSERT INTO bundles (id, name, description, emoji, color, listing_ids, install_count, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                bundle.id, bundle.name, bundle.description,
-                bundle.emoji, bundle.color, json.dumps(bundle.listing_ids),
-                bundle.install_count, bundle.created_at,
+                bundle.id,
+                bundle.name,
+                bundle.description,
+                bundle.emoji,
+                bundle.color,
+                json.dumps(bundle.listing_ids),
+                bundle.install_count,
+                bundle.created_at,
             ),
         )
         self._conn.commit()

@@ -1,4 +1,5 @@
 """Tests for bundle API endpoints."""
+
 import importlib.util
 import sys
 import tempfile
@@ -34,21 +35,25 @@ def store():
     s = MarketplaceStore(db_path=tmp.name)
     # Seed listings
     for slug in ["skill-a", "skill-b", "skill-c"]:
-        s.publish_listing(MarketplaceListing(
-            id=slug,
-            author_id="test",
-            title=slug,
-            description="test",
-            category=MarketplaceCategory.skills,
-            status="approved",
-        ))
+        s.publish_listing(
+            MarketplaceListing(
+                id=slug,
+                author_id="test",
+                title=slug,
+                description="test",
+                category=MarketplaceCategory.skills,
+                status="approved",
+            )
+        )
     # Seed a bundle
-    s.create_bundle(Bundle(
-        id="test-bundle",
-        name="Test Bundle",
-        description="A test bundle",
-        listing_ids=["skill-a", "skill-b"],
-    ))
+    s.create_bundle(
+        Bundle(
+            id="test-bundle",
+            name="Test Bundle",
+            description="A test bundle",
+            listing_ids=["skill-a", "skill-b"],
+        )
+    )
     yield s
     s.close()
 
@@ -62,7 +67,9 @@ def client(store):
     app = FastAPI()
     app.include_router(marketplace_mod.router)
     app.dependency_overrides[get_current_user] = lambda: User(
-        id="test-user", username="tester", role=Role.admin,
+        id="test-user",
+        username="tester",
+        role=Role.admin,
     )
     original = marketplace_mod._get_store
 

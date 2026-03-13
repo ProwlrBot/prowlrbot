@@ -25,7 +25,14 @@ import time
 from collections import defaultdict
 from typing import Any, Dict, Optional, Set
 
-from fastapi import APIRouter, Header, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    Header,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from ..roar import ROARMessage
@@ -150,7 +157,9 @@ def create_roar_router(
         if not auth_token:
             return
         if not authorization or not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing or invalid authorization")
+            raise HTTPException(
+                status_code=401, detail="Missing or invalid authorization"
+            )
         token = authorization[7:]
         if not _hmac.compare_digest(token, auth_token):
             raise HTTPException(status_code=401, detail="Invalid authorization token")
@@ -181,14 +190,20 @@ def create_roar_router(
                 )
                 return JSONResponse(
                     status_code=403,
-                    content={"error": "signature_invalid", "detail": "HMAC signature verification failed."},
+                    content={
+                        "error": "signature_invalid",
+                        "detail": "HMAC signature verification failed.",
+                    },
                 )
 
         # Replay protection via idempotency guard
         if _check_seen(incoming.id):
             return JSONResponse(
                 status_code=409,
-                content={"error": "duplicate_message", "detail": "Message already processed."},
+                content={
+                    "error": "duplicate_message",
+                    "detail": "Message already processed.",
+                },
             )
 
         response = await server.handle_message(incoming)
@@ -211,7 +226,9 @@ def create_roar_router(
                 if auth_data.get("type") != "auth" or not _hmac.compare_digest(
                     auth_data.get("token", ""), auth_token
                 ):
-                    await ws.send_text(json.dumps({"error": "auth_failed", "detail": "Invalid token."}))
+                    await ws.send_text(
+                        json.dumps({"error": "auth_failed", "detail": "Invalid token."})
+                    )
                     await ws.close(code=4001)
                     return
                 await ws.send_text(json.dumps({"type": "auth_ok"}))
@@ -225,10 +242,14 @@ def create_roar_router(
                 raw = await ws.receive_text()
 
                 if _limiter is not None and not _limiter.consume():
-                    await ws.send_text(json.dumps({
-                        "error": "rate_limited",
-                        "detail": "Too many requests. Please try again later.",
-                    }))
+                    await ws.send_text(
+                        json.dumps(
+                            {
+                                "error": "rate_limited",
+                                "detail": "Too many requests. Please try again later.",
+                            }
+                        )
+                    )
                     continue
 
                 try:
@@ -236,28 +257,42 @@ def create_roar_router(
                     incoming = ROARMessage.model_validate(data)
 
                     # Verify signature on WebSocket frames too
-                    if server._signing_secret and not incoming.verify(server._signing_secret):
-                        await ws.send_text(json.dumps({
-                            "error": "signature_invalid",
-                            "detail": "HMAC signature verification failed.",
-                        }))
+                    if server._signing_secret and not incoming.verify(
+                        server._signing_secret
+                    ):
+                        await ws.send_text(
+                            json.dumps(
+                                {
+                                    "error": "signature_invalid",
+                                    "detail": "HMAC signature verification failed.",
+                                }
+                            )
+                        )
                         continue
 
                     # Replay protection
                     if _check_seen(incoming.id):
-                        await ws.send_text(json.dumps({
-                            "error": "duplicate_message",
-                            "detail": "Message already processed.",
-                        }))
+                        await ws.send_text(
+                            json.dumps(
+                                {
+                                    "error": "duplicate_message",
+                                    "detail": "Message already processed.",
+                                }
+                            )
+                        )
                         continue
 
                     response = await server.handle_message(incoming)
                     await ws.send_text(json.dumps(response.model_dump(by_alias=True)))
                 except Exception as exc:
-                    await ws.send_text(json.dumps({
-                        "error": "processing_error",
-                        "detail": _sanitize_error(exc),
-                    }))
+                    await ws.send_text(
+                        json.dumps(
+                            {
+                                "error": "processing_error",
+                                "detail": _sanitize_error(exc),
+                            }
+                        )
+                    )
         except WebSocketDisconnect:
             logger.info("ROAR WebSocket disconnected")
 
@@ -283,10 +318,14 @@ def create_roar_router(
         if len(_active_sse) >= _MAX_SSE_CONNECTIONS:
             return JSONResponse(
                 status_code=503,
-                content={"error": "too_many_connections", "detail": "SSE connection limit reached."},
+                content={
+                    "error": "too_many_connections",
+                    "detail": "SSE connection limit reached.",
+                },
             )
 
         import uuid
+
         conn_id = uuid.uuid4().hex[:12]
 
         from .streaming import StreamFilter

@@ -119,7 +119,9 @@ def _clamp_limit(limit: int) -> int:
     return max(1, min(limit, _MAX_LIMIT))
 
 
-def _decay_score(created_iso: str, half_life_days: float = _DECAY_HALF_LIFE_DAYS) -> float:
+def _decay_score(
+    created_iso: str, half_life_days: float = _DECAY_HALF_LIFE_DAYS
+) -> float:
     """Compute an exponential decay factor in [0, 1] based on age.
 
     Args:

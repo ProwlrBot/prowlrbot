@@ -1,7 +1,12 @@
 """Tests for MarketplaceStore v3 migration and trust tier fields."""
+
 import tempfile
 
-from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing, TrustTier
+from prowlrbot.marketplace.models import (
+    MarketplaceCategory,
+    MarketplaceListing,
+    TrustTier,
+)
 from prowlrbot.marketplace.store import MarketplaceStore
 
 
@@ -15,7 +20,9 @@ def test_v3_columns_exist():
     """v3 migration creates trust_tier and related columns."""
     store = _tmp_store()
     cur = store._conn.cursor()
-    cols = {row["name"] for row in cur.execute("PRAGMA table_info(listings)").fetchall()}
+    cols = {
+        row["name"] for row in cur.execute("PRAGMA table_info(listings)").fetchall()
+    }
     assert "trust_tier" in cols
     assert "author_name" in cols
     assert "source_repo" in cols
@@ -64,11 +71,14 @@ def test_update_listing_v3_fields():
         category=MarketplaceCategory.agents,
     )
     store.publish_listing(listing)
-    updated = store.update_listing(listing.id, {
-        "trust_tier": "official",
-        "author_name": "Updated Author",
-        "license": "Apache-2.0",
-    })
+    updated = store.update_listing(
+        listing.id,
+        {
+            "trust_tier": "official",
+            "author_name": "Updated Author",
+            "license": "Apache-2.0",
+        },
+    )
     assert updated is not None
     assert updated.trust_tier == TrustTier.official
     assert updated.author_name == "Updated Author"

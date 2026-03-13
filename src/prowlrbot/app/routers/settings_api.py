@@ -151,8 +151,7 @@ async def set_color_theme(req: ColorThemeRequest) -> Dict[str, str]:
     if req.color_theme not in THEME_IDS:
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown theme '{req.color_theme}'. "
-            f"Valid: {sorted(THEME_IDS)}",
+            detail=f"Unknown theme '{req.color_theme}'. " f"Valid: {sorted(THEME_IDS)}",
         )
     settings = _load_settings()
     settings["color_theme"] = req.color_theme

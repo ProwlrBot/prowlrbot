@@ -24,6 +24,7 @@ import {
   Eye,
   Palette,
   Bot,
+  BarChart3,
 } from "lucide-react";
 
 const { Sider } = Layout;
@@ -53,6 +54,7 @@ const keyToPath: Record<string, string> = {
   credits: "/credits",
   replay: "/replay",
   terminal: "/terminal",
+  analytics: "/analytics",
 };
 
 interface SidebarProps {
@@ -88,6 +90,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       key: "warroom",
       label: "War Room",
       icon: <Radio size={16} />,
+    },
+    {
+      key: "analytics",
+      label: "Analytics",
+      icon: <BarChart3 size={16} />,
     },
     {
       key: "chat-group",

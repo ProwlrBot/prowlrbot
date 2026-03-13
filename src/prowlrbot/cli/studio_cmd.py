@@ -24,7 +24,9 @@ def start_cmd(host: str, port: int, dev: bool) -> None:
     """Start Prowlr-Studio backend and frontend."""
     studio_dir = _find_studio_dir()
     if not studio_dir:
-        click.echo("Error: Prowlr-Studio not found. Install with: prowlr studio install")
+        click.echo(
+            "Error: Prowlr-Studio not found. Install with: prowlr studio install"
+        )
         sys.exit(1)
 
     click.echo(f"Starting Prowlr-Studio on {host}:{port}...")
@@ -88,7 +90,12 @@ def install_cmd(install_dir: str | None) -> None:
 
     try:
         subprocess.run(
-            ["git", "clone", "https://github.com/ProwlrBot/prowrl-studio.git", str(target)],
+            [
+                "git",
+                "clone",
+                "https://github.com/ProwlrBot/prowrl-studio.git",
+                str(target),
+            ],
             check=True,
         )
         subprocess.run(["bun", "install"], cwd=str(target), check=True)

@@ -30,25 +30,85 @@ class ShellPolicy:
     allowed_commands: List[str] = field(
         default_factory=lambda: [
             # Navigation & inspection
-            "ls", "pwd", "cat", "head", "tail", "wc", "file", "stat",
-            "find", "grep", "rg", "awk", "sed", "sort", "uniq", "diff",
-            "tree", "which", "whereis", "echo", "printf", "date",
+            "ls",
+            "pwd",
+            "cat",
+            "head",
+            "tail",
+            "wc",
+            "file",
+            "stat",
+            "find",
+            "grep",
+            "rg",
+            "awk",
+            "sed",
+            "sort",
+            "uniq",
+            "diff",
+            "tree",
+            "which",
+            "whereis",
+            "echo",
+            "printf",
+            "date",
             # Development (python/python3 excluded — use pip for installs,
             # agent tools for code execution)
-            "pip", "pip3",
-            "git", "gh", "make", "cmake", "cargo", "go", "rustc",
-            "pytest", "black", "ruff", "mypy", "flake8", "isort",
-            "pre-commit", "tox",
+            "pip",
+            "pip3",
+            "git",
+            "gh",
+            "make",
+            "cmake",
+            "cargo",
+            "go",
+            "rustc",
+            "pytest",
+            "black",
+            "ruff",
+            "mypy",
+            "flake8",
+            "isort",
+            "pre-commit",
+            "tox",
             # Network (read-only diagnostics — curl/wget excluded for security)
-            "ping", "dig", "nslookup", "host",
+            "ping",
+            "dig",
+            "nslookup",
+            "host",
             # File manipulation (safe)
-            "cp", "mv", "mkdir", "touch", "ln", "tar", "zip", "unzip",
-            "gzip", "gunzip", "xz",
+            "cp",
+            "mv",
+            "mkdir",
+            "touch",
+            "ln",
+            "tar",
+            "zip",
+            "unzip",
+            "gzip",
+            "gunzip",
+            "xz",
             # System info
-            "uname", "whoami", "hostname", "df", "du", "free", "top",
-            "ps", "uptime", "id", "groups",
+            "uname",
+            "whoami",
+            "hostname",
+            "df",
+            "du",
+            "free",
+            "top",
+            "ps",
+            "uptime",
+            "id",
+            "groups",
             # Text processing
-            "jq", "yq", "cut", "tr", "tee", "xargs", "less", "more",
+            "jq",
+            "yq",
+            "cut",
+            "tr",
+            "tee",
+            "xargs",
+            "less",
+            "more",
             # ProwlrBot
             "prowlr",
         ]
@@ -130,7 +190,10 @@ class ShellPolicy:
                 break
 
             if base_cmd and base_cmd not in self.allowed_commands:
-                return False, f"Command blocked: '{base_cmd}' is not in the allowed commands list"
+                return (
+                    False,
+                    f"Command blocked: '{base_cmd}' is not in the allowed commands list",
+                )
 
             # Also check denylist on each segment
             for pattern in self.blocked_patterns:
@@ -211,8 +274,12 @@ async def execute_shell_command(
             encoding = locale.getpreferredencoding(False) or "utf-8"
             stdout_truncated = len(stdout) > MAX_OUTPUT_BYTES
             stderr_truncated = len(stderr) > MAX_OUTPUT_BYTES
-            stdout_str = stdout[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
-            stderr_str = stderr[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
+            stdout_str = (
+                stdout[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
+            )
+            stderr_str = (
+                stderr[:MAX_OUTPUT_BYTES].decode(encoding, errors="replace").strip("\n")
+            )
             if stdout_truncated:
                 stdout_str += f"\n\n[output truncated — {len(stdout):,} bytes total, showing first {MAX_OUTPUT_BYTES:,}]"
             if stderr_truncated:

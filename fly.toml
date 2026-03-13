@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # fly.toml — ProwlrBot on Fly.io
 #
 # Quick start:
@@ -21,10 +22,19 @@
 
 app = "prowlrbot"           # change to your unique app name
 primary_region = "lax"      # Los Angeles — change to your nearest region
+=======
+# fly.toml — Fly.io configuration for ProwlrBot
+# Deploy: flyctl deploy
+# Docs:   https://fly.io/docs/reference/configuration/
+
+app = "prowlrbot"
+primary_region = "sjc"
+>>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296
 
 [build]
   dockerfile = "deploy/Dockerfile.fly"
 
+<<<<<<< HEAD
 # HTTP service — ProwlrBot runs on 8088, Fly terminates TLS
 [[services]]
   internal_port = 8088
@@ -82,3 +92,42 @@ primary_region = "lax"      # Los Angeles — change to your nearest region
 [deploy]
   strategy = "rolling"
   release_command = "prowlr init --defaults --accept-security"
+=======
+[env]
+  HOME = "/data"
+  PROWLRBOT_PORT = "8088"
+  PROWLRBOT_WORKING_DIR = "/data/.prowlrbot"
+  PROWLRBOT_SECRET_DIR = "/data/.prowlrbot.secret"
+  PROWLRBOT_RUNNING_IN_CONTAINER = "1"
+  NODE_ENV = "production"
+
+# Persistent volume for config, SQLite databases, chat history, skills
+[mounts]
+  source = "prowlrbot_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8088
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+[[http_service.checks]]
+  grace_period = "30s"
+  interval = "15s"
+  method = "GET"
+  path = "/api/health"
+  timeout = "5s"
+
+# Machine sizing — shared-cpu-2x is a good balance for an AI agent server.
+# Scale up to performance-2x if running heavy workloads.
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "1gb"
+>>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296

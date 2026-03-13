@@ -55,6 +55,7 @@ async def warroom_ws(ws: WebSocket):
             return
         if not secret and token_hash:
             import hashlib
+
             if not hmac.compare_digest(
                 hashlib.sha256(token.encode()).hexdigest(), token_hash
             ):
@@ -63,6 +64,7 @@ async def warroom_ws(ws: WebSocket):
 
     # Rate limit new connections per IP
     import time
+
     client_ip = ws.client.host if ws.client else "unknown"
     now = time.time()
     cutoff = now - 60.0

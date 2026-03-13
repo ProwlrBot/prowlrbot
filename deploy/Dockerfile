@@ -1,15 +1,17 @@
 # -----------------------------------------------------------------------------
 # Stage 1: build console frontend (dist not committed in repo).
 # -----------------------------------------------------------------------------
-FROM agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/node:slim AS console-builder
+FROM node:20-slim AS console-builder
 WORKDIR /app
 COPY console /app/console
 RUN cd /app/console && npm ci --include=dev && npm run build
 
 # -----------------------------------------------------------------------------
-# Stage 2: runtime image with Python, Chromium, and app.
+# Stage 2: runtime image with Python, Chromium, and browser automation.
+# Includes Xvfb + XFCE for visible browser tool (screenshot, browser_visible).
+# For a lean headless-only image, use deploy/Dockerfile.fly instead.
 # -----------------------------------------------------------------------------
-FROM agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/node:slim
+FROM node:20-slim
 
 # ENV variables
 ENV NODE_ENV=production
@@ -23,7 +25,7 @@ ENV PROWLRBOT_ENABLED_CHANNELS=${PROWLRBOT_ENABLED_CHANNELS}
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --fix-missing \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl  \
     python3  \
     python3-pip  \
@@ -32,19 +34,15 @@ RUN apt-get update && apt-get install -y --fix-missing \
     libssl-dev  \
     git  \
     supervisor  \
-    vim  \
     gettext-base \
     xfce4 \
     xfce4-terminal \
     xvfb \
     dbus-x11 \
-    fonts-wqy-zenhei \
-    fonts-wqy-microhei \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt-get clean
+    fonts-liberation \
+  && rm -rf /var/lib/apt/lists/*
 
-
-RUN apt-get update && apt-get install -y --fix-missing \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     chromium-sandbox \
     libx11-xcb1 \
@@ -59,11 +57,8 @@ RUN apt-get update && apt-get install -y --fix-missing \
     libdrm2 \
     libgbm1 \
     libasound2 \
-    fonts-liberation \
     libu2f-udev \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt-get clean
-
+  && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i 's/^CHROMIUM_FLAGS=""/CHROMIUM_FLAGS="--no-sandbox"/' /usr/bin/chromium
 

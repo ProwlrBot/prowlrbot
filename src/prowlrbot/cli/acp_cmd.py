@@ -9,7 +9,9 @@ import sys
 import click
 
 
-@click.command(name="acp", help="Start ACP server (JSON-RPC 2.0 over stdio) for IDE integration")
+@click.command(
+    name="acp", help="Start ACP server (JSON-RPC 2.0 over stdio) for IDE integration"
+)
 @click.option("--debug", is_flag=True, default=False, help="Enable debug logging")
 def acp_cmd(debug: bool) -> None:
     """Start ProwlrBot as an ACP agent for VS Code / Zed / JetBrains."""

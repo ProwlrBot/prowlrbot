@@ -15,6 +15,7 @@ class TipRequest(PydanticBaseModel):
     amount: float
     message: str = ""
 
+
 from ...marketplace.models import (
     Bundle,
     CreditBalance,
@@ -48,7 +49,9 @@ def _get_store() -> MarketplaceStore:
 
 
 @router.post("/listings", response_model=MarketplaceListing)
-async def publish_listing(listing: MarketplaceListing, _user=Depends(get_current_user)) -> MarketplaceListing:
+async def publish_listing(
+    listing: MarketplaceListing, _user=Depends(get_current_user)
+) -> MarketplaceListing:
     """Publish a new listing to the marketplace."""
     return _get_store().publish_listing(listing)
 
@@ -95,10 +98,7 @@ async def get_bundle(bundle_id: str) -> dict:
     bundle = store.get_bundle(bundle_id)
     if bundle is None:
         raise HTTPException(status_code=404, detail="Bundle not found")
-    listings = [
-        store.get_listing(lid)
-        for lid in bundle.listing_ids
-    ]
+    listings = [store.get_listing(lid) for lid in bundle.listing_ids]
     listings = [l for l in listings if l is not None]
     return {
         "bundle": bundle.model_dump(),
@@ -123,7 +123,9 @@ async def install_bundle(bundle_id: str, _user=Depends(get_current_user)) -> dic
             continue
         try:
             record = InstallRecord(
-                listing_id=lid, user_id="local", version=listing.version,
+                listing_id=lid,
+                user_id="local",
+                version=listing.version,
             )
             store.record_install(record)
             installed.append(lid)
@@ -155,14 +157,13 @@ async def get_listing_detail(listing_id: str) -> dict:
     tip_total = store.get_tip_total(listing.author_id)
 
     # Bundle membership
-    bundles = [
-        b.name for b in store.list_bundles()
-        if listing_id in b.listing_ids
-    ]
+    bundles = [b.name for b in store.list_bundles() if listing_id in b.listing_ids]
 
     # Related listings: same category, max 4, excluding current
     related = store.search_listings(
-        category=listing.category.value, sort="popular", limit=5,
+        category=listing.category.value,
+        sort="popular",
+        limit=5,
     )
     related = [r for r in related if r.id != listing_id][:4]
 
@@ -182,7 +183,9 @@ async def get_listing_detail(listing_id: str) -> dict:
 
 
 @router.put("/listings/{listing_id}", response_model=MarketplaceListing)
-async def update_listing(listing_id: str, updates: dict, _user=Depends(get_current_user)) -> MarketplaceListing:
+async def update_listing(
+    listing_id: str, updates: dict, _user=Depends(get_current_user)
+) -> MarketplaceListing:
     """Partially update a listing."""
     listing = _get_store().update_listing(listing_id, updates)
     if listing is None:
@@ -202,7 +205,9 @@ async def list_by_author(author_id: str) -> list[MarketplaceListing]:
 
 
 @router.post("/listings/{listing_id}/reviews", response_model=ReviewEntry)
-async def add_review(listing_id: str, review: ReviewEntry, _user=Depends(get_current_user)) -> ReviewEntry:
+async def add_review(
+    listing_id: str, review: ReviewEntry, _user=Depends(get_current_user)
+) -> ReviewEntry:
     """Add a review to a listing."""
     listing = _get_store().get_listing(listing_id)
     if listing is None:
@@ -223,7 +228,9 @@ async def get_reviews(listing_id: str, limit: int = 50) -> list[ReviewEntry]:
 
 
 @router.post("/listings/{listing_id}/install", response_model=InstallRecord)
-async def record_install(listing_id: str, record: InstallRecord, _user=Depends(get_current_user)) -> InstallRecord:
+async def record_install(
+    listing_id: str, record: InstallRecord, _user=Depends(get_current_user)
+) -> InstallRecord:
     """Record an installation of a listing."""
     listing = _get_store().get_listing(listing_id)
     if listing is None:
@@ -256,13 +263,48 @@ async def list_categories() -> list[str]:
 
 
 PERSONA_CATALOG = [
-    {"id": "parent", "label": "Parent & Family", "icon": "home", "description": "Automate family life"},
-    {"id": "business", "label": "Small Business", "icon": "briefcase", "description": "Run your business smarter"},
-    {"id": "student", "label": "Student", "icon": "book-open", "description": "Study smarter, not harder"},
-    {"id": "creator", "label": "Content Creator", "icon": "palette", "description": "Create more, manage less"},
-    {"id": "freelancer", "label": "Freelancer", "icon": "laptop", "description": "Handle the admin so you can do the work"},
-    {"id": "developer", "label": "Developer", "icon": "code", "description": "Automate your dev workflow"},
-    {"id": "everyone", "label": "Everyone", "icon": "globe", "description": "Daily life, automated"},
+    {
+        "id": "parent",
+        "label": "Parent & Family",
+        "icon": "home",
+        "description": "Automate family life",
+    },
+    {
+        "id": "business",
+        "label": "Small Business",
+        "icon": "briefcase",
+        "description": "Run your business smarter",
+    },
+    {
+        "id": "student",
+        "label": "Student",
+        "icon": "book-open",
+        "description": "Study smarter, not harder",
+    },
+    {
+        "id": "creator",
+        "label": "Content Creator",
+        "icon": "palette",
+        "description": "Create more, manage less",
+    },
+    {
+        "id": "freelancer",
+        "label": "Freelancer",
+        "icon": "laptop",
+        "description": "Handle the admin so you can do the work",
+    },
+    {
+        "id": "developer",
+        "label": "Developer",
+        "icon": "code",
+        "description": "Automate your dev workflow",
+    },
+    {
+        "id": "everyone",
+        "label": "Everyone",
+        "icon": "globe",
+        "description": "Daily life, automated",
+    },
 ]
 
 
@@ -273,7 +315,9 @@ async def list_personas() -> list[dict]:
 
 
 @router.get("/for/{persona}", response_model=list[MarketplaceListing])
-async def get_listings_for_persona(persona: str, limit: int = 20) -> list[MarketplaceListing]:
+async def get_listings_for_persona(
+    persona: str, limit: int = 20
+) -> list[MarketplaceListing]:
     """Get curated listings for a specific persona."""
     return _get_store().search_listings(persona=persona, limit=min(limit, 100))
 
@@ -284,7 +328,9 @@ async def get_listings_for_persona(persona: str, limit: int = 20) -> list[Market
 
 
 @router.post("/listings/{listing_id}/tip")
-async def tip_author(listing_id: str, tip_req: TipRequest, _user=Depends(get_current_user)) -> dict:
+async def tip_author(
+    listing_id: str, tip_req: TipRequest, _user=Depends(get_current_user)
+) -> dict:
     """Create a Stripe checkout session for tipping, or record locally."""
     import os
 
@@ -457,7 +503,9 @@ async def spend_credits(
 
 
 @router.post("/credits/{user_id}/unlock/{content_key}", response_model=CreditBalance)
-async def unlock_content(user_id: str, content_key: str, _user=Depends(get_current_user)) -> CreditBalance:
+async def unlock_content(
+    user_id: str, content_key: str, _user=Depends(get_current_user)
+) -> CreditBalance:
     """Unlock premium content with credits."""
     if content_key not in PREMIUM_CONTENT_PRICES:
         raise HTTPException(status_code=404, detail=f"Unknown content: {content_key}")

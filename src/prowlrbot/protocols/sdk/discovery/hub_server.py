@@ -64,7 +64,9 @@ class RegisterRequest(BaseModel):
             raise ValueError(f"List exceeds maximum length of {_MAX_LIST_LENGTH}")
         for item in v:
             if isinstance(item, str) and len(item) > _MAX_FIELD_LENGTH:
-                raise ValueError(f"List item exceeds maximum length of {_MAX_FIELD_LENGTH}")
+                raise ValueError(
+                    f"List item exceeds maximum length of {_MAX_FIELD_LENGTH}"
+                )
         return v
 
     @field_validator("endpoints")
@@ -74,7 +76,9 @@ class RegisterRequest(BaseModel):
             raise ValueError(f"Endpoints exceeds maximum count of {_MAX_LIST_LENGTH}")
         for key, val in v.items():
             if len(key) > _MAX_FIELD_LENGTH or len(val) > _MAX_FIELD_LENGTH:
-                raise ValueError(f"Endpoint key/value exceeds maximum length of {_MAX_FIELD_LENGTH}")
+                raise ValueError(
+                    f"Endpoint key/value exceeds maximum length of {_MAX_FIELD_LENGTH}"
+                )
         return v
 
 
@@ -120,7 +124,9 @@ def create_hub_router(api_key: str = "") -> APIRouter:
         """Raise 401 if API key is required but missing/invalid."""
         if api_key:
             if not key or not _hmac.compare_digest(key, api_key):
-                raise HTTPException(status_code=401, detail="Invalid or missing API key")
+                raise HTTPException(
+                    status_code=401, detail="Invalid or missing API key"
+                )
 
     @router.post("/agents")
     async def register_agent(

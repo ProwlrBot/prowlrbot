@@ -73,7 +73,9 @@ def validate_file_path(file_path: str) -> bool:
     for blocked in _BLOCKED_PREFIXES:
         try:
             blocked_resolved = blocked.resolve()
-            if resolved == blocked_resolved or resolved.is_relative_to(blocked_resolved):
+            if resolved == blocked_resolved or resolved.is_relative_to(
+                blocked_resolved
+            ):
                 return False
         except (ValueError, OSError):
             continue
@@ -82,7 +84,9 @@ def validate_file_path(file_path: str) -> bool:
     for allowed in _ALLOWED_PREFIXES:
         try:
             allowed_resolved = allowed.resolve()
-            if resolved == allowed_resolved or resolved.is_relative_to(allowed_resolved):
+            if resolved == allowed_resolved or resolved.is_relative_to(
+                allowed_resolved
+            ):
                 return True
         except (ValueError, OSError):
             continue
