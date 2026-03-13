@@ -34,3 +34,28 @@ def test_tiers_have_required_fields():
         assert "credits_per_month" in tier
         assert "features" in tier
         assert isinstance(tier["features"], list)
+
+
+def test_tiers_have_color_cta_fields():
+    from prowlrbot.app.routers.marketplace import router
+    from fastapi import FastAPI
+    app = FastAPI()
+    app.include_router(router)
+    client = TestClient(app)
+    data = client.get("/marketplace/tiers").json()
+    for tier in data:
+        assert "color" in tier
+        assert "cta" in tier
+        assert "cta_disabled" in tier
+        assert isinstance(tier["cta_disabled"], bool)
+
+
+def test_credit_transactions_returns_list():
+    from prowlrbot.app.routers.marketplace import router
+    from fastapi import FastAPI
+    app = FastAPI()
+    app.include_router(router)
+    client = TestClient(app)
+    resp = client.get("/marketplace/credits/test_user/transactions")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
