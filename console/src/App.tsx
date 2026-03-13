@@ -1,8 +1,11 @@
 import { createGlobalStyle } from "antd-style";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import MainLayout from "./layouts/MainLayout";
+import LoginPage from "./pages/Login";
 import "./styles/theme.css";
 import "./styles/layout.css";
 import "./styles/form-override.css";
@@ -13,6 +16,20 @@ const GlobalStyle = createGlobalStyle`
   box-sizing: border-box;
 }
 `;
+
+function AuthGate() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <MainLayout /> : <LoginPage />;
+}
 
 function ThemedApp() {
   const { antAlgorithm, antTokenOverrides } = useTheme();
@@ -25,19 +42,23 @@ function ThemedApp() {
         token: antTokenOverrides,
       }}
     >
-      <MainLayout />
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
     </ConfigProvider>
   );
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <GlobalStyle />
-      <ThemeProvider>
-        <ThemedApp />
-      </ThemeProvider>
-    </BrowserRouter>
+    <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>
+      <BrowserRouter>
+        <GlobalStyle />
+        <ThemeProvider>
+          <ThemedApp />
+        </ThemeProvider>
+      </BrowserRouter>
+    </Sentry.ErrorBoundary>
   );
 }
 

@@ -1,0 +1,26 @@
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--pb-bg-base, #f5f5f5);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
