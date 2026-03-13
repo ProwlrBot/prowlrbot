@@ -504,6 +504,56 @@ We ❤️ contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for commit conve
 
 ---
 
+## 💬 Community
+
+Join the community — ask questions, share what you've built, report bugs, suggest features.
+
+<p align="center">
+  <a href="https://github.com/ProwlrBot/prowlrbot/discussions">
+    <img src="https://img.shields.io/badge/GitHub_Discussions-Join_the_conversation-181717?style=for-the-badge&logo=github" alt="GitHub Discussions" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/ProwlrBot/prowlrbot/issues">
+    <img src="https://img.shields.io/badge/GitHub_Issues-Report_a_bug-red?style=for-the-badge&logo=github" alt="GitHub Issues" />
+  </a>
+</p>
+
+**Good first ways to get involved:**
+
+- ⭐ Star the repo — it helps more people find the project
+- 🐛 [Open an issue](https://github.com/ProwlrBot/prowlrbot/issues) — bugs, questions, ideas, all welcome
+- 💬 [Start a discussion](https://github.com/ProwlrBot/prowlrbot/discussions) — share your setup, show off a skill you built, ask how something works
+- 🔧 [Build a skill](docs/guides/building-skills.md) — add it to the marketplace so others can use it
+- 📣 Tell someone — the fastest way to grow this is word of mouth
+
+---
+
+## 💖 Support the Project
+
+ProwlrBot is free, open source, and will stay that way. If it saves you time or solves a real problem, consider sponsoring — it goes toward development time, infrastructure, and keeping the lights on.
+
+<p align="center">
+  <a href="https://github.com/sponsors/kdairatchi">
+    <img src="https://img.shields.io/badge/GitHub_Sponsors-Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors" />
+  </a>
+  &nbsp;
+  <a href="https://buymeacoffee.com/kdairatchi">
+    <img src="https://img.shields.io/badge/Buy_Me_a_Coffee-Support-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" />
+  </a>
+  &nbsp;
+  <a href="https://ko-fi.com/kdairatchi">
+    <img src="https://img.shields.io/badge/Ko--fi-Donate-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
+  </a>
+  &nbsp;
+  <a href="https://opencollective.com/prowlrbot">
+    <img src="https://img.shields.io/badge/Open_Collective-Contribute-3295A8?style=for-the-badge&logo=opencollective&logoColor=white" alt="Open Collective" />
+  </a>
+</p>
+
+**Sponsoring is completely optional.** The software is yours either way. But if you want to say thanks and help push development forward, any amount makes a real difference.
+
+---
+
 ## 📄 License
 
 ProwlrBot is open source under the [Apache 2.0 License](LICENSE).
@@ -514,8 +564,9 @@ ProwlrBot is open source under the [Apache 2.0 License](LICENSE).
   <strong>ProwlrBot</strong> — Always watching. Always ready.<br/><br/>
   <a href="docs/README.md">📚 Docs</a> ·
   <a href="docs/blog/">📰 Blog</a> ·
+  <a href="https://github.com/ProwlrBot/prowlrbot/discussions">💬 Discussions</a> ·
   <a href="https://github.com/prowlrbot/prowlrbot/issues">🐛 Issues</a> ·
   <a href="https://github.com/ProwlrBot/prowlr-marketplace">🛒 Marketplace</a> ·
-  <a href="CONTRIBUTING.md">🤝 Contribute</a>
+  <a href="CONTRIBUTING.md">🤝 Contribute</a> ·
+  <a href="https://github.com/sponsors/kdairatchi">💖 Sponsor</a>
 </p>
-```
