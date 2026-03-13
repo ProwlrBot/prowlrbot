@@ -50,6 +50,12 @@ class ColorThemeRequest(BaseModel):
     )
 
 
+class AutonomyLevelRequest(BaseModel):
+    """Request body for autonomy level update."""
+
+    autonomy_level: int = Field(..., ge=0, le=100)
+
+
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------
@@ -196,3 +202,25 @@ async def get_system_info() -> Dict[str, Any]:
         "uptime_human": f"{hours}h {minutes}m {seconds}s",
         "pid": __import__("os").getpid(),
     }
+
+
+# ------------------------------------------------------------------
+# GET /settings/autonomy-level — read autonomy level
+# POST /settings/autonomy-level — write autonomy level
+# ------------------------------------------------------------------
+
+
+@router.get("/autonomy-level")
+async def get_autonomy_level() -> Dict[str, Any]:
+    """Return the current autonomy level (0–100)."""
+    settings = _load_settings()
+    return {"autonomy_level": settings.get("autonomy_level", 50)}
+
+
+@router.post("/autonomy-level")
+async def set_autonomy_level(req: AutonomyLevelRequest) -> Dict[str, Any]:
+    """Set the autonomy level (0–100) and persist it."""
+    settings = _load_settings()
+    settings["autonomy_level"] = req.autonomy_level
+    _save_settings(settings)
+    return {"autonomy_level": req.autonomy_level}
