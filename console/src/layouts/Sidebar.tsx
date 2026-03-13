@@ -27,7 +27,6 @@ import {
   BarChart3,
   HardDrive,
   Trophy,
-  Image,
 } from "lucide-react";
 
 const { Sider } = Layout;

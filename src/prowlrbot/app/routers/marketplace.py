@@ -21,6 +21,12 @@ class ScanRequest(PydanticBaseModel):
     filename: str = "SKILL.md"
 
 
+class SubscribeRequest(PydanticBaseModel):
+    user_id: str = "default"
+    success_url: str = ""
+    cancel_url: str = ""
+
+
 from ...marketplace.models import (
     Bundle,
     CreditBalance,
@@ -391,6 +397,90 @@ async def get_tiers():
     ]
 
 
+# Tier config: id → (display_name, price_cents, credits_per_month)
+_TIER_CONFIG: dict[str, tuple[str, int, int]] = {
+    "pro": ("ProwlrBot Pro", 1900, 10_000),
+    "team": ("ProwlrBot Team", 4900, 50_000),
+}
+
+
+def _get_or_create_subscription_price(stripe_module, tier_id: str) -> str:
+    """Return a live Stripe Price ID for a monthly subscription tier.
+
+    Uses ``lookup_key`` so repeated calls are idempotent — the first call
+    creates the Product + Price; subsequent calls return the same Price ID.
+    """
+    name, amount_cents, _ = _TIER_CONFIG[tier_id]
+    lookup_key = f"prowlrbot_{tier_id}_monthly"
+
+    existing = stripe_module.Price.list(lookup_keys=[lookup_key], limit=1)
+    if existing.data:
+        return existing.data[0].id
+
+    product = stripe_module.Product.create(
+        name=name,
+        metadata={"prowlrbot_tier": tier_id},
+    )
+    price = stripe_module.Price.create(
+        unit_amount=amount_cents,
+        currency="usd",
+        recurring={"interval": "month"},
+        product=product.id,
+        lookup_key=lookup_key,
+        transfer_lookup_key=True,
+    )
+    return price.id
+
+
+@router.post("/subscribe/{tier_id}")
+async def subscribe(
+    tier_id: str,
+    body: SubscribeRequest,
+    request: Request,
+    _user=Depends(get_current_user),
+) -> dict:
+    """Create a Stripe Checkout Session for a monthly subscription tier.
+
+    Returns ``{"checkout_url": "<stripe_url>"}`` on success.
+    The caller should redirect the user to ``checkout_url``.
+    """
+    import os
+
+    if tier_id not in _TIER_CONFIG:
+        raise HTTPException(status_code=400, detail=f"Unknown tier: {tier_id!r}")
+
+    stripe_key = os.environ.get("STRIPE_SECRET_KEY")
+    if not stripe_key:
+        raise HTTPException(status_code=503, detail="Stripe not configured")
+
+    # Derive fallback success/cancel URLs from the request origin when not provided.
+    origin = str(request.base_url).rstrip("/")
+    success_url = body.success_url or f"{origin}/credits?subscribed=true&tier={tier_id}"
+    cancel_url = body.cancel_url or f"{origin}/credits"
+
+    try:
+        import stripe
+
+        stripe.api_key = stripe_key
+        price_id = _get_or_create_subscription_price(stripe, tier_id)
+
+        session = stripe.checkout.Session.create(
+            mode="subscription",
+            line_items=[{"price": price_id, "quantity": 1}],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "user_id": body.user_id,
+                "tier_id": tier_id,
+            },
+        )
+        return {"checkout_url": session.url}
+    except ImportError:
+        raise HTTPException(status_code=503, detail="Stripe SDK not installed")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Stripe error: {exc}")
+
+
 PERSONA_CATALOG = [
     {
         "id": "parent",
@@ -537,7 +627,7 @@ async def tip_author(
 
 @router.post("/webhook/stripe")
 async def stripe_webhook(request: Request) -> dict:
-    """Stripe webhook — records tip after successful payment."""
+    """Stripe webhook — handles tip payments and subscription lifecycle."""
     import os
 
     webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
@@ -556,7 +646,13 @@ async def stripe_webhook(request: Request) -> dict:
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
-    if event["type"] == "checkout.session.completed":
+    store = _get_store()
+    event_type = event["type"]
+
+    # ------------------------------------------------------------------
+    # One-time tip payment
+    # ------------------------------------------------------------------
+    if event_type == "checkout.session.completed":
         session = event["data"]["object"]
         metadata = session.get("metadata", {})
         listing_id = metadata.get("listing_id")
@@ -565,7 +661,6 @@ async def stripe_webhook(request: Request) -> dict:
         message = metadata.get("message", "")
 
         if listing_id and author_id and amount > 0:
-            store = _get_store()
             tip = TipRecord(
                 listing_id=listing_id,
                 author_id=author_id,
@@ -573,6 +668,53 @@ async def stripe_webhook(request: Request) -> dict:
                 message=message,
             )
             store.add_tip(tip)
+
+    # ------------------------------------------------------------------
+    # Subscription created — award initial monthly credits
+    # ------------------------------------------------------------------
+    elif event_type == "customer.subscription.created":
+        sub = event["data"]["object"]
+        metadata = sub.get("metadata", {})
+        user_id = metadata.get("user_id", "default")
+        tier_id = metadata.get("tier_id", "")
+        _, _, credits = _TIER_CONFIG.get(tier_id, ("", 0, 0))
+        if credits > 0:
+            store.add_credits(
+                user_id=user_id,
+                amount=credits,
+                transaction_type=CreditTransactionType("purchased"),
+                description=f"{tier_id.title()} subscription — initial credits",
+            )
+
+    # ------------------------------------------------------------------
+    # Invoice paid — monthly credit refresh on renewal
+    # ------------------------------------------------------------------
+    elif event_type == "invoice.payment_succeeded":
+        invoice = event["data"]["object"]
+        # Only act on subscription renewals (billing_reason != subscription_create
+        # to avoid double-awarding on the first invoice, which fires alongside
+        # customer.subscription.created).
+        if invoice.get("billing_reason") == "subscription_cycle":
+            sub_id = invoice.get("subscription")
+            if sub_id:
+                try:
+                    import stripe as _stripe
+
+                    _stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
+                    sub = _stripe.Subscription.retrieve(sub_id)
+                    meta = sub.get("metadata", {})
+                    user_id = meta.get("user_id", "default")
+                    tier_id = meta.get("tier_id", "")
+                    _, _, credits = _TIER_CONFIG.get(tier_id, ("", 0, 0))
+                    if credits > 0:
+                        store.add_credits(
+                            user_id=user_id,
+                            amount=credits,
+                            transaction_type=CreditTransactionType("purchased"),
+                            description=f"{tier_id.title()} subscription — monthly renewal",
+                        )
+                except Exception:
+                    pass  # best-effort; Stripe will retry on failure
 
     return {"status": "received"}
 

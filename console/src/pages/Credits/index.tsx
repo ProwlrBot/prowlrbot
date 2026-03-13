@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Card,
   Col,
@@ -15,8 +15,12 @@ import {
 } from "antd";
 import { CheckOutlined, CrownOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { getCreditBalance, getCreditTransactions } from "../../api/modules/credits";
+import { request } from "../../api/request";
 
 const { Title, Text, Paragraph } = Typography;
+
+// Maps display tier name → backend tier_id for the subscribe endpoint
+const TIER_ID: Record<string, string> = { Pro: "pro", Team: "team" };
 
 const TIERS = [
   {
@@ -76,6 +80,26 @@ export default function CreditsPage() {
   const [tier, setTier] = useState("Free");
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upgrading, setUpgrading] = useState<string | null>(null);
+
+  const handleUpgrade = useCallback(async (tierName: string) => {
+    const tierId = TIER_ID[tierName];
+    if (!tierId) return;
+    setUpgrading(tierName);
+    try {
+      const data = await request<{ checkout_url: string }>(
+        `/marketplace/subscribe/${tierId}`,
+        { method: "POST", body: JSON.stringify({ user_id: "default" }) }
+      );
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url;
+      }
+    } catch {
+      // error handled by request helper
+    } finally {
+      setUpgrading(null);
+    }
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -157,10 +181,11 @@ export default function CreditsPage() {
                   </ul>
                   <Button
                     type={t.ctaDisabled ? "default" : "primary"}
-                    disabled={t.ctaDisabled || t.name === tier}
+                    disabled={t.ctaDisabled || t.name === tier || upgrading === t.name}
+                    loading={upgrading === t.name}
                     block
                     onClick={() => {
-                      window.open("https://prowlrbot.com/pricing", "_blank");
+                      if (TIER_ID[t.name]) handleUpgrade(t.name);
                     }}
                   >
                     {t.name === tier ? "Current Plan" : t.cta}
