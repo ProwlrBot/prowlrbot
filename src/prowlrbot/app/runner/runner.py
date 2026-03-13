@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-argument too-many-branches too-many-statements
 import asyncio
+import functools
 import json
 import logging
 from pathlib import Path
@@ -150,8 +151,15 @@ class AgentRunner(Runner):
                     name = "Media Message"
 
             try:
-                replay_sess = _replay_recorder.start_recording(
-                    session_id, agent_id="default", title=name or session_id[:8]
+                loop = asyncio.get_running_loop()
+                replay_sess = await loop.run_in_executor(
+                    None,
+                    functools.partial(
+                        _replay_recorder.start_recording,
+                        session_id,
+                        agent_id="default",
+                        title=name or session_id[:8],
+                    ),
                 )
             except Exception:
                 pass  # replay is best-effort, never block a query
@@ -202,7 +210,27 @@ class AgentRunner(Runner):
             except Exception:  # pylint: disable=broad-except
                 pass  # autonomy is best-effort; never block a query
 
-            _first_msg = True
+            # Record the user message before streaming starts
+            if replay_sess is not None and msgs:
+                try:
+                    _loop = asyncio.get_running_loop()
+                    user_content = (
+                        msgs[0].get_text_content()
+                        if hasattr(msgs[0], "get_text_content")
+                        else str(msgs[0])
+                    )
+                    await _loop.run_in_executor(
+                        None,
+                        functools.partial(
+                            _replay_recorder.record_event,
+                            replay_sess.id,
+                            ReplayEventType.USER_MESSAGE,
+                            content=(user_content or "")[:500],
+                        ),
+                    )
+                except Exception:
+                    pass  # replay is best-effort
+
             async for msg, last in stream_printing_messages(
                 agents=[agent],
                 coroutine_task=agent(msgs),
@@ -210,20 +238,18 @@ class AgentRunner(Runner):
                 yield msg, last
                 if replay_sess is not None:
                     try:
-                        _event_type = (
-                            ReplayEventType.USER_MESSAGE
-                            if _first_msg
-                            else ReplayEventType.AGENT_RESPONSE
-                        )
-                        _replay_recorder.record_event(
-                            replay_sess.id,
-                            _event_type,
-                            content=str(msg)[:500],
+                        _loop = asyncio.get_running_loop()
+                        await _loop.run_in_executor(
+                            None,
+                            functools.partial(
+                                _replay_recorder.record_event,
+                                replay_sess.id,
+                                ReplayEventType.AGENT_RESPONSE,
+                                content=str(msg)[:500],
+                            ),
                         )
                     except Exception:
                         pass  # replay is best-effort
-                    finally:
-                        _first_msg = False
 
             _query_succeeded = True
             asyncio.create_task(
@@ -271,7 +297,14 @@ class AgentRunner(Runner):
 
             if replay_sess is not None:
                 try:
-                    _replay_recorder.stop_recording(replay_sess.id)
+                    _loop = asyncio.get_running_loop()
+                    await _loop.run_in_executor(
+                        None,
+                        functools.partial(
+                            _replay_recorder.stop_recording,
+                            replay_sess.id,
+                        ),
+                    )
                 except Exception:
                     pass  # replay is best-effort
 
