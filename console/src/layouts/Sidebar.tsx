@@ -25,6 +25,7 @@ import {
   Palette,
   Bot,
   BarChart3,
+  HardDrive,
 } from "lucide-react";
 
 const { Sider } = Layout;
@@ -55,6 +56,7 @@ const keyToPath: Record<string, string> = {
   replay: "/replay",
   terminal: "/terminal",
   analytics: "/analytics",
+  hardware: "/hardware",
 };
 
 interface SidebarProps {
@@ -218,6 +220,11 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
           key: "models",
           label: t("nav.models"),
           icon: <Box size={16} />,
+        },
+        {
+          key: "hardware",
+          label: "Hardware Advisor",
+          icon: <HardDrive size={16} />,
         },
         {
           key: "environments",
