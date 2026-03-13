@@ -334,6 +334,63 @@ async def list_categories() -> list[str]:
     return [c.value for c in MarketplaceCategory]
 
 
+@router.get("/tiers")
+async def get_tiers():
+    """Return available subscription tiers with pricing and feature lists."""
+    return [
+        {
+            "id": "free",
+            "name": "Free",
+            "price_monthly": 0,
+            "price_label": "$0/mo",
+            "credits_per_month": 1000,
+            "features": [
+                "1 agent",
+                "1,000 credits/mo",
+                "Basic monitoring",
+                "Community support",
+            ],
+            "color": "default",
+            "cta": "Current Plan",
+            "cta_disabled": True,
+        },
+        {
+            "id": "pro",
+            "name": "Pro",
+            "price_monthly": 19,
+            "price_label": "$19/mo",
+            "credits_per_month": 10000,
+            "features": [
+                "5 agents",
+                "10,000 credits/mo",
+                "Advanced monitoring",
+                "Priority support",
+                "API access",
+            ],
+            "color": "blue",
+            "cta": "Upgrade to Pro",
+            "cta_disabled": False,
+        },
+        {
+            "id": "team",
+            "name": "Team",
+            "price_monthly": 49,
+            "price_label": "$49/mo",
+            "credits_per_month": 50000,
+            "features": [
+                "Unlimited agents",
+                "50,000 credits/mo",
+                "War Room",
+                "Team collaboration",
+                "SLA support",
+            ],
+            "color": "purple",
+            "cta": "Upgrade to Team",
+            "cta_disabled": False,
+        },
+    ]
+
+
 PERSONA_CATALOG = [
     {
         "id": "parent",
@@ -529,6 +586,14 @@ async def stripe_webhook(request: Request) -> dict:
 async def get_credits(user_id: str) -> CreditBalance:
     """Get a user's credit balance."""
     return _get_store().get_balance(user_id)
+
+
+@router.get("/credits/{user_id}/transactions")
+async def get_credit_transactions(user_id: str, limit: int = 20) -> list:
+    """Get a user's credit transaction history."""
+    store = _get_store()
+    transactions = store.get_transactions(user_id, limit=min(limit, 100)) if hasattr(store, "get_transactions") else []
+    return transactions
 
 
 @router.post("/credits/{user_id}/add", response_model=CreditBalance)
