@@ -43,8 +43,11 @@ from ...agents.memory import MemoryManager
 from ...agents.react_agent import ProwlrBotAgent
 from ...config import load_config
 from ...constant import WORKING_DIR
+from ...replay.recorder import SessionRecorder, EventType as ReplayEventType
 
 logger = logging.getLogger(__name__)
+
+_replay_recorder = SessionRecorder(db_path=WORKING_DIR / "replay.db")
 
 
 class AgentRunner(Runner):
@@ -86,6 +89,7 @@ class AgentRunner(Runner):
         chat = None
         session_state_loaded = False
         _query_succeeded = False
+        replay_sess = None
 
         try:
             session_id = request.session_id
@@ -145,6 +149,13 @@ class AgentRunner(Runner):
                 else:
                     name = "Media Message"
 
+            try:
+                replay_sess = _replay_recorder.start_recording(
+                    session_id, agent_id="default", title=name or session_id[:8]
+                )
+            except Exception:
+                pass  # replay is best-effort, never block a query
+
             if self._chat_manager is not None:
                 chat = await self._chat_manager.get_or_create_chat(
                     session_id,
@@ -191,11 +202,28 @@ class AgentRunner(Runner):
             except Exception:  # pylint: disable=broad-except
                 pass  # autonomy is best-effort; never block a query
 
+            _first_msg = True
             async for msg, last in stream_printing_messages(
                 agents=[agent],
                 coroutine_task=agent(msgs),
             ):
                 yield msg, last
+                if replay_sess is not None:
+                    try:
+                        _event_type = (
+                            ReplayEventType.USER_MESSAGE
+                            if _first_msg
+                            else ReplayEventType.AGENT_RESPONSE
+                        )
+                        _replay_recorder.record_event(
+                            replay_sess.id,
+                            _event_type,
+                            content=str(msg)[:500],
+                        )
+                    except Exception:
+                        pass  # replay is best-effort
+                    finally:
+                        _first_msg = False
 
             _query_succeeded = True
             asyncio.create_task(
@@ -240,6 +268,12 @@ class AgentRunner(Runner):
 
             if self._chat_manager is not None and chat is not None:
                 await self._chat_manager.update_chat(chat)
+
+            if replay_sess is not None:
+                try:
+                    _replay_recorder.stop_recording(replay_sess.id)
+                except Exception:
+                    pass  # replay is best-effort
 
     async def init_handler(self, *args, **kwargs):
         """
