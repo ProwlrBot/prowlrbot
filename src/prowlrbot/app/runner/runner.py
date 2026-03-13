@@ -5,6 +5,31 @@ import json
 import logging
 from pathlib import Path
 
+
+async def _award_xp_background(
+    entity_id: str,
+    category: str,
+    reason: str,
+    amount: int = 10,
+) -> None:
+    """Fire-and-forget XP award via internal HTTP. Never raises."""
+    try:
+        import httpx  # noqa: PLC0415
+
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            await client.post(
+                "http://localhost:8088/api/gamification/xp",
+                json={
+                    "entity_id": entity_id,
+                    "entity_type": "agent",
+                    "amount": amount,
+                    "category": category,
+                    "reason": reason,
+                },
+            )
+    except Exception:
+        pass  # XP is best-effort, never block the agent
+
 from agentscope.pipeline import stream_printing_messages
 from agentscope_runtime.engine.runner import Runner
 from agentscope_runtime.engine.schemas.agent_schemas import AgentRequest
@@ -60,6 +85,7 @@ class AgentRunner(Runner):
         agent = None
         chat = None
         session_state_loaded = False
+        _query_succeeded = False
 
         try:
             session_id = request.session_id
@@ -144,6 +170,16 @@ class AgentRunner(Runner):
                 coroutine_task=agent(msgs),
             ):
                 yield msg, last
+
+            _query_succeeded = True
+            asyncio.create_task(
+                _award_xp_background(
+                    entity_id=session_id or "default",
+                    category="task_complete",
+                    reason="Completed agent task",
+                    amount=10,
+                )
+            )
 
         except asyncio.CancelledError:
             if agent is not None:

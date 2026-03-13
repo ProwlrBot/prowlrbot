@@ -10,6 +10,31 @@ from .models import CronJobSpec
 logger = logging.getLogger(__name__)
 
 
+async def _award_xp_background(
+    entity_id: str,
+    category: str,
+    reason: str,
+    amount: int = 5,
+) -> None:
+    """Fire-and-forget XP award via internal HTTP. Never raises."""
+    try:
+        import httpx  # noqa: PLC0415
+
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            await client.post(
+                "http://localhost:8088/api/gamification/xp",
+                json={
+                    "entity_id": entity_id,
+                    "entity_type": "agent",
+                    "amount": amount,
+                    "category": category,
+                    "reason": reason,
+                },
+            )
+    except Exception:
+        pass  # XP is best-effort, never block cron execution
+
+
 class CronExecutor:
     def __init__(self, *, runner: Any, channel_manager: Any):
         self._runner = runner
@@ -73,3 +98,11 @@ class CronExecutor:
                 )
 
         await asyncio.wait_for(_run(), timeout=job.runtime.timeout_seconds)
+        asyncio.create_task(
+            _award_xp_background(
+                entity_id=target_session_id or f"cron:{job.id}",
+                category="cron_complete",
+                reason=f"Completed cron job {job.id}",
+                amount=5,
+            )
+        )
