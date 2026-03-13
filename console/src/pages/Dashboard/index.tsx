@@ -114,14 +114,14 @@ function formatTokens(val: number): string {
 }
 
 const EVENT_STYLE: Record<string, { tag: string; color: string; tagBg: string }> = {
-  tool_call: { tag: "tool", color: "#6366f1", tagBg: "rgba(99,102,241,0.15)" },
-  reasoning: { tag: "think", color: "#8b5cf6", tagBg: "rgba(139,92,246,0.15)" },
-  task_update: { tag: "task", color: "#22c55e", tagBg: "rgba(34,197,94,0.15)" },
-  monitor_alert: { tag: "alert", color: "#f59e0b", tagBg: "rgba(245,158,11,0.15)" },
-  mcp_request: { tag: "mcp", color: "#3b82f6", tagBg: "rgba(59,130,246,0.15)" },
-  agent_status: { tag: "agent", color: "#22c55e", tagBg: "rgba(34,197,94,0.15)" },
-  error: { tag: "error", color: "#ef4444", tagBg: "rgba(239,68,68,0.15)" },
-  stream_token: { tag: "stream", color: "#94a3b8", tagBg: "rgba(148,163,184,0.15)" },
+  tool_call: { tag: "tool", color: "var(--pb-accent-purple)", tagBg: "var(--pb-tint-purple)" },
+  reasoning: { tag: "think", color: "var(--pb-accent-purple)", tagBg: "var(--pb-tint-purple)" },
+  task_update: { tag: "task", color: "var(--pb-accent-green)", tagBg: "var(--pb-tint-green)" },
+  monitor_alert: { tag: "alert", color: "var(--pb-accent-orange)", tagBg: "var(--pb-tint-orange)" },
+  mcp_request: { tag: "mcp", color: "var(--pb-accent-blue)", tagBg: "var(--pb-tint-blue)" },
+  agent_status: { tag: "agent", color: "var(--pb-accent-green)", tagBg: "var(--pb-tint-green)" },
+  error: { tag: "error", color: "var(--pb-accent-red)", tagBg: "var(--pb-tint-red)" },
+  stream_token: { tag: "stream", color: "var(--pb-text-tertiary)", tagBg: "var(--pb-bg-hover)" },
 };
 
 function formatEventText(data: any): string {
@@ -167,7 +167,6 @@ export default function Dashboard() {
   const [wsConnected, setWsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Density toggle
   const toggleDensity = useCallback(() => {
     setDensity((d) => {
       const next = d === "visual" ? "compact" : "visual";
@@ -178,17 +177,14 @@ export default function Dashboard() {
 
   // ── Fetch all data on mount ──
   useEffect(() => {
-    // Analytics
     getAnalyticsSummary("day").then(setSummary).catch(() => {});
     getCostOverTime(costDays).then(setCostData).catch(() => {});
     getModelBreakdown().then(setModels).catch(() => {});
 
-    // Health
     getHealthStatus()
       .then((h: any) => setHealth(h))
       .catch(() => {});
 
-    // Gamification
     getLevelInfo("default")
       .then((l: any) => setLevelData(l))
       .catch(() => {});
@@ -198,7 +194,6 @@ export default function Dashboard() {
       })
       .catch(() => {});
 
-    // Notifications
     listNotifications(false, 10)
       .then((n: any) => {
         if (Array.isArray(n)) setNotifications(n);
@@ -210,13 +205,8 @@ export default function Dashboard() {
       })
       .catch(() => {});
 
-    // Agents
-    api
-      .listSkills()
-      .then(() => {})
-      .catch(() => {});
+    api.listSkills().then(() => {}).catch(() => {});
 
-    // Load channels as monitors
     api
       .listChannels()
       .then((channels: any) => {
@@ -233,7 +223,6 @@ export default function Dashboard() {
       })
       .catch(() => {});
 
-    // Agents list
     const fetchAgents = async () => {
       try {
         const config = await api.getAgentRunningConfig();
@@ -244,8 +233,8 @@ export default function Dashboard() {
             status: "online",
             model: (config as any)?.model || "Auto-detect",
             description: "Main agent",
-            icon: "\u{26A1}",
-            color: "#22c55e",
+            icon: "\u26A1",
+            color: "var(--pb-status-success)",
           },
         ];
         setAgents(agentList);
@@ -257,8 +246,8 @@ export default function Dashboard() {
             status: "online",
             model: "Auto-detect",
             description: "Main agent",
-            icon: "\u{26A1}",
-            color: "#22c55e",
+            icon: "\u26A1",
+            color: "var(--pb-status-success)",
           },
         ]);
       }
@@ -266,7 +255,6 @@ export default function Dashboard() {
     fetchAgents();
   }, []);
 
-  // Re-fetch cost data when period changes
   useEffect(() => {
     getCostOverTime(costDays).then(setCostData).catch(() => {});
   }, [costDays]);
@@ -298,8 +286,8 @@ export default function Dashboard() {
 
             const style = EVENT_STYLE[data.type] || {
               tag: data.type,
-              color: "#94a3b8",
-              tagBg: "rgba(148,163,184,0.15)",
+              color: "var(--pb-text-tertiary)",
+              tagBg: "var(--pb-bg-hover)",
             };
 
             const event: ActivityEvent = {
@@ -343,14 +331,14 @@ export default function Dashboard() {
     return (
       <div
         style={{
-          background: "#181b1f",
-          border: "1px solid #2c3235",
-          borderRadius: 4,
+          background: "var(--pb-bg-card)",
+          border: "1px solid var(--pb-border)",
+          borderRadius: 8,
           padding: "8px 12px",
-          fontSize: 11,
+          fontSize: 12,
         }}
       >
-        <div style={{ color: "#9da5b4", marginBottom: 4 }}>{label}</div>
+        <div style={{ color: "var(--pb-text-tertiary)", marginBottom: 4 }}>{label}</div>
         {payload.map((p: any) => (
           <div key={p.dataKey} style={{ color: p.color }}>
             {p.dataKey === "cost" ? formatCost(p.value) : formatTokens(p.value)}
@@ -362,39 +350,29 @@ export default function Dashboard() {
 
   return (
     <div className={styles.dashboard}>
-      {/* ── Top Bar ── */}
-      <div className={styles.topbar}>
-        <div className={styles.topbarLeft}>
-          <div className={styles.topbarLogo}>P</div>
+      {/* ── Header ── */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
           <div>
-            <div className={styles.topbarTitle}>ProwlrBot</div>
-            <div className={styles.topbarBreadcrumb}>
-              Dashboard / Overview
-              {health ? ` \u00b7 ${health.uptime_formatted || ""}` : ""}
+            <div className={styles.headerTitle}>Dashboard</div>
+            <div className={styles.headerMeta}>
+              Overview
+              {health ? ` \u00b7 Uptime: ${health.uptime_formatted || ""}` : ""}
+              {summary ? ` \u00b7 ${summary.total_queries} queries today` : ""}
             </div>
           </div>
         </div>
-        <div className={styles.topbarRight}>
+        <div className={styles.headerRight}>
           <div
-            className={`${styles.badge} ${systemStatus === "green" ? styles.badgeGreen : styles.badgeRed}`}
+            className={`${styles.statusBadge} ${systemStatus === "green" ? styles.statusGreen : styles.statusRed}`}
           >
-            <span>\u25CF</span>
-            {systemStatus === "green" ? "ALL SYSTEMS GO" : "ISSUES DETECTED"}
+            <span>{"\u25CF"}</span>
+            {systemStatus === "green" ? "All Systems Go" : "Issues Detected"}
           </div>
           <button className={styles.densityToggle} onClick={toggleDensity} title="Toggle density">
-            {isCompact ? <List size={12} /> : <LayoutGrid size={12} />}
-            {" "}
+            {isCompact ? <List size={14} /> : <LayoutGrid size={14} />}
             {isCompact ? "Compact" : "Visual"}
           </button>
-          <div className={styles.topbarUser}>
-            <div>
-              <div className={styles.topbarName}>Nunu</div>
-              {levelData && (
-                <div className={styles.topbarLevel}>Lv. {levelData.level}</div>
-              )}
-            </div>
-            <div className={styles.topbarAvatar}>N</div>
-          </div>
         </div>
       </div>
 
@@ -403,8 +381,8 @@ export default function Dashboard() {
         {/* ── Row 1: Stat Panels ── */}
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-queries)" }}>
-              {summary?.total_queries ?? "—"}
+            <div className={styles.statValue} style={{ color: "var(--pb-accent-blue)" }}>
+              {summary?.total_queries ?? "\u2014"}
             </div>
             <div className={styles.statLabel}>Queries Today</div>
             {!isCompact && (
@@ -415,13 +393,13 @@ export default function Dashboard() {
 
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-cost)" }}>
-              {summary ? formatCost(summary.total_cost) : "—"}
+            <div className={styles.statValue} style={{ color: "var(--pb-status-success)" }}>
+              {summary ? formatCost(summary.total_cost) : "\u2014"}
             </div>
             <div className={styles.statLabel}>Cost Today</div>
             {!isCompact && (
               <div className={`${styles.statDelta} ${styles.deltaNeutral}`}>
-                {summary?.avg_latency_ms ? `${Math.round(summary.avg_latency_ms)}ms avg` : "—"}
+                {summary?.avg_latency_ms ? `${Math.round(summary.avg_latency_ms)}ms avg` : "\u2014"}
               </div>
             )}
           </div>
@@ -429,8 +407,8 @@ export default function Dashboard() {
 
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-agents)" }}>
-              {agents.length || "—"}
+            <div className={styles.statValue} style={{ color: "var(--pb-accent-orange)" }}>
+              {agents.length || "\u2014"}
             </div>
             <div className={styles.statLabel}>Active Agents</div>
             {!isCompact && (
@@ -443,8 +421,8 @@ export default function Dashboard() {
 
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-tokens)" }}>
-              {summary ? formatTokens(summary.total_tokens) : "—"}
+            <div className={styles.statValue} style={{ color: "var(--pb-text-secondary)" }}>
+              {summary ? formatTokens(summary.total_tokens) : "\u2014"}
             </div>
             <div className={styles.statLabel}>Tokens Used</div>
             {!isCompact && costData.length > 0 && (
@@ -460,7 +438,7 @@ export default function Dashboard() {
                         height: `${h}%`,
                         background:
                           i === costData.slice(-7).length - 1
-                            ? "var(--pb-dash-chart-secondary)"
+                            ? "var(--pb-accent-purple)"
                             : undefined,
                       }}
                     />
@@ -475,7 +453,7 @@ export default function Dashboard() {
         {!isCompact && (
           <div className={`${styles.panel} ${styles.col3}`}>
             <div className={styles.panelHeader}>
-              <div className={styles.panelTitle}>Cost &amp; Usage</div>
+              <div className={styles.panelTitle}>Cost & Usage</div>
               <div className={styles.panelActions}>
                 {[7, 30, 90].map((d) => (
                   <span
@@ -488,15 +466,15 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <div className={styles.panelBody} style={{ height: 180 }}>
+            <div className={styles.panelBody} style={{ height: 200 }}>
               {costData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={costData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid stroke="#2c3235" strokeDasharray="4 4" />
+                    <CartesianGrid stroke="var(--pb-border)" strokeDasharray="4 4" />
                     <XAxis
                       dataKey="date"
-                      tick={{ fill: "#6e7681", fontSize: 10 }}
-                      axisLine={{ stroke: "#2c3235" }}
+                      tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
+                      axisLine={{ stroke: "var(--pb-border)" }}
                       tickLine={false}
                       tickFormatter={(v) => {
                         const d = new Date(v);
@@ -504,7 +482,7 @@ export default function Dashboard() {
                       }}
                     />
                     <YAxis
-                      tick={{ fill: "#6e7681", fontSize: 10 }}
+                      tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
                       axisLine={false}
                       tickLine={false}
                       tickFormatter={(v) => `$${v}`}
@@ -545,10 +523,7 @@ export default function Dashboard() {
           <div className={styles.panelBody}>
             {agents.map((agent) => (
               <div key={agent.id} className={styles.agentRow}>
-                <div
-                  className={styles.agentAvatar}
-                  style={{ color: agent.color }}
-                >
+                <div className={styles.agentAvatar} style={{ color: agent.color }}>
                   {agent.icon}
                 </div>
                 <div className={styles.agentInfo}>
@@ -562,15 +537,14 @@ export default function Dashboard() {
                   style={{
                     background:
                       agent.status === "online"
-                        ? "var(--pb-dash-stat-cost)"
-                        : "var(--pb-dash-text-dim)",
+                        ? "var(--pb-status-success)"
+                        : "var(--pb-status-neutral)",
                   }}
                   title={agent.status}
                 />
               </div>
             ))}
 
-            {/* XP / Level */}
             {levelData && (
               <div className={styles.xpSection}>
                 <div className={styles.xpHeader}>
@@ -591,15 +565,15 @@ export default function Dashboard() {
 
         {/* ── Row 3: Live Feed + Monitors + Quick Actions / Notifs ── */}
         <div
-          className={`${styles.panel} ${isCompact ? styles.col2 : styles.col2}`}
-          style={{ maxHeight: isCompact ? 200 : 320 }}
+          className={`${styles.panel} ${styles.col2}`}
+          style={{ maxHeight: isCompact ? 200 : 340 }}
         >
           <div className={styles.panelHeader}>
             <div className={styles.panelTitle} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               Live Feed
               {wsConnected && <span className={styles.liveDot} />}
             </div>
-            <span style={{ fontSize: 10, color: wsConnected ? "#22c55e" : "#6e7681" }}>
+            <span style={{ fontSize: 11, color: wsConnected ? "var(--pb-status-success)" : "var(--pb-text-tertiary)" }}>
               {wsConnected ? "LIVE" : "CONNECTING..."}
             </span>
           </div>
@@ -643,12 +617,12 @@ export default function Dashboard() {
                       style={{
                         background:
                           m.status === "ok"
-                            ? "var(--pb-dash-monitor-ok)"
+                            ? "var(--pb-status-success)"
                             : m.status === "warning"
-                              ? "var(--pb-dash-monitor-warn)"
+                              ? "var(--pb-status-warning)"
                               : m.status === "down"
-                                ? "var(--pb-dash-monitor-down)"
-                                : "var(--pb-dash-monitor-off)",
+                                ? "var(--pb-status-error)"
+                                : "var(--pb-status-neutral)",
                       }}
                     />
                     <div className={styles.monitorLatency}>
@@ -662,16 +636,15 @@ export default function Dashboard() {
               <div className={styles.emptyState}>No monitors configured</div>
             )}
 
-            {/* Model cost breakdown */}
             {modelEntries.length > 0 && (
-              <div style={{ marginTop: 12, paddingTop: 8, borderTop: "1px solid var(--pb-dash-border)" }}>
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--pb-border)" }}>
                 <div
                   style={{
-                    fontSize: 10,
-                    color: "var(--pb-dash-text-dim)",
+                    fontSize: 11,
+                    color: "var(--pb-text-tertiary)",
                     textTransform: "uppercase" as const,
                     letterSpacing: 0.5,
-                    marginBottom: 6,
+                    marginBottom: 8,
                   }}
                 >
                   Model Breakdown
@@ -730,7 +703,7 @@ export default function Dashboard() {
             {notifications.length > 0 ? (
               notifications.map((n) => (
                 <div key={n.id} className={styles.notifRow}>
-                  <span className={styles.notifIcon}>{n.icon || "\u{1F514}"}</span>
+                  <span className={styles.notifIcon}>{n.icon || "\uD83D\uDD14"}</span>
                   <span className={styles.notifText}>{n.title || n.message}</span>
                   <span className={styles.notifTime}>{timeAgo(n.timestamp)}</span>
                 </div>
@@ -742,14 +715,14 @@ export default function Dashboard() {
 
           {/* Achievements */}
           {achievements.length > 0 && (
-            <div style={{ padding: "8px 12px", borderTop: "1px solid var(--pb-dash-border)" }}>
+            <div style={{ padding: "12px 16px", borderTop: "1px solid var(--pb-border)" }}>
               <div
                 style={{
-                  fontSize: 10,
-                  color: "var(--pb-dash-text-dim)",
+                  fontSize: 11,
+                  color: "var(--pb-text-tertiary)",
                   textTransform: "uppercase" as const,
                   letterSpacing: 0.5,
-                  marginBottom: 6,
+                  marginBottom: 8,
                 }}
               >
                 Achievements

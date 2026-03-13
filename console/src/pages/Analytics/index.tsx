@@ -70,8 +70,8 @@ export default function AnalyticsPage() {
   const ChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
-      <div style={{ background: "#181b1f", border: "1px solid #2c3235", borderRadius: 4, padding: "8px 12px", fontSize: 11 }}>
-        <div style={{ color: "#9da5b4", marginBottom: 4 }}>{label}</div>
+      <div style={{ background: "var(--pb-bg-card)", border: "1px solid var(--pb-border)", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
+        <div style={{ color: "var(--pb-text-tertiary)", marginBottom: 4 }}>{label}</div>
         {payload.map((p: any) => (
           <div key={p.dataKey} style={{ color: p.color }}>
             {p.name}: {p.dataKey === "cost" ? formatCost(p.value) : formatTokens(p.value)}
@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
         {/* Stat cards */}
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-queries)" }}>
+            <div className={styles.statValue} style={{ color: "var(--pb-accent-blue)" }}>
               {summary?.total_queries ?? "\u2014"}
             </div>
             <div className={styles.statLabel}>Total Queries</div>
@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
         </div>
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-cost)" }}>
+            <div className={styles.statValue} style={{ color: "var(--pb-status-success)" }}>
               {summary ? formatCost(summary.total_cost) : "\u2014"}
             </div>
             <div className={styles.statLabel}>Total Cost</div>
@@ -125,7 +125,7 @@ export default function AnalyticsPage() {
         </div>
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-tokens)" }}>
+            <div className={styles.statValue} style={{ color: "var(--pb-text-secondary)" }}>
               {summary ? formatTokens(summary.total_tokens) : "\u2014"}
             </div>
             <div className={styles.statLabel}>Total Tokens</div>
@@ -133,7 +133,7 @@ export default function AnalyticsPage() {
         </div>
         <div className={`${styles.panel} ${styles.col1}`}>
           <div className={styles.statPanel}>
-            <div className={styles.statValue} style={{ color: "var(--pb-dash-stat-agents)" }}>
+            <div className={styles.statValue} style={{ color: "var(--pb-accent-orange)" }}>
               {summary ? `${Math.round(summary.avg_latency_ms)}ms` : "\u2014"}
             </div>
             <div className={styles.statLabel}>Avg Latency</div>
@@ -145,15 +145,15 @@ export default function AnalyticsPage() {
           <div className={styles.panelHeader}>
             <div className={styles.panelTitle}>Cost Over Time</div>
           </div>
-          <div className={styles.panelBody} style={{ height: 220 }}>
+          <div className={styles.panelBody} style={{ height: 240 }}>
             {costData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={costData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#2c3235" strokeDasharray="4 4" />
+                  <CartesianGrid stroke="var(--pb-border)" strokeDasharray="4 4" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "#6e7681", fontSize: 10 }}
-                    axisLine={{ stroke: "#2c3235" }}
+                    tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
+                    axisLine={{ stroke: "var(--pb-border)" }}
                     tickLine={false}
                     tickFormatter={(v) => {
                       const d = new Date(v);
@@ -161,7 +161,7 @@ export default function AnalyticsPage() {
                     }}
                   />
                   <YAxis
-                    tick={{ fill: "#6e7681", fontSize: 10 }}
+                    tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v) => `$${v}`}
@@ -187,15 +187,15 @@ export default function AnalyticsPage() {
           <div className={styles.panelHeader}>
             <div className={styles.panelTitle}>Token Usage</div>
           </div>
-          <div className={styles.panelBody} style={{ height: 220 }}>
+          <div className={styles.panelBody} style={{ height: 240 }}>
             {costData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={costData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#2c3235" strokeDasharray="4 4" />
+                  <CartesianGrid stroke="var(--pb-border)" strokeDasharray="4 4" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "#6e7681", fontSize: 10 }}
-                    axisLine={{ stroke: "#2c3235" }}
+                    tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
+                    axisLine={{ stroke: "var(--pb-border)" }}
                     tickLine={false}
                     tickFormatter={(v) => {
                       const d = new Date(v);
@@ -203,13 +203,13 @@ export default function AnalyticsPage() {
                     }}
                   />
                   <YAxis
-                    tick={{ fill: "#6e7681", fontSize: 10 }}
+                    tick={{ fill: "var(--pb-text-tertiary)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v) => formatTokens(v)}
                   />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="tokens" fill="#8b5cf6" radius={[2, 2, 0, 0]} name="Tokens" />
+                  <Bar dataKey="tokens" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Tokens" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
