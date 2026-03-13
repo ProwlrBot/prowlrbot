@@ -1,133 +1,65 @@
-<<<<<<< HEAD
 # fly.toml — ProwlrBot on Fly.io
 #
 # Quick start:
 #   fly auth login
-#   fly apps create prowlrbot          # pick a unique name
-#   fly volumes create prowlrbot_data --region lax --size 3
+#   fly apps create prowlrbot
+#   fly volumes create prowlrbot_data --region sjc --size 3
 #   fly secrets set PROWLRBOT_SECRET_KEY="$(openssl rand -hex 32)"
-#   fly secrets set OPENAI_API_KEY="sk-..."    # or your provider
-#   fly deploy --dockerfile deploy/Dockerfile.fly
+#   fly secrets set ANTHROPIC_API_KEY="sk-ant-..."
+#   fly deploy
 #
-# After deploy:
-#   fly open          → opens https://<app>.fly.dev
-#   fly logs -f       → tail live logs
-#   fly ssh console   → shell into the machine
-#   fly status        → check VM health
-#
-# Secrets (set with `fly secrets set KEY=value`):
-#   PROWLRBOT_SECRET_KEY   — random hex string for session signing
-#   OPENAI_API_KEY         — or ANTHROPIC_API_KEY, GROQ_API_KEY, etc.
-#   PROWLRBOT_ADMIN_PASS   — optional: lock the UI behind a password
-
-app = "prowlrbot"           # change to your unique app name
-primary_region = "lax"      # Los Angeles — change to your nearest region
-=======
-# fly.toml — Fly.io configuration for ProwlrBot
-# Deploy: flyctl deploy
-# Docs:   https://fly.io/docs/reference/configuration/
+# Custom domains (after deploy):
+#   fly certs add api.prowlrbot.com
+#   → adds Cloudflare CNAME: api → prowlrbot.fly.dev
 
 app = "prowlrbot"
 primary_region = "sjc"
->>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296
 
 [build]
   dockerfile = "deploy/Dockerfile.fly"
 
-<<<<<<< HEAD
-# HTTP service — ProwlrBot runs on 8088, Fly terminates TLS
-[[services]]
-  internal_port = 8088
-  protocol = "tcp"
-
-  [[services.ports]]
-    port = 80
-    handlers = ["http"]
-    force_https = true
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-
-  [services.concurrency]
-    type = "connections"
-    hard_limit = 200
-    soft_limit = 100
-
-  [[services.http_checks]]
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "30s"
-    method = "GET"
-    path = "/api/health"
-
-  [[services.http_checks]]
-    interval = "60s"
-    timeout = "5s"
-    grace_period = "30s"
-    method = "GET"
-    path = "/roar/health"
-
-# Persistent volume — stores config, chats, skills, memory
-[[mounts]]
-  source = "prowlrbot_data"
-  destination = "/data"
-
-# VM size — shared-cpu-2x is a good starting point
-# Upgrade to performance-1x for heavier workloads
-[vm]
-  cpu_kind = "shared"
-  cpus = 2
-  memory_mb = 1024
-
-# Environment variables (non-secret)
 [env]
-  PROWLRBOT_WORKING_DIR = "/data"
+  PROWLRBOT_PORT            = "8088"
+  PROWLRBOT_WORKING_DIR     = "/data/.prowlrbot"
+  PROWLRBOT_SECRET_DIR      = "/data/.prowlrbot.secret"
   PROWLRBOT_RUNNING_IN_CONTAINER = "1"
-  PROWLRBOT_PORT = "8088"
-  # Skip Playwright browser download (no browser in lean image)
+  NODE_ENV                  = "production"
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
-# Deployment strategy — rolling ensures zero downtime
-[deploy]
-  strategy = "rolling"
-  release_command = "prowlr init --defaults --accept-security"
-=======
-[env]
-  HOME = "/data"
-  PROWLRBOT_PORT = "8088"
-  PROWLRBOT_WORKING_DIR = "/data/.prowlrbot"
-  PROWLRBOT_SECRET_DIR = "/data/.prowlrbot.secret"
-  PROWLRBOT_RUNNING_IN_CONTAINER = "1"
-  NODE_ENV = "production"
-
-# Persistent volume for config, SQLite databases, chat history, skills
 [mounts]
-  source = "prowlrbot_data"
+  source      = "prowlrbot_data"
   destination = "/data"
 
 [http_service]
-  internal_port = 8088
-  force_https = true
-  auto_stop_machines = "stop"
-  auto_start_machines = true
+  internal_port        = 8088
+  force_https          = true
+  auto_stop_machines   = "stop"
+  auto_start_machines  = true
   min_machines_running = 1
 
   [http_service.concurrency]
-    type = "connections"
+    type       = "connections"
     hard_limit = 100
     soft_limit = 80
 
 [[http_service.checks]]
   grace_period = "30s"
-  interval = "15s"
-  method = "GET"
-  path = "/api/health"
-  timeout = "5s"
+  interval     = "15s"
+  method       = "GET"
+  path         = "/api/health"
+  timeout      = "5s"
 
-# Machine sizing — shared-cpu-2x is a good balance for an AI agent server.
-# Scale up to performance-2x if running heavy workloads.
+[[http_service.checks]]
+  grace_period = "30s"
+  interval     = "60s"
+  method       = "GET"
+  path         = "/roar/health"
+  timeout      = "5s"
+
 [[vm]]
-  size = "shared-cpu-2x"
+  size   = "shared-cpu-2x"
   memory = "1gb"
->>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296
+
+[deploy]
+  strategy        = "rolling"
+  release_command = "prowlr init --defaults --accept-security"
