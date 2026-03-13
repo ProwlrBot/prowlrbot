@@ -1,66 +1,55 @@
 <p align="center">
-  <img src="/console/public/logo.png" alt="ProwlrBot Logo" width="520" />
+  <img src="/console/public/logo.png" alt="ProwlrBot Logo" width="400" />
 </p>
 
 <h1 align="center">ProwlrBot</h1>
 
 <p align="center">
-  <strong>Autonomous AI Agent Operations Platform</strong><br/>
-  Multi‑agent coordination • Smart model routing • War room collaboration • Local or cloud models
+  <em>Your AI agent. Your machine. Your rules.</em>
 </p>
 
 <p align="center">
-  <a href="#quick-start"><b>Quick Start</b></a> •
-  <a href="docs/README.md"><b>Documentation</b></a> •
-  <a href="https://github.com/prowlrbot/prowlrbot/issues"><b>Issues</b></a> •
+  <a href="#-quick-start"><b>Get started in 60 seconds</b></a> •
+  <a href="docs/README.md"><b>Docs</b></a> •
+  <a href="https://github.com/ProwlrBot/prowlrbot/issues"><b>Issues</b></a> •
   <a href="https://github.com/ProwlrBot/prowlr-marketplace"><b>Marketplace</b></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/ProwlrBot/prowlrbot?style=for-the-badge&logo=github" alt="Stars">
-  <img src="https://img.shields.io/github/forks/ProwlrBot/prowlrbot?style=for-the-badge&logo=github" alt="Forks">
-  <img src="https://img.shields.io/github/issues/ProwlrBot/prowlrbot?style=for-the-badge&logo=github" alt="Issues">
-  <img src="https://img.shields.io/github/license/ProwlrBot/prowlrbot?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/stars/ProwlrBot/prowlrbot?style=flat-square&logo=github" alt="Stars">
+  <img src="https://img.shields.io/github/license/ProwlrBot/prowlrbot?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/self--hosted-first-brightgreen?style=flat-square" alt="Self-hosted">
+  <img src="https://img.shields.io/badge/local%20models-Ollama%20%7C%20llama.cpp%20%7C%20MLX-blue?style=flat-square" alt="Local models">
 </p>
 
 ---
 
-## 📖 Table of Contents
+ProwlrBot is a **self-hosted AI agent** that runs on your machine, connects to every channel you already use, and keeps working while you’re asleep.
 
-- [Why ProwlrBot?](#why-prowlrbot)
-- [✨ Key Features](#-key-features)
-- [🚀 Quick Start](#-quick-start)
-- [📦 Installation Options](#-installation-options)
-- [🏗️ Architecture](#️-architecture)
-- [🛠️ Core Capabilities](#️-core-capabilities)
-  - [Multi‑Agent War Room](#multi-agent-war-room)
-  - [Smart Model Router](#smart-model-router)
-  - [Web Monitoring & Cron](#web-monitoring--cron)
-  - [REST API & MCP Integration](#rest-api--mcp-integration)
-  - [Local Models (No Cloud)](#local-models-no-cloud)
-- [📂 Project Structure](#-project-structure)
-- [🌐 Ecosystem](#-ecosystem)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+It monitors websites for changes. It runs scheduled tasks. It answers your team on Discord and Telegram at the same time. It coordinates multiple AI agents so they don’t step on each other. It does all of this with **your API keys, your models, and your data — nothing leaves your network unless you want it to.**
+
+No subscription required. No vendor lock-in. `pip install prowlrbot` and you own it.
 
 ---
 
 ## Why ProwlrBot?
 
-Most AI agent tools assume **one agent working alone**. Real development environments involve **multiple agents, multiple machines, and parallel tasks**. Without coordination you get:
+There are a lot of AI chatbots. ProwlrBot is not a chatbot.
 
-- agents editing the same file
-- conflicting commits
-- duplicated work
-- lost context
+**It’s an agent that acts.** Left alone, it monitors, schedules, and responds across all your channels simultaneously. You set it up once and it keeps running.
 
-**ProwlrBot introduces the War Room** – a shared coordination layer where agents claim tasks, lock files, share discoveries, and collaborate across machines. The result: **parallel AI development without chaos.**
+**Your data stays yours.** API keys are stored locally in an encrypted secrets file. Conversation history lives on your machine. You can run entirely on local models with Ollama — no API key, no data leaving your network, no bill.
 
-| Without ProwlrBot | With ProwlrBot |
-|-------------------|----------------|
-| Three Claude terminals editing the same file → git conflict | Agents see file locks and work on different files |
-| Agents duplicate effort because they can’t see each other’s progress | Shared mission board and real‑time status updates |
-| Context lost when switching tasks | Persistent memory and shared findings |
+**It speaks where you already are.** One agent, eight channels. Discord, Telegram, DingTalk, Feishu, iMessage, and more. Your team doesn’t need to learn a new tool — ProwlrBot comes to them.
+
+**It grows with you.** The skill marketplace means you can add capabilities without writing code. The ROAR Protocol means your agents can talk to other agents, on other machines, at other companies.
+
+| The old way | With ProwlrBot |
+|-------------|----------------|
+| Check 10 tabs manually every morning | One agent monitors all of them, pings you only when something changes |
+| Forget to follow up on something | Schedule it once — the agent handles it at 9am every day |
+| Three Claude terminals stepping on each other | War Room coordinates them — file locks, shared task board, no conflicts |
+| Paying $50/mo for a tool that phones home | Self-hosted, model-agnostic, free forever |
 
 ---
 
@@ -517,7 +506,7 @@ We ❤️ contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for commit conve
 
 ## 📄 License
 
-ProwlrBot is open source under the [MIT License](LICENSE).
+ProwlrBot is open source under the [Apache 2.0 License](LICENSE).
 
 ---
 
