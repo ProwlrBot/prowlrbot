@@ -35,9 +35,7 @@ CATEGORY_DIR_MAP: dict[str, str] = {
 }
 
 # index.json URL — single request replaces N+1 GitHub API directory crawl
-INDEX_JSON_URL = (
-    f"{GITHUB_RAW}/ProwlrBot/prowlr-marketplace/main/index.json"
-)
+INDEX_JSON_URL = f"{GITHUB_RAW}/ProwlrBot/prowlr-marketplace/main/index.json"
 
 # ── Ecosystem repos ──────────────────────────────────────────────────────────
 

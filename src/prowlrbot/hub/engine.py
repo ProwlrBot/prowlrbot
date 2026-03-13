@@ -729,7 +729,9 @@ class WarRoomEngine:
 
     def purge_old_events(self, retention_days: int = 30) -> int:
         """Delete events older than retention_days. Returns count deleted."""
-        cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=retention_days)).isoformat()
+        cutoff = (
+            datetime.now(tz=timezone.utc) - timedelta(days=retention_days)
+        ).isoformat()
         result = self._conn.execute(
             "DELETE FROM events WHERE timestamp < ?",
             (cutoff,),

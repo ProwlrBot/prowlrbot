@@ -98,11 +98,15 @@ async def oauth_callback(
     # Verify CSRF state
     expected_provider = _pending_states.pop(state, None)
     if expected_provider is None or expected_provider != provider_name:
-        raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
+        raise HTTPException(
+            status_code=400, detail="Invalid or expired state parameter"
+        )
 
     provider = get_provider(provider_name)
     if provider is None:
-        raise HTTPException(status_code=404, detail=f"Unknown provider: {provider_name}")
+        raise HTTPException(
+            status_code=404, detail=f"Unknown provider: {provider_name}"
+        )
 
     # Build callback URL (must match what we sent to the provider)
     base_url = os.environ.get(

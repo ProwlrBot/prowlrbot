@@ -102,12 +102,15 @@ class AuthDependency:
         token = credentials.credentials
 
         # Accept either a valid API token or a valid JWT
-        if self.auth_config.token_hash and verify_api_token(token, self.auth_config.token_hash):
+        if self.auth_config.token_hash and verify_api_token(
+            token, self.auth_config.token_hash
+        ):
             return token
 
         # Try JWT validation
         try:
             import os
+
             expiry = int(os.environ.get("PROWLRBOT_JWT_EXPIRY_MINUTES", "60"))
             handler = JWTHandler(secret_key=_JWT_SECRET, expiry_minutes=expiry)
             handler.decode_token(token)

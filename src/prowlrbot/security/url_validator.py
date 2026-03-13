@@ -12,10 +12,12 @@ import socket
 from urllib.parse import urlparse
 
 # Cloud metadata endpoints (AWS, GCP, Azure)
-_BLOCKED_HOSTS = frozenset({
-    "metadata.google.internal",
-    "metadata.gfe.goog",
-})
+_BLOCKED_HOSTS = frozenset(
+    {
+        "metadata.google.internal",
+        "metadata.gfe.goog",
+    }
+)
 
 _BLOCKED_PREFIXES = (
     "169.254.169.254",
@@ -47,7 +49,9 @@ def validate_outbound_url(url: str) -> tuple[bool, str]:
 
     # Resolve hostname to IP and validate
     try:
-        infos = socket.getaddrinfo(hostname, parsed.port or 443, proto=socket.IPPROTO_TCP)
+        infos = socket.getaddrinfo(
+            hostname, parsed.port or 443, proto=socket.IPPROTO_TCP
+        )
     except socket.gaierror:
         return False, f"DNS resolution failed for {hostname}"
 

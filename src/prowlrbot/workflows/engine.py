@@ -135,9 +135,7 @@ class WorkflowEngine:
                 tasks = []
                 for step_id in tier:
                     step = step_map[step_id]
-                    tasks.append(
-                        self._execute_step(step, run, context)
-                    )
+                    tasks.append(self._execute_step(step, run, context))
                 await asyncio.gather(*tasks)
 
                 # Check for abort conditions
@@ -226,9 +224,7 @@ class WorkflowEngine:
             result.duration_ms = int((time.monotonic() - t0) * 1000)
             result.completed_at = datetime.now(timezone.utc).isoformat()
 
-    async def _run_agent_step(
-        self, step: WorkflowStep, context: dict[str, Any]
-    ) -> str:
+    async def _run_agent_step(self, step: WorkflowStep, context: dict[str, Any]) -> str:
         """Run an agent query step."""
         prompt = _resolve_template(step.prompt, context)
 

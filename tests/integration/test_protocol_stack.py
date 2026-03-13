@@ -134,7 +134,9 @@ class TestACPErrorHandling:
             }
         )
         assert resp["result"]["status"] == "error"
-        assert resp["result"]["response"]  # error message present (generic, not leaking internals)
+        assert resp["result"][
+            "response"
+        ]  # error message present (generic, not leaking internals)
 
     async def test_unknown_method(self):
         """Unknown JSON-RPC methods should return error code -32601."""

@@ -21,7 +21,6 @@ from prowlrbot.marketplace.models import (
 )
 from prowlrbot.marketplace.store import MarketplaceStore
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 
@@ -100,7 +99,9 @@ class TestPublishListing:
         assert fetched.works_with == ["github", "slack"]
         assert fetched.demo_url == "https://demo.example.com"
         assert fetched.setup_steps == [{"order": 1, "label": "Install"}]
-        assert fetched.user_stories == [{"persona": "dev", "story": "I want fast deploys"}]
+        assert fetched.user_stories == [
+            {"persona": "dev", "story": "I want fast deploys"}
+        ]
         assert fetched.hero_animation == "deploy.lottie"
 
     def test_publish_all_26_columns(self, store: MarketplaceStore):
@@ -150,8 +151,12 @@ class TestPublishListing:
 
 class TestSearchListings:
     def test_search_by_query(self, store: MarketplaceStore):
-        store.publish_listing(_make_listing(title="Deploy Bot", description="Automated deployments"))
-        store.publish_listing(_make_listing(title="Chat Bot", description="Chat interface"))
+        store.publish_listing(
+            _make_listing(title="Deploy Bot", description="Automated deployments")
+        )
+        store.publish_listing(
+            _make_listing(title="Chat Bot", description="Chat interface")
+        )
 
         results = store.search_listings(query="Deploy")
         assert len(results) == 1
@@ -166,7 +171,9 @@ class TestSearchListings:
         assert results[0].category == MarketplaceCategory.skills
 
     def test_search_by_persona(self, store: MarketplaceStore):
-        store.publish_listing(_make_listing(title="Dev Tool", persona_tags=["developer"]))
+        store.publish_listing(
+            _make_listing(title="Dev Tool", persona_tags=["developer"])
+        )
         store.publish_listing(_make_listing(title="Mom Tool", persona_tags=["parent"]))
 
         results = store.search_listings(persona="developer")
@@ -182,27 +189,35 @@ class TestSearchListings:
         assert results[0].title == "Hard"
 
     def test_search_combined_filters(self, store: MarketplaceStore):
-        store.publish_listing(_make_listing(
-            title="Dev Workflow",
-            category=MarketplaceCategory.workflows,
-            persona_tags=["developer"],
-            difficulty="intermediate",
-        ))
-        store.publish_listing(_make_listing(
-            title="Dev Skill",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer"],
-            difficulty="intermediate",
-        ))
-        store.publish_listing(_make_listing(
-            title="Parent Workflow",
-            category=MarketplaceCategory.workflows,
-            persona_tags=["parent"],
-            difficulty="beginner",
-        ))
+        store.publish_listing(
+            _make_listing(
+                title="Dev Workflow",
+                category=MarketplaceCategory.workflows,
+                persona_tags=["developer"],
+                difficulty="intermediate",
+            )
+        )
+        store.publish_listing(
+            _make_listing(
+                title="Dev Skill",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer"],
+                difficulty="intermediate",
+            )
+        )
+        store.publish_listing(
+            _make_listing(
+                title="Parent Workflow",
+                category=MarketplaceCategory.workflows,
+                persona_tags=["parent"],
+                difficulty="beginner",
+            )
+        )
 
         results = store.search_listings(
-            category="workflows", persona="developer", difficulty="intermediate",
+            category="workflows",
+            persona="developer",
+            difficulty="intermediate",
         )
         assert len(results) == 1
         assert results[0].title == "Dev Workflow"
@@ -256,18 +271,21 @@ class TestUpdateListing:
         listing = _make_listing()
         store.publish_listing(listing)
 
-        updated = store.update_listing(listing.id, {
-            "difficulty": "advanced",
-            "setup_time_minutes": 30,
-            "persona_tags": ["developer", "business"],
-            "before_after": {"before": "old", "after": "new"},
-            "skill_scan": {"rating": 5},
-            "works_with": ["github"],
-            "demo_url": "https://new-demo.com",
-            "setup_steps": [{"step": 1}],
-            "user_stories": [{"story": "updated"}],
-            "hero_animation": "new.lottie",
-        })
+        updated = store.update_listing(
+            listing.id,
+            {
+                "difficulty": "advanced",
+                "setup_time_minutes": 30,
+                "persona_tags": ["developer", "business"],
+                "before_after": {"before": "old", "after": "new"},
+                "skill_scan": {"rating": 5},
+                "works_with": ["github"],
+                "demo_url": "https://new-demo.com",
+                "setup_steps": [{"step": 1}],
+                "user_stories": [{"story": "updated"}],
+                "hero_animation": "new.lottie",
+            },
+        )
         assert updated.difficulty == "advanced"
         assert updated.setup_time_minutes == 30
         assert updated.persona_tags == ["developer", "business"]
@@ -286,7 +304,9 @@ class TestUpdateListing:
         listing = _make_listing()
         store.publish_listing(listing)
 
-        updated = store.update_listing(listing.id, {"id": "new-id", "author_id": "hacker"})
+        updated = store.update_listing(
+            listing.id, {"id": "new-id", "author_id": "hacker"}
+        )
         assert updated.id == listing.id
         assert updated.author_id == listing.author_id
 
@@ -316,7 +336,9 @@ class TestUpdateListing:
         listing = _make_listing()
         store.publish_listing(listing)
 
-        updated = store.update_listing(listing.id, {"category": MarketplaceCategory.workflows})
+        updated = store.update_listing(
+            listing.id, {"category": MarketplaceCategory.workflows}
+        )
         assert updated.category == MarketplaceCategory.workflows
 
 
@@ -352,7 +374,15 @@ class TestMigrateV2:
         conn.execute(
             "INSERT INTO listings (id, author_id, title, description, category, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("v1-item", "author", "V1 Listing", "Old listing", "skills", "2026-01-01", "2026-01-01"),
+            (
+                "v1-item",
+                "author",
+                "V1 Listing",
+                "Old listing",
+                "skills",
+                "2026-01-01",
+                "2026-01-01",
+            ),
         )
         conn.commit()
         conn.close()
@@ -412,7 +442,11 @@ class TestReviews:
         listing = _make_listing()
         store.publish_listing(listing)
 
-        store.add_review(ReviewEntry(listing_id=listing.id, reviewer_id="r1", rating=4, comment="Good"))
+        store.add_review(
+            ReviewEntry(
+                listing_id=listing.id, reviewer_id="r1", rating=4, comment="Good"
+            )
+        )
         reviews = store.get_reviews(listing.id)
         assert len(reviews) == 1
         assert reviews[0].comment == "Good"
@@ -442,8 +476,12 @@ class TestTips:
         listing = _make_listing()
         store.publish_listing(listing)
 
-        store.add_tip(TipRecord(listing_id=listing.id, author_id="author-1", amount=5.0))
-        store.add_tip(TipRecord(listing_id=listing.id, author_id="author-1", amount=10.0))
+        store.add_tip(
+            TipRecord(listing_id=listing.id, author_id="author-1", amount=5.0)
+        )
+        store.add_tip(
+            TipRecord(listing_id=listing.id, author_id="author-1", amount=10.0)
+        )
 
         tips = store.get_tips_for_author("author-1")
         assert len(tips) == 2
@@ -463,7 +501,9 @@ class TestCredits:
 
     def test_add_credits(self, store: MarketplaceStore):
         balance = store.add_credits(
-            "u1", 100, CreditTransactionType.monthly_grant,
+            "u1",
+            100,
+            CreditTransactionType.monthly_grant,
         )
         assert balance.balance == 100
         assert balance.total_earned == 100
@@ -471,7 +511,9 @@ class TestCredits:
     def test_spend_credits(self, store: MarketplaceStore):
         store.add_credits("u1", 200, CreditTransactionType.monthly_grant)
         balance = store.spend_credits(
-            "u1", 50, CreditTransactionType.listing_purchase,
+            "u1",
+            50,
+            CreditTransactionType.listing_purchase,
         )
         assert balance.balance == 150
         assert balance.total_spent == 50
@@ -507,12 +549,20 @@ class TestDiscoveryQueries:
         assert len(results) == 2
 
     def test_get_popular_only_approved(self, store: MarketplaceStore):
-        store.publish_listing(_make_listing(
-            title="Popular", downloads=100, status=ListingStatus.approved,
-        ))
-        store.publish_listing(_make_listing(
-            title="Draft", downloads=200, status=ListingStatus.draft,
-        ))
+        store.publish_listing(
+            _make_listing(
+                title="Popular",
+                downloads=100,
+                status=ListingStatus.approved,
+            )
+        )
+        store.publish_listing(
+            _make_listing(
+                title="Draft",
+                downloads=200,
+                status=ListingStatus.draft,
+            )
+        )
 
         results = store.get_popular()
         assert len(results) == 1

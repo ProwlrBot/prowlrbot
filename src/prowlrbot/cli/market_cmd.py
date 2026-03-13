@@ -425,9 +425,7 @@ def market_install_bundle(bundle_id: str):
         if listing is None:
             click.echo(f"    SKIP  {lid} (not found)")
             continue
-        record = InstallRecord(
-            listing_id=lid, user_id="local", version=listing.version
-        )
+        record = InstallRecord(listing_id=lid, user_id="local", version=listing.version)
         store.record_install(record)
         click.echo(f"    OK    {listing.title}")
         installed += 1
@@ -452,15 +450,11 @@ def market_detail(listing_id: str):
         return
 
     badge = (
-        "OFFICIAL"
-        if getattr(listing, "trust_tier", "") == "official"
-        else "VERIFIED"
+        "OFFICIAL" if getattr(listing, "trust_tier", "") == "official" else "VERIFIED"
     )
     click.echo(f"\n  {listing.title} [{badge}]")
     click.echo(f"  {'─' * 50}")
-    click.echo(
-        f"  Author:      {getattr(listing, 'author_name', listing.author_id)}"
-    )
+    click.echo(f"  Author:      {getattr(listing, 'author_name', listing.author_id)}")
     click.echo(f"  Version:     {listing.version}")
     click.echo(f"  Category:    {listing.category}")
     click.echo(f"  License:     {getattr(listing, 'license', 'MIT')}")

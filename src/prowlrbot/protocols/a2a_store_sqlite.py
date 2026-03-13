@@ -34,9 +34,7 @@ from .a2a_server import (
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_DB_PATH = os.path.join(
-    os.path.expanduser("~"), ".prowlrbot", "a2a_tasks.db"
-)
+_DEFAULT_DB_PATH = os.path.join(os.path.expanduser("~"), ".prowlrbot", "a2a_tasks.db")
 
 
 class SQLiteA2ATaskStore:
@@ -62,8 +60,7 @@ class SQLiteA2ATaskStore:
 
     def _create_tables(self) -> None:
         """Create tables on first use."""
-        self._conn.executescript(
-            """
+        self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS tasks (
                 id TEXT PRIMARY KEY,
                 from_agent TEXT NOT NULL DEFAULT '',
@@ -99,8 +96,7 @@ class SQLiteA2ATaskStore:
                 message TEXT,
                 FOREIGN KEY (task_id) REFERENCES tasks(id)
             );
-            """
-        )
+            """)
         self._conn.commit()
 
     def create(self, task: A2ATask) -> A2ATask:
@@ -118,7 +114,13 @@ class SQLiteA2ATaskStore:
         with self._lock:
             self._conn.execute(
                 "INSERT INTO tasks (id, from_agent, to_agent, status, metadata_json) VALUES (?, ?, ?, ?, ?)",
-                (task.id, task.from_agent, task.to_agent, task.status, json.dumps(task.metadata)),
+                (
+                    task.id,
+                    task.from_agent,
+                    task.to_agent,
+                    task.status,
+                    json.dumps(task.metadata),
+                ),
             )
 
             for msg in task.messages:
@@ -170,7 +172,9 @@ class SQLiteA2ATaskStore:
             The updated task, or None if not found.
         """
         with self._lock:
-            row = self._conn.execute("SELECT id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+            row = self._conn.execute(
+                "SELECT id FROM tasks WHERE id = ?", (task_id,)
+            ).fetchone()
             if row is None:
                 return None
 
@@ -197,7 +201,9 @@ class SQLiteA2ATaskStore:
             The updated task, or None if not found.
         """
         with self._lock:
-            row = self._conn.execute("SELECT id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+            row = self._conn.execute(
+                "SELECT id FROM tasks WHERE id = ?", (task_id,)
+            ).fetchone()
             if row is None:
                 return None
 
@@ -216,7 +222,9 @@ class SQLiteA2ATaskStore:
             The updated task, or None if not found.
         """
         with self._lock:
-            row = self._conn.execute("SELECT id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+            row = self._conn.execute(
+                "SELECT id FROM tasks WHERE id = ?", (task_id,)
+            ).fetchone()
             if row is None:
                 return None
 
@@ -263,7 +271,14 @@ class SQLiteA2ATaskStore:
         parts_json = json.dumps([p.model_dump() for p in artifact.parts])
         self._conn.execute(
             "INSERT INTO task_artifacts (id, task_id, name, description, parts_json, metadata_json) VALUES (?, ?, ?, ?, ?, ?)",
-            (artifact.id, task_id, artifact.name, artifact.description, parts_json, json.dumps(artifact.metadata)),
+            (
+                artifact.id,
+                task_id,
+                artifact.name,
+                artifact.description,
+                parts_json,
+                json.dumps(artifact.metadata),
+            ),
         )
 
     def _build_task(self, row: sqlite3.Row) -> A2ATask:
@@ -278,7 +293,13 @@ class SQLiteA2ATaskStore:
         messages = []
         for mr in msg_rows:
             parts = [Part(**p) for p in json.loads(mr["parts_json"])]
-            messages.append(Message(role=mr["role"], parts=parts, metadata=json.loads(mr["metadata_json"])))
+            messages.append(
+                Message(
+                    role=mr["role"],
+                    parts=parts,
+                    metadata=json.loads(mr["metadata_json"]),
+                )
+            )
 
         # Load artifacts
         art_rows = self._conn.execute(
@@ -288,10 +309,15 @@ class SQLiteA2ATaskStore:
         artifacts = []
         for ar in art_rows:
             parts = [Part(**p) for p in json.loads(ar["parts_json"])]
-            artifacts.append(Artifact(
-                id=ar["id"], name=ar["name"], description=ar["description"],
-                parts=parts, metadata=json.loads(ar["metadata_json"]),
-            ))
+            artifacts.append(
+                Artifact(
+                    id=ar["id"],
+                    name=ar["name"],
+                    description=ar["description"],
+                    parts=parts,
+                    metadata=json.loads(ar["metadata_json"]),
+                )
+            )
 
         # Load history
         hist_rows = self._conn.execute(
@@ -299,7 +325,11 @@ class SQLiteA2ATaskStore:
             (task_id,),
         ).fetchall()
         history = [
-            StatusEntry(status=TaskStatus(hr["status"]), timestamp=hr["timestamp"], message=hr["message"])
+            StatusEntry(
+                status=TaskStatus(hr["status"]),
+                timestamp=hr["timestamp"],
+                message=hr["message"],
+            )
             for hr in hist_rows
         ]
 

@@ -7,7 +7,6 @@ import pytest
 
 from prowlrbot.app.routers.marketplace import PERSONA_CATALOG
 
-
 # ── PERSONA_CATALOG data structure ────────────────────────────────────────────
 
 
@@ -19,7 +18,9 @@ class TestPersonaCatalog:
         required = {"id", "label", "icon", "description"}
         for persona in PERSONA_CATALOG:
             missing = required - set(persona.keys())
-            assert not missing, f"Persona {persona.get('id', '?')} missing fields: {missing}"
+            assert (
+                not missing
+            ), f"Persona {persona.get('id', '?')} missing fields: {missing}"
 
     def test_persona_ids_are_unique(self):
         ids = [p["id"] for p in PERSONA_CATALOG]
@@ -27,7 +28,15 @@ class TestPersonaCatalog:
 
     def test_expected_personas_present(self):
         ids = {p["id"] for p in PERSONA_CATALOG}
-        expected = {"parent", "business", "student", "creator", "freelancer", "developer", "everyone"}
+        expected = {
+            "parent",
+            "business",
+            "student",
+            "creator",
+            "freelancer",
+            "developer",
+            "everyone",
+        }
         assert expected.issubset(ids)
 
     def test_all_personas_have_nonempty_values(self):
@@ -41,9 +50,9 @@ class TestPersonaCatalog:
         """Labels should be human-readable (not just IDs)."""
         for persona in PERSONA_CATALOG:
             # Labels typically have spaces or capital letters
-            assert persona["label"] != persona["id"], (
-                f"Persona '{persona['id']}' label should differ from id"
-            )
+            assert (
+                persona["label"] != persona["id"]
+            ), f"Persona '{persona['id']}' label should differ from id"
 
     def test_persona_count(self):
         assert len(PERSONA_CATALOG) == 7
@@ -62,6 +71,7 @@ class TestPersonaFiltering:
     @pytest.fixture()
     def store(self, tmp_path):
         from prowlrbot.marketplace.store import MarketplaceStore
+
         s = MarketplaceStore(db_path=tmp_path / "test.db")
         yield s
         s.close()
@@ -69,20 +79,24 @@ class TestPersonaFiltering:
     def test_search_by_persona_returns_matching(self, store):
         from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing
 
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Developer Tool",
-            description="For devs",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer"],
-        ))
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Parent Helper",
-            description="For parents",
-            category=MarketplaceCategory.skills,
-            persona_tags=["parent"],
-        ))
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Developer Tool",
+                description="For devs",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer"],
+            )
+        )
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Parent Helper",
+                description="For parents",
+                category=MarketplaceCategory.skills,
+                persona_tags=["parent"],
+            )
+        )
 
         results = store.search_listings(persona="developer")
         assert len(results) == 1
@@ -91,13 +105,15 @@ class TestPersonaFiltering:
     def test_search_by_persona_multiple_tags(self, store):
         from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing
 
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Universal Tool",
-            description="For everyone",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer", "freelancer", "everyone"],
-        ))
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Universal Tool",
+                description="For everyone",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer", "freelancer", "everyone"],
+            )
+        )
 
         # Should match on any of the tags
         for persona in ["developer", "freelancer", "everyone"]:
@@ -107,13 +123,15 @@ class TestPersonaFiltering:
     def test_search_by_nonexistent_persona(self, store):
         from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing
 
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Dev Only",
-            description="Only for devs",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer"],
-        ))
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Dev Only",
+                description="Only for devs",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer"],
+            )
+        )
 
         results = store.search_listings(persona="astronaut")
         assert len(results) == 0
@@ -121,22 +139,26 @@ class TestPersonaFiltering:
     def test_persona_with_difficulty_filter(self, store):
         from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing
 
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Easy Dev",
-            description="Beginner dev tool",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer"],
-            difficulty="beginner",
-        ))
-        store.publish_listing(MarketplaceListing(
-            author_id="a",
-            title="Hard Dev",
-            description="Advanced dev tool",
-            category=MarketplaceCategory.skills,
-            persona_tags=["developer"],
-            difficulty="advanced",
-        ))
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Easy Dev",
+                description="Beginner dev tool",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer"],
+                difficulty="beginner",
+            )
+        )
+        store.publish_listing(
+            MarketplaceListing(
+                author_id="a",
+                title="Hard Dev",
+                description="Advanced dev tool",
+                category=MarketplaceCategory.skills,
+                persona_tags=["developer"],
+                difficulty="advanced",
+            )
+        )
 
         results = store.search_listings(persona="developer", difficulty="beginner")
         assert len(results) == 1
@@ -170,7 +192,10 @@ class TestMarketplacePersonaEndpoints:
 
         app = FastAPI()
         # Override auth dependency so POST endpoints work without JWT
-        app.dependency_overrides[get_current_user] = lambda: {"sub": "test-user", "role": "admin"}
+        app.dependency_overrides[get_current_user] = lambda: {
+            "sub": "test-user",
+            "role": "admin",
+        }
         app.include_router(mp_module.router)
 
         yield TestClient(app)

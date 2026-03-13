@@ -6,6 +6,7 @@ Entries promoted from medium-term (learning) memory land here and are indexed
 with FTS5 for fast full-text retrieval.  Each entry is scoped to a single
 agent via ``agent_id`` and tracks access patterns for future relevance scoring.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -32,8 +33,7 @@ class ArchiveDB:
     # ------------------------------------------------------------------
 
     def _create_tables(self) -> None:
-        self._conn.executescript(
-            """
+        self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS archive (
                 id            TEXT PRIMARY KEY,
                 agent_id      TEXT NOT NULL,
@@ -52,8 +52,7 @@ class ArchiveDB:
 
             CREATE INDEX IF NOT EXISTS idx_archive_agent
                 ON archive(agent_id);
-        """
-        )
+        """)
         self._conn.commit()
 
     # ------------------------------------------------------------------

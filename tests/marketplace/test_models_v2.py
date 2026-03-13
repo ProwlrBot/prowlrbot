@@ -26,13 +26,20 @@ from prowlrbot.marketplace.models import (
     TipRecord,
 )
 
-
 # ── Enum values ───────────────────────────────────────────────────────────────
 
 
 class TestEnums:
     def test_marketplace_categories(self):
-        expected = {"skills", "agents", "prompts", "mcp-servers", "themes", "workflows", "specs"}
+        expected = {
+            "skills",
+            "agents",
+            "prompts",
+            "mcp-servers",
+            "themes",
+            "workflows",
+            "specs",
+        }
         assert {c.value for c in MarketplaceCategory} == expected
 
     def test_listing_status_values(self):
@@ -53,16 +60,25 @@ class TestEnums:
 
     def test_credit_transaction_type_earning(self):
         earning = {
-            "monthly_grant", "publish_bonus", "download_milestone",
-            "review_bonus", "tip_kickback", "referral", "bug_report", "purchased",
+            "monthly_grant",
+            "publish_bonus",
+            "download_milestone",
+            "review_bonus",
+            "tip_kickback",
+            "referral",
+            "bug_report",
+            "purchased",
         }
         all_vals = {t.value for t in CreditTransactionType}
         assert earning.issubset(all_vals)
 
     def test_credit_transaction_type_spending(self):
         spending = {
-            "listing_purchase", "workflow_unlock", "spec_generate",
-            "insight_purchase", "blueprint_unlock",
+            "listing_purchase",
+            "workflow_unlock",
+            "spec_generate",
+            "insight_purchase",
+            "blueprint_unlock",
         }
         all_vals = {t.value for t in CreditTransactionType}
         assert spending.issubset(all_vals)
@@ -85,7 +101,9 @@ class TestMarketplaceListingDefaults:
 
     def test_v1_defaults(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         assert listing.version == "1.0.0"
@@ -102,7 +120,9 @@ class TestMarketplaceListingDefaults:
 
     def test_v2_defaults(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         assert listing.difficulty == "beginner"
@@ -118,18 +138,24 @@ class TestMarketplaceListingDefaults:
 
     def test_auto_id_is_unique(self):
         a = MarketplaceListing(
-            author_id="u", title="A", description="D",
+            author_id="u",
+            title="A",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         b = MarketplaceListing(
-            author_id="u", title="B", description="D",
+            author_id="u",
+            title="B",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         assert a.id != b.id
 
     def test_auto_id_is_hex(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         # uuid4().hex is 32 hex chars
@@ -143,7 +169,9 @@ class TestMarketplaceListingDefaults:
 class TestMarketplaceListingV2Fields:
     def test_difficulty_set(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.agents,
             difficulty="advanced",
         )
@@ -151,7 +179,9 @@ class TestMarketplaceListingV2Fields:
 
     def test_setup_time_minutes(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.agents,
             setup_time_minutes=30,
         )
@@ -159,7 +189,9 @@ class TestMarketplaceListingV2Fields:
 
     def test_persona_tags(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
             persona_tags=["developer", "freelancer"],
         )
@@ -168,7 +200,9 @@ class TestMarketplaceListingV2Fields:
     def test_before_after(self):
         ba = {"before": "Manual process", "after": "Automated"}
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.workflows,
             before_after=ba,
         )
@@ -177,7 +211,9 @@ class TestMarketplaceListingV2Fields:
     def test_skill_scan(self):
         scan = {"complexity": 3, "tools_used": ["shell", "browser"]}
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
             skill_scan=scan,
         )
@@ -185,7 +221,9 @@ class TestMarketplaceListingV2Fields:
 
     def test_works_with(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.agents,
             works_with=["slack", "github", "jira"],
         )
@@ -193,7 +231,9 @@ class TestMarketplaceListingV2Fields:
 
     def test_demo_url(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.themes,
             demo_url="https://demo.example.com",
         )
@@ -205,7 +245,9 @@ class TestMarketplaceListingV2Fields:
             {"order": 2, "label": "Configure", "command": "prowlr init"},
         ]
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
             setup_steps=steps,
         )
@@ -214,10 +256,15 @@ class TestMarketplaceListingV2Fields:
 
     def test_user_stories(self):
         stories = [
-            {"persona": "developer", "story": "As a developer, I want to automate deploys"},
+            {
+                "persona": "developer",
+                "story": "As a developer, I want to automate deploys",
+            },
         ]
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.workflows,
             user_stories=stories,
         )
@@ -225,7 +272,9 @@ class TestMarketplaceListingV2Fields:
 
     def test_hero_animation(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.themes,
             hero_animation="lottie://animations/deploy.json",
         )
@@ -282,14 +331,23 @@ class TestMarketplaceListingSerialization:
 
     def test_dict_export_contains_v2_fields(self):
         listing = MarketplaceListing(
-            author_id="u", title="T", description="D",
+            author_id="u",
+            title="T",
+            description="D",
             category=MarketplaceCategory.skills,
         )
         d = listing.model_dump()
         v2_keys = {
-            "difficulty", "setup_time_minutes", "persona_tags", "before_after",
-            "skill_scan", "works_with", "demo_url", "setup_steps",
-            "user_stories", "hero_animation",
+            "difficulty",
+            "setup_time_minutes",
+            "persona_tags",
+            "before_after",
+            "skill_scan",
+            "works_with",
+            "demo_url",
+            "setup_steps",
+            "user_stories",
+            "hero_animation",
         }
         assert v2_keys.issubset(d.keys())
 
@@ -299,15 +357,24 @@ class TestMarketplaceListingSerialization:
 
 class TestProTierLimits:
     def test_all_tiers_present(self):
-        assert set(PRO_TIER_LIMITS.keys()) == {ProTier.free, ProTier.starter, ProTier.pro, ProTier.team}
+        assert set(PRO_TIER_LIMITS.keys()) == {
+            ProTier.free,
+            ProTier.starter,
+            ProTier.pro,
+            ProTier.team,
+        }
 
     def test_unlimited_agents_all_tiers(self):
         for tier in ProTier:
-            assert PRO_TIER_LIMITS[tier]["agents"] == -1, f"{tier} should have unlimited agents"
+            assert (
+                PRO_TIER_LIMITS[tier]["agents"] == -1
+            ), f"{tier} should have unlimited agents"
 
     def test_unlimited_teams_all_tiers(self):
         for tier in ProTier:
-            assert PRO_TIER_LIMITS[tier]["teams"] == -1, f"{tier} should have unlimited teams"
+            assert (
+                PRO_TIER_LIMITS[tier]["teams"] == -1
+            ), f"{tier} should have unlimited teams"
 
     def test_pro_has_unlimited_workflows(self):
         assert PRO_TIER_LIMITS[ProTier.pro]["active_workflows"] == -1
@@ -326,7 +393,9 @@ class TestProTierLimits:
 
     def test_credit_multiplier_increases_with_tier(self):
         tiers_ordered = [ProTier.free, ProTier.starter, ProTier.pro, ProTier.team]
-        multipliers = [PRO_TIER_LIMITS[t]["credit_earn_multiplier"] for t in tiers_ordered]
+        multipliers = [
+            PRO_TIER_LIMITS[t]["credit_earn_multiplier"] for t in tiers_ordered
+        ]
         assert multipliers == sorted(multipliers)
         assert multipliers[0] < multipliers[-1]
 
@@ -341,7 +410,9 @@ class TestProTierLimits:
 
 class TestReviewEntry:
     def test_valid_review(self):
-        review = ReviewEntry(listing_id="l1", reviewer_id="r1", rating=5, comment="Great!")
+        review = ReviewEntry(
+            listing_id="l1", reviewer_id="r1", rating=5, comment="Great!"
+        )
         assert review.rating == 5
         assert review.listing_id == "l1"
 

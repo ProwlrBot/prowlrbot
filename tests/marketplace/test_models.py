@@ -1,5 +1,10 @@
 """Tests for marketplace model enums and new fields."""
-from prowlrbot.marketplace.models import MarketplaceCategory, MarketplaceListing, TrustTier
+
+from prowlrbot.marketplace.models import (
+    MarketplaceCategory,
+    MarketplaceListing,
+    TrustTier,
+)
 
 
 def test_specs_category_exists():
@@ -11,13 +16,22 @@ def test_specs_category_exists():
 
 def test_all_seven_categories():
     """All 7 categories are present."""
-    expected = {"skills", "agents", "prompts", "mcp-servers", "themes", "workflows", "specs"}
+    expected = {
+        "skills",
+        "agents",
+        "prompts",
+        "mcp-servers",
+        "themes",
+        "workflows",
+        "specs",
+    }
     actual = {c.value for c in MarketplaceCategory}
     assert actual == expected
 
 
 def test_trust_tier_enum():
     from prowlrbot.marketplace.models import TrustTier
+
     assert TrustTier("official") == TrustTier.official
     assert TrustTier("verified") == TrustTier.verified
 

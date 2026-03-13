@@ -819,6 +819,7 @@ def _validate_browser_url(url: str) -> tuple[bool, str]:
     """Validate a URL before browser navigation (SSRF protection)."""
     try:
         from prowlrbot.security.url_validator import validate_outbound_url
+
         return validate_outbound_url(url)
     except Exception:
         return True, "OK"  # Don't block if validator unavailable

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for marketplace install actually delivering skill files."""
+
 import tempfile
 from pathlib import Path
 from unittest.mock import patch

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for marketplace CLI commands: bundles, install-bundle, detail, seed."""
+
 import tempfile
 from unittest.mock import patch
 

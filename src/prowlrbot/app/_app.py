@@ -13,7 +13,9 @@ if _sentry_dsn:
         dsn=_sentry_dsn,
         send_default_pii=True,
         traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "1.0")),
-        profiles_sample_rate=float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE", "1.0")),
+        profiles_sample_rate=float(
+            os.environ.get("SENTRY_PROFILES_SAMPLE_RATE", "1.0")
+        ),
     )
 
 from fastapi import FastAPI, HTTPException
@@ -54,7 +56,11 @@ from ..dashboard.events import EventBus
 from ..envs import load_envs_into_environ
 from ..auth.store import UserStore
 from ..auth.models import Role
-from ..providers.store import load_providers_json, set_active_llm, update_provider_settings
+from ..providers.store import (
+    load_providers_json,
+    set_active_llm,
+    update_provider_settings,
+)
 
 # Apply log level on load so reload child process gets same level as CLI.
 logger = setup_logger(os.environ.get(LOG_LEVEL_ENV, "info"))
@@ -160,11 +166,10 @@ def _auto_detect_provider() -> None:
             return
 
         # Check for Ollama (local, no API key needed — just check connectivity)
-        ollama_url = os.environ.get(
-            "OLLAMA_HOST", "http://localhost:11434"
-        )
+        ollama_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
         try:
             import httpx
+
             resp = httpx.get(f"{ollama_url}/api/tags", timeout=3)
             if resp.status_code == 200:
                 models = resp.json().get("models", [])
@@ -199,6 +204,7 @@ async def lifespan(app: FastAPI):  # pylint: disable=too-many-statements
     # Clean up stale temp files from previous runs
     try:
         from .runner.query_error_dump import cleanup_old_error_dumps
+
         cleanup_old_error_dumps()
     except Exception:
         pass
@@ -394,6 +400,7 @@ from ..hub.websocket import warroom_ws
 async def ws_warroom(ws):
     await warroom_ws(ws)
 
+
 app.include_router(
     agent_app.router,
     prefix="/api/agent",
@@ -428,6 +435,7 @@ app.include_router(create_roar_router(roar_server), dependencies=[Depends(auth_d
 # Terminal WebSocket (PTY) — Unix only
 try:
     from .routers.terminal import router as _terminal_router
+
     app.include_router(_terminal_router)
 except ImportError:
     pass  # pty not available (Windows)

@@ -52,8 +52,7 @@ class SQLiteAgentDirectory:
 
     def _create_tables(self) -> None:
         """Create tables on first use."""
-        self._conn.execute(
-            """
+        self._conn.execute("""
             CREATE TABLE IF NOT EXISTS agents (
                 did TEXT PRIMARY KEY,
                 card_json TEXT NOT NULL,
@@ -61,8 +60,7 @@ class SQLiteAgentDirectory:
                 last_seen REAL NOT NULL,
                 hub_url TEXT NOT NULL DEFAULT ''
             )
-            """
-        )
+            """)
         self._conn.commit()
 
     def register(self, card: AgentCard) -> DiscoveryEntry:

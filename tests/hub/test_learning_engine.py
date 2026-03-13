@@ -164,11 +164,17 @@ class TestFTSSearch:
 
     def test_search_with_project_filter(self, db):
         db.add_learning(
-            "correction", "a", "Proj A fix", "Fix in project A",
+            "correction",
+            "a",
+            "Proj A fix",
+            "Fix in project A",
             project="proj-a",
         )
         db.add_learning(
-            "correction", "a", "Proj B fix", "Fix in project B",
+            "correction",
+            "a",
+            "Proj B fix",
+            "Fix in project B",
             project="proj-b",
         )
         results = db.search("fix", project="proj-a")
@@ -284,12 +290,20 @@ class TestDecayScoring:
         """Verify query_learnings returns results sorted by confidence * decay."""
         # Add high-confidence and low-confidence learnings
         db.add_learning(
-            "correction", "a", "High confidence", "Important fix",
-            project="test", confidence=1.0,
+            "correction",
+            "a",
+            "High confidence",
+            "Important fix",
+            project="test",
+            confidence=1.0,
         )
         db.add_learning(
-            "pattern", "a", "Low confidence", "Maybe useful",
-            project="test", confidence=0.1,
+            "pattern",
+            "a",
+            "Low confidence",
+            "Maybe useful",
+            project="test",
+            confidence=0.1,
         )
         results = db.query_learnings("test")
         assert len(results) == 2
@@ -465,7 +479,10 @@ class TestModuleLevelFunctions:
         db_path = str(tmp_path / "func_test.db")
         conn = init_db(db_path)
         lid = add_learning(
-            conn, "proj", "pattern", "Long content here",
+            conn,
+            "proj",
+            "pattern",
+            "Long content here",
             title="Custom title",
         )
         row = conn.execute(

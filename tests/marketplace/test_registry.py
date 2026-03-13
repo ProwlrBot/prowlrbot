@@ -1,4 +1,5 @@
 """Tests for registry sync trust tier assignment."""
+
 from prowlrbot.marketplace.registry import CATEGORY_DIR_MAP
 
 
@@ -9,5 +10,14 @@ def test_specs_in_category_dir_map():
 
 
 def test_all_categories_mapped():
-    expected = {"skills", "agents", "prompts", "mcp-servers", "themes", "workflows", "specs", "consumer"}
+    expected = {
+        "skills",
+        "agents",
+        "prompts",
+        "mcp-servers",
+        "themes",
+        "workflows",
+        "specs",
+        "consumer",
+    }
     assert set(CATEGORY_DIR_MAP.keys()) == expected

@@ -1,4 +1,5 @@
 """Tests for Stripe tip jar with graceful degradation."""
+
 import importlib.util
 import sys
 import tempfile
@@ -35,13 +36,15 @@ _TEST_USER = User(id="test-user", username="tester", role=Role.admin)
 def store():
     tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
     s = MarketplaceStore(db_path=tmp.name)
-    s.publish_listing(MarketplaceListing(
-        id="tippable",
-        author_id="author1",
-        title="Tippable Skill",
-        description="test",
-        category=MarketplaceCategory.skills,
-    ))
+    s.publish_listing(
+        MarketplaceListing(
+            id="tippable",
+            author_id="author1",
+            title="Tippable Skill",
+            description="test",
+            category=MarketplaceCategory.skills,
+        )
+    )
     yield s
     s.close()
 
@@ -63,6 +66,7 @@ def client(store):
 def test_tip_records_locally_when_stripe_not_configured(client):
     """Without STRIPE_SECRET_KEY, tip records locally and returns 200."""
     import os
+
     env = {k: v for k, v in os.environ.items() if k != "STRIPE_SECRET_KEY"}
     with patch.dict("os.environ", env, clear=True):
         resp = client.post("/marketplace/listings/tippable/tip", json={"amount": 5})
