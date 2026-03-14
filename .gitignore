@@ -81,10 +81,18 @@ providers.json
 logs/
 *.log
 
-# vibe coding
 .claude
 openspec
 /AGENTS.md
 CLAUDE.md
 *.tmp
 .superpowers/
+
+# Local / agent-only (do not commit)
+docs/plans/local/
+**/*.local.md
+*.local.md
+.local/
+scratch/
+notes/
+agent-notes/

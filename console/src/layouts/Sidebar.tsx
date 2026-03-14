@@ -207,16 +207,7 @@ export default function Sidebar({ selectedKey, plugins = [] }: SidebarProps) {
           label: "Team Builder",
           icon: <UsersRound size={16} />,
         },
-        {
-          key: "replay",
-          label: "Replay",
-          icon: <Box size={16} />,
-        },
-        {
-          key: "terminal",
-          label: "Terminal",
-          icon: <Cpu size={16} />,
-        },
+        // Replay and Terminal hidden until UI/backend are ready
       ],
     },
     {

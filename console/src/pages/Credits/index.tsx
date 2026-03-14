@@ -12,6 +12,7 @@ import {
   Typography,
   Divider,
   Space,
+  message,
 } from "antd";
 import { CheckOutlined, CrownOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { getCreditBalance, getCreditTransactions } from "../../api/modules/credits";
@@ -94,11 +95,13 @@ export default function CreditsPage() {
       if (data?.checkout_url) {
         window.location.href = data.checkout_url;
       } else if (data?.message) {
-        // Stripe not configured: show CLI hint
-        console.info("Subscribe:", data.message);
+        message.warning(data.message);
+      } else {
+        message.warning("Checkout could not be started. Try again or use CLI: prowlr market upgrade <tier>.");
       }
-    } catch {
-      // error handled by request helper
+    } catch (e) {
+      const err = e instanceof Error ? e.message : String(e);
+      message.error(err || "Request failed. Ensure the app is running and Stripe is configured on the server.");
     } finally {
       setUpgrading(null);
     }

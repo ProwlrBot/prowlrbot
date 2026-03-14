@@ -36,5 +36,12 @@
     "rollup": ">=4.59.0",
     "dompurify": ">=3.3.2",
     "lodash-es": ">=4.17.23"
+  },
+  "pnpm": {
+    "overrides": {
+      "rollup": ">=4.59.0",
+      "dompurify": ">=3.3.2",
+      "lodash-es": ">=4.17.23"
+    }
   }
 }

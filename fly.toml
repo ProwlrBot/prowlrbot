@@ -43,14 +43,14 @@ primary_region = "sjc"
     soft_limit = 80
 
 [[http_service.checks]]
-  grace_period = "30s"
+  grace_period = "45s"
   interval     = "15s"
   method       = "GET"
   path         = "/api/health"
   timeout      = "5s"
 
 [[http_service.checks]]
-  grace_period = "30s"
+  grace_period = "45s"
   interval     = "60s"
   method       = "GET"
   path         = "/roar/health"

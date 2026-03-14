@@ -87,7 +87,7 @@ export function Nav({
           <img
             src={`${import.meta.env.BASE_URL}logo.svg`}
             alt={projectName}
-            style={{ height: 48, width: "auto" }}
+            style={{ height: 56, width: "auto", maxWidth: 180 }}
           />
         </Link>
 
