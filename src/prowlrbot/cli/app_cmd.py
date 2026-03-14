@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", message=".*deprecated.*Pydantic.*")
 import click
 import uvicorn
 
-from ..constant import LOG_LEVEL_ENV
+from ..constant import LOG_LEVEL_ENV, RUNNING_IN_CONTAINER
 from ..config.utils import write_last_api
 from ..utils.logging import setup_logger, SuppressPathAccessLogFilter
 
@@ -34,9 +34,9 @@ def _load_dotenv_if_present() -> None:
 @click.command("app")
 @click.option(
     "--host",
-    default="127.0.0.1",
+    default=None,
     show_default=True,
-    help="Bind host",
+    help="Bind host (default: 0.0.0.0 in container, 127.0.0.1 otherwise)",
 )
 @click.option(
     "--port",
@@ -71,7 +71,7 @@ def _load_dotenv_if_present() -> None:
     help="Path substrings to hide from uvicorn access log (repeatable).",
 )
 def app_cmd(
-    host: str,
+    host: str | None,
     port: int,
     reload: bool,
     workers: int,
@@ -80,6 +80,8 @@ def app_cmd(
 ) -> None:
     """Run ProwlrBot FastAPI app."""
     _load_dotenv_if_present()
+    if host is None:
+        host = "0.0.0.0" if (RUNNING_IN_CONTAINER or "").lower() in ("1", "true", "yes") else "127.0.0.1"
     # Persist last used host/port for other terminals
     write_last_api(host, port)
     os.environ[LOG_LEVEL_ENV] = log_level

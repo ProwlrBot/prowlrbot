@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # deploy/Dockerfile.fly
 # Lean ProwlrBot image for Fly.io deployment.
 #
@@ -37,55 +36,12 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git curl \
     && rm -rf /var/lib/apt/lists/*
 
-=======
-# -----------------------------------------------------------------------------
-# Fly.io-optimized Dockerfile for ProwlrBot
-# Lean build: no desktop environment, headless-only browser support.
-# -----------------------------------------------------------------------------
-
-# Stage 1: Build console frontend
-# -----------------------------------------------------------------------------
-FROM node:20-slim AS console-builder
-WORKDIR /app/console
-COPY console/package.json console/package-lock.json ./
-RUN npm ci --include=dev
-COPY console/ ./
-RUN npm run build
-
-# Stage 2: Runtime
-# -----------------------------------------------------------------------------
-FROM python:3.12-slim
-
-ENV NODE_ENV=production \
-    PYTHONUNBUFFERED=1 \
-    HOME=/data \
-    PROWLRBOT_WORKING_DIR=/data/.prowlrbot \
-    PROWLRBOT_SECRET_DIR=/data/.prowlrbot.secret \
-    PROWLRBOT_RUNNING_IN_CONTAINER=1 \
-    PROWLRBOT_PORT=8088
-
-# Install only what's needed: git (for skills), curl (healthcheck), chromium (headless browser tool)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    git \
-    chromium \
-    fonts-liberation \
-  && rm -rf /var/lib/apt/lists/*
-
-# Playwright: use system Chromium in headless mode
-ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium \
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-
-WORKDIR /app
-
->>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296
 # Install Python package
 COPY pyproject.toml setup.py README.md ./
 COPY src ./src
-COPY --from=console-builder /app/console/dist/ ./src/prowlrbot/console/
+COPY --from=console-builder /app/console/dist/ ./console/dist/
 RUN pip install --no-cache-dir .
 
-<<<<<<< HEAD
 # Init default config (no interactive prompt, no browser tools)
 RUN prowlr init --defaults --accept-security
 
@@ -98,13 +54,3 @@ EXPOSE 8088
 
 # Run uvicorn directly (no supervisord needed without Xvfb)
 CMD ["prowlr", "app", "--host", "0.0.0.0", "--port", "8088"]
-=======
-# Entrypoint handles first-run init on the persistent volume
-COPY --chmod=755 deploy/entrypoint-fly.sh /entrypoint.sh
-
-EXPOSE 8088
-
-# Run as root so we can write to the Fly volume on first deploy.
-# The volume is mounted by Fly.io at runtime and may need initialization.
-CMD ["/entrypoint.sh"]
->>>>>>> 8dcd1f90a2da5ae66ff55657784f512bddd46296

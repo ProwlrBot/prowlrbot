@@ -310,8 +310,11 @@ export default function Sidebar({ selectedKey, plugins = [] }: SidebarProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
+            flexWrap: "wrap",
+            minWidth: 250,
+            minHeight: 60,
             padding: "8px 12px",
-            backgroundColor: "rgba(255, 255, 255, 1)",
+            backgroundColor: "rgb(255, 255, 255)",
             border: "1px solid rgba(0, 0, 0, 0.12)",
             borderRadius: 8,
             boxShadow: "0px 4px 12px 0px rgba(0, 0, 0, 0.15)",
@@ -322,8 +325,8 @@ export default function Sidebar({ selectedKey, plugins = [] }: SidebarProps) {
             src="/logo.png"
             alt="ProwlrBot"
             style={{
-              width: 250,
-              height: 60,
+              width: "250px",
+              height: "60px",
               display: "block",
               objectFit: "contain",
             }}

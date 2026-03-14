@@ -63,9 +63,11 @@ prowlr market buy-credits
 
 ## Setup: Tiers & Payments
 
+Stripe is used by the **ProwlrBot backend** (the app you run with `prowlr app`), not by the website. If you deploy only the **website** to Cloudflare Pages, that is static content only — no backend and no Stripe there. To use Stripe, run the backend on a server (VPS, Railway, Fly.io, etc.) and set the keys in that environment.
+
 ### Where to put keys
 
-Store Stripe and tier-related env vars in **`~/.prowlrbot.secret/envs.json`** as a JSON object (the app loads it at startup):
+On the machine or container where the backend runs, store Stripe and tier-related env vars in **`~/.prowlrbot.secret/envs.json`** as a JSON object (the app loads it at startup):
 
 ```json
 {
