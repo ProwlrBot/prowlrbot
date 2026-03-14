@@ -49,15 +49,56 @@ Each tier includes a monthly credit allowance:
 ## Credit Balance
 
 ```bash
-# Check your credit balance
-prowlr credits balance
+# Check your credit balance and tier
+prowlr market credits --user default
 
-# View transaction history
-prowlr credits history
+# View tier features
+prowlr market tiers
 
-# Purchase additional credits
-prowlr credits buy 500
+# Purchase additional credits (when Stripe is configured)
+prowlr market buy-credits
 ```
+
+---
+
+## Setup: Tiers & Payments
+
+### Where to put keys
+
+Store Stripe and tier-related env vars in **`~/.prowlrbot.secret/envs.json`** as a JSON object (the app loads it at startup):
+
+```json
+{
+  "STRIPE_SECRET_KEY": "sk_test_...",
+  "STRIPE_WEBHOOK_SECRET": "whsec_...",
+  "PROWLR_FREE_TIER_WELCOME_CREDITS": "100",
+  "PROWLR_ALLOW_LOCAL_UPGRADE": "0"
+}
+```
+
+- **STRIPE_SECRET_KEY** — From Stripe Dashboard → Developers → API keys.
+- **STRIPE_WEBHOOK_SECRET** — From Stripe Dashboard → Webhooks (production) or from `stripe listen` (local dev).
+- **PROWLR_FREE_TIER_WELCOME_CREDITS** — Optional; new users get this many credits once (default 0).
+- **PROWLR_ALLOW_LOCAL_UPGRADE** — Set to `"1"` only if you want `prowlr market upgrade` to work when Stripe is configured (e.g. dev).
+
+### Local dev: Stripe webhooks
+
+1. Install [Stripe CLI](https://github.com/stripe/stripe-cli/releases).
+2. Run: `stripe login` (one time).
+3. With `prowlr app` running, in another terminal run:
+   ```bash
+   stripe listen --forward-to localhost:8088/api/marketplace/webhook/stripe
+   ```
+4. Copy the **webhook signing secret** (`whsec_...`) from the CLI output into `envs.json` as `STRIPE_WEBHOOK_SECRET`, then restart `prowlr app`.
+
+### Production webhook
+
+In Stripe Dashboard → Webhooks, add an endpoint:
+
+- **URL**: `https://your-domain.com/api/marketplace/webhook/stripe`
+- **Events**: `checkout.session.completed`, `customer.subscription.created`, `invoice.payment_succeeded`
+
+Use the endpoint’s signing secret in `envs.json`.
 
 ## Revenue Sharing
 

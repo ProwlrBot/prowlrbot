@@ -21,10 +21,21 @@ interface Props {
   model: ModelGrade;
   onInstall: (ollamaTag: string) => void;
   installing: boolean;
+  installed?: boolean;
+  downloadStatus?: string;
 }
 
-export const ModelGradeCard: React.FC<Props> = ({ model, onInstall, installing }) => {
-  const canInstall = model.grade !== "F" && model.ollama_tag;
+export const ModelGradeCard: React.FC<Props> = ({
+  model,
+  onInstall,
+  installing,
+  installed = false,
+  downloadStatus,
+}) => {
+  const canInstall = model.grade !== "F" && model.ollama_tag && !installed;
+  const showProgress =
+    installing && (downloadStatus === "downloading" || downloadStatus === "DOWNLOADING" || downloadStatus === "Starting…");
+
   return (
     <div
       style={{
@@ -58,14 +69,16 @@ export const ModelGradeCard: React.FC<Props> = ({ model, onInstall, installing }
           {model.cpu_offload_possible && " · CPU offload"}
         </div>
       </div>
-      {canInstall ? (
+      {installed ? (
+        <Tag color="success">Installed</Tag>
+      ) : canInstall ? (
         <Button
           size="small"
           type="primary"
-          loading={installing}
+          loading={installing && !downloadStatus}
           onClick={() => model.ollama_tag && onInstall(model.ollama_tag)}
         >
-          Install
+          {showProgress ? downloadStatus || "Installing…" : "Install"}
         </Button>
       ) : (
         <Button size="small" type="link">

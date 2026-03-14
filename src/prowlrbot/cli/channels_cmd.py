@@ -677,8 +677,9 @@ def channels_group() -> None:
 
 def _channel_config_fields(ch):
     """Yield (field_name, value) for a channel config (model or dict)."""
-    if hasattr(ch, "model_fields"):
-        for fn in ch.model_fields:
+    cls = type(ch)
+    if hasattr(cls, "model_fields"):
+        for fn in cls.model_fields:
             if fn == "enabled":
                 continue
             yield (fn, getattr(ch, fn))

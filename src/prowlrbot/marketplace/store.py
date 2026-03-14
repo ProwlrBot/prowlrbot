@@ -17,6 +17,7 @@ def _escape_like(value: str) -> str:
 
 from .models import (
     Bundle,
+    ConsolePluginManifest,
     CreditBalance,
     CreditTransaction,
     CreditTransactionType,
@@ -147,6 +148,19 @@ class MarketplaceStore:
         self._conn.commit()
         self._migrate_v2()
         self._migrate_v3()
+        self._migrate_console_plugin()
+
+    def _migrate_console_plugin(self) -> None:
+        """Add console_plugin column for marketplace listings that add UI tabs."""
+        cur = self._conn.cursor()
+        existing = {
+            row["name"] for row in cur.execute("PRAGMA table_info(listings)").fetchall()
+        }
+        if "console_plugin" not in existing:
+            cur.execute(
+                "ALTER TABLE listings ADD COLUMN console_plugin TEXT DEFAULT NULL"
+            )
+        self._conn.commit()
 
     def _migrate_v3(self) -> None:
         """Add v3 trust-tier columns (safe to run multiple times)."""
@@ -198,6 +212,10 @@ class MarketplaceStore:
 
     def publish_listing(self, listing: MarketplaceListing) -> MarketplaceListing:
         """Insert a new listing into the store."""
+        console_plugin_json = None
+        if listing.console_plugin is not None:
+            console_plugin_json = listing.console_plugin.model_dump_json()
+
         self._conn.execute(
             """
             INSERT INTO listings
@@ -208,10 +226,10 @@ class MarketplaceStore:
                  skill_scan, works_with, demo_url, setup_steps,
                  user_stories, hero_animation,
                  trust_tier, author_name, author_url, author_avatar_url,
-                 source_repo, license, changelog, compatibility)
+                 source_repo, license, changelog, compatibility, console_plugin)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?, ?, ?)
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 listing.id,
@@ -252,6 +270,7 @@ class MarketplaceStore:
                 listing.license,
                 listing.changelog,
                 listing.compatibility,
+                console_plugin_json,
             ),
         )
         self._conn.commit()
@@ -355,6 +374,7 @@ class MarketplaceStore:
             "license",
             "changelog",
             "compatibility",
+            "console_plugin",
         }
         filtered = {k: v for k, v in updates.items() if k in allowed}
         if not filtered:
@@ -398,6 +418,17 @@ class MarketplaceStore:
             val = filtered["trust_tier"]
             if hasattr(val, "value"):
                 filtered["trust_tier"] = val.value
+
+        if "console_plugin" in filtered:
+            val = filtered["console_plugin"]
+            if val is None:
+                filtered["console_plugin"] = None
+            elif isinstance(val, dict):
+                filtered["console_plugin"] = json.dumps(val)
+            elif isinstance(val, ConsolePluginManifest):
+                filtered["console_plugin"] = val.model_dump_json()
+            else:
+                filtered["console_plugin"] = None
 
         filtered["updated_at"] = datetime.now(timezone.utc).isoformat()
 
@@ -759,7 +790,66 @@ class MarketplaceStore:
                     row[field] = json.loads(raw)
                 except (json.JSONDecodeError, TypeError):
                     row[field] = json.loads(default)
+        # Parse console_plugin JSON into ConsolePluginManifest or None
+        cp = row.get("console_plugin")
+        if cp is None or (isinstance(cp, str) and cp.strip() in ("", "null")):
+            row["console_plugin"] = None
+        elif isinstance(cp, str):
+            try:
+                row["console_plugin"] = ConsolePluginManifest(**json.loads(cp))
+            except (json.JSONDecodeError, TypeError, ValueError):
+                row["console_plugin"] = None
         return MarketplaceListing(**row)
+
+    def get_installed_listing_ids(
+        self, user_id: Optional[str] = None
+    ) -> list[str]:
+        """Return listing IDs that have been installed (optionally for a user)."""
+        if user_id:
+            rows = self._conn.execute(
+                "SELECT DISTINCT listing_id FROM installs WHERE user_id = ?",
+                (user_id,),
+            ).fetchall()
+        else:
+            rows = self._conn.execute(
+                "SELECT DISTINCT listing_id FROM installs"
+            ).fetchall()
+        return [r["listing_id"] for r in rows]
+
+    def get_console_plugins(
+        self, user_id: Optional[str] = None
+    ) -> list[dict]:
+        """Return console plugin manifests: built-ins plus from installed listings."""
+        # Built-in plugins (always available; can later be made installable-only)
+        builtins: list[dict] = [
+            {
+                "path": "/warroom",
+                "label": "War Room",
+                "icon": "Radio",
+                "entry": "warroom",
+            },
+        ]
+        installed_ids = self.get_installed_listing_ids(user_id)
+        from_installed: list[dict] = []
+        for lid in installed_ids:
+            listing = self.get_listing(lid)
+            if listing and listing.console_plugin:
+                cp = listing.console_plugin
+                # Avoid duplicate paths (installed overrides built-in if same path)
+                from_installed.append({
+                    "path": cp.path,
+                    "label": cp.label,
+                    "icon": cp.icon,
+                    "entry": cp.entry,
+                })
+        # Merge: built-ins first, then installed (installed can override by path)
+        seen_paths: set[str] = set()
+        result: list[dict] = []
+        for p in from_installed + builtins:
+            if p["path"] not in seen_paths:
+                seen_paths.add(p["path"])
+                result.append(p)
+        return result
 
     # ------------------------------------------------------------------
     # Bundles

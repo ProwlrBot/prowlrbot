@@ -230,6 +230,33 @@ prowlr app
    - Local: `prowlr models download <repo_id>` then `prowlr models set-llm llamacpp <model_id>`
    - Other: `prowlr models set-llm anthropic claude-sonnet-4-6` (or openai, groq, etc.)
 
+---
+
+### War Room returns 401 or 403
+
+**Symptoms:**
+- War Room page in the console shows errors or "Request failed: 401/403"
+- Or `curl http://localhost:8088/api/warroom/health` returns 401/403
+
+**Cause:** War Room is **built into the main app** — there is no separate bridge or server to start. The `/api/warroom/*` and `/ws/warroom` endpoints are protected by the same auth as the rest of the console. So 401/403 means authentication failed.
+
+**You do not need to start anything extra.** Run only:
+
+```bash
+prowlr app
+```
+
+Then open the console in the browser (e.g. http://localhost:8088), **log in** (admin + password from `.env` or `prowlr set-admin-password`), and go to the War Room page. The browser sends your JWT with each request, so once you're logged in, War Room API and WebSocket work.
+
+**If you're testing from the terminal** (e.g. curl), you must send a valid token:
+
+```bash
+# After logging in via the console, copy the JWT from localStorage (DevTools → Application → Local Storage → prowlrbot-jwt)
+# Or use an API token if you have PROWLRBOT_API_TOKEN_HASH set:
+curl -H "Authorization: Bearer YOUR_JWT_OR_API_TOKEN" http://localhost:8088/api/warroom/health
+```
+
+**If you use the standalone bridge** (e.g. for multi-machine coordination), that's a separate process: `python -m prowlrbot.hub.bridge`. The in-app War Room does not depend on it.
 
 ---
 

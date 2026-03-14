@@ -1,8 +1,9 @@
 import { Layout, Menu, type MenuProps } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../api";
+import type { ConsolePluginManifest } from "../api";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -31,7 +32,7 @@ import {
 
 const { Sider } = Layout;
 
-const keyToPath: Record<string, string> = {
+const BASE_KEY_TO_PATH: Record<string, string> = {
   dashboard: "/dashboard",
   chat: "/chat",
   channels: "/channels",
@@ -62,11 +63,34 @@ const keyToPath: Record<string, string> = {
   "ui-gallery": "/ui-gallery",
 };
 
+const PLUGIN_ICON_MAP: Record<string, React.ReactNode> = {
+  Radio: <Radio size={16} />,
+  BarChart3: <BarChart3 size={16} />,
+  Trophy: <Trophy size={16} />,
+  Plug: <Plug size={16} />,
+  LayoutDashboard: <LayoutDashboard size={16} />,
+  Eye: <Eye size={16} />,
+  Sparkles: <Sparkles size={16} />,
+};
+
 interface SidebarProps {
   selectedKey: string;
+  plugins?: ConsolePluginManifest[];
 }
 
-export default function Sidebar({ selectedKey }: SidebarProps) {
+export default function Sidebar({ selectedKey, plugins = [] }: SidebarProps) {
+  const keyToPath = useMemo(
+    () => ({
+      ...BASE_KEY_TO_PATH,
+      ...Object.fromEntries(
+        plugins.map((p) => [
+          p.path.replace(/^\//, "").replace(/\//g, "-"),
+          p.path,
+        ])
+      ),
+    }),
+    [plugins]
+  );
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [openKeys, setOpenKeys] = useState<string[]>([
@@ -85,27 +109,30 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
       .catch(() => {});
   }, []);
 
+  const pluginMenuItems: MenuProps["items"] =
+    plugins.length > 0
+      ? plugins.map((p) => ({
+          key: p.path.replace(/^\//, "").replace(/\//g, "-"),
+          label: p.label,
+          icon: PLUGIN_ICON_MAP[p.icon] ?? <Plug size={16} />,
+        }))
+      : [
+          { key: "warroom", label: "War Room", icon: <Radio size={16} /> },
+          { key: "analytics", label: "Analytics", icon: <BarChart3 size={16} /> },
+          {
+            key: "leaderboard",
+            label: "Leaderboard",
+            icon: <Trophy size={16} />,
+          },
+        ];
+
   const menuItems: MenuProps["items"] = [
     {
       key: "dashboard",
       label: t("nav.dashboard"),
       icon: <LayoutDashboard size={16} />,
     },
-    {
-      key: "warroom",
-      label: "War Room",
-      icon: <Radio size={16} />,
-    },
-    {
-      key: "analytics",
-      label: "Analytics",
-      icon: <BarChart3 size={16} />,
-    },
-    {
-      key: "leaderboard",
-      label: "Leaderboard",
-      icon: <Trophy size={16} />,
-    },
+    ...pluginMenuItems,
     {
       key: "chat-group",
       label: t("nav.chat"),

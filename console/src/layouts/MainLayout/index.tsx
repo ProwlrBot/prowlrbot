@@ -1,6 +1,9 @@
+import React from "react";
 import { Layout } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import api from "../../api";
+import type { ConsolePluginManifest } from "../../api";
 import Sidebar from "../Sidebar";
 import Header from "../Header";
 import ConsoleCronBubble from "../../components/ConsoleCronBubble";
@@ -37,7 +40,7 @@ import UIGallery from "../../pages/UIGallery";
 
 const { Content } = Layout;
 
-const pathToKey: Record<string, string> = {
+const STATIC_PATH_TO_KEY: Record<string, string> = {
   "/dashboard": "dashboard",
   "/chat": "chat",
   "/channels": "channels",
@@ -54,7 +57,6 @@ const pathToKey: Record<string, string> = {
   "/security": "security",
   "/privacy": "privacy",
   "/appearance": "appearance",
-  "/warroom": "warroom",
   "/monitoring": "monitoring",
   "/memory": "memory",
   "/swarm": "swarm",
@@ -68,10 +70,38 @@ const pathToKey: Record<string, string> = {
   "/ui-gallery": "ui-gallery",
 };
 
+/** Built-in entry keys map to console components (for plugin-driven routes). */
+const BUILTIN_PLUGIN_ENTRIES: Record<string, React.ComponentType> = {
+  warroom: WarRoomPage,
+  monitoring: MonitoringPage,
+};
+
+function PluginFrame({ url }: { url: string }) {
+  return (
+    <iframe
+      title="Plugin"
+      src={url}
+      style={{ width: "100%", height: "100%", minHeight: "calc(100vh - 120px)", border: 0 }}
+    />
+  );
+}
+
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  const [plugins, setPlugins] = useState<ConsolePluginManifest[]>([]);
+
+  useEffect(() => {
+    api.getPlugins().then(setPlugins).catch(() => setPlugins([]));
+  }, []);
+
+  const pathToKey: Record<string, string> = {
+    ...STATIC_PATH_TO_KEY,
+    ...Object.fromEntries(
+      plugins.map((p) => [p.path, p.path.replace(/^\//, "").replace(/\//g, "-")])
+    ),
+  };
   const selectedKey = pathToKey[currentPath] || "dashboard";
 
   useEffect(() => {
@@ -82,7 +112,7 @@ export default function MainLayout() {
 
   return (
     <Layout style={{ height: "100vh" }}>
-      <Sidebar selectedKey={selectedKey} />
+      <Sidebar selectedKey={selectedKey} plugins={plugins} />
       <Layout>
         <Header selectedKey={selectedKey} />
         <Content className="page-container">
@@ -106,8 +136,26 @@ export default function MainLayout() {
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/appearance" element={<AppearancePage />} />
-              <Route path="/warroom" element={<WarRoomPage />} />
-              <Route path="/monitoring" element={<MonitoringPage />} />
+              {plugins.length > 0
+                ? plugins.map((p) => {
+                    const Component =
+                      p.entry.startsWith("http") || p.entry.startsWith("/")
+                        ? () => <PluginFrame url={p.entry} />
+                        : BUILTIN_PLUGIN_ENTRIES[p.entry];
+                    return Component ? (
+                      <Route
+                        key={p.path}
+                        path={p.path}
+                        element={React.createElement(Component)}
+                      />
+                    ) : null;
+                  })
+                : (
+                    <>
+                      <Route path="/warroom" element={<WarRoomPage />} />
+                      <Route path="/monitoring" element={<MonitoringPage />} />
+                    </>
+                  )}
               <Route path="/memory" element={<MemoryPage />} />
               <Route path="/swarm" element={<SwarmPage />} />
               <Route path="/team-builder" element={<TeamBuilderPage />} />

@@ -49,6 +49,20 @@ class PricingModel(StrEnum):
     usage_based = "usage_based"
 
 
+class ConsolePluginManifest(BaseModel):
+    """Declares that a marketplace listing adds a console tab/page."""
+
+    path: str = Field(..., min_length=1, max_length=128)
+    label: str = Field(..., min_length=1, max_length=64)
+    icon: str = Field(default="Plug", max_length=64)
+    entry: str = Field(
+        ...,
+        min_length=1,
+        max_length=2048,
+        description="Built-in key (e.g. 'warroom') or URL for iframe",
+    )
+
+
 class Difficulty(StrEnum):
     """How hard a listing is to set up and use."""
 
@@ -102,6 +116,9 @@ class MarketplaceListing(BaseModel):
     license: str = "MIT"
     changelog: str = ""
     compatibility: str = ""
+
+    # Console UI extension: when set, installing this listing adds a tab/page
+    console_plugin: Optional[ConsolePluginManifest] = None
 
 
 class Bundle(BaseModel):

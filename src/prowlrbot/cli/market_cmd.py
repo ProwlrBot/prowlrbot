@@ -40,6 +40,22 @@ def _format_price(listing: MarketplaceListing) -> str:
     return f"${listing.price:.2f} (usage)"
 
 
+def _resolve_listing(store: MarketplaceStore, listing_id: str):
+    """Resolve listing by ID or by title (search). Returns (listing, None) or (None, error_msg)."""
+    listing = store.get_listing(listing_id)
+    if listing:
+        return listing, None
+    results = store.search_listings(query=listing_id, limit=5)
+    if not results:
+        return None, f"Package '{listing_id}' not found."
+    if len(results) == 1:
+        return results[0], None
+    lines = ["Multiple matches — use listing ID:", ""]
+    for r in results:
+        lines.append(f"  {r.id}  {r.title}")
+    return None, "\n".join(lines)
+
+
 # ── Group ────────────────────────────────────────────────────────────────────
 
 
@@ -74,16 +90,18 @@ def market_search(query: str, category: str, limit: int):
 
     click.echo()
     click.echo(
-        f"  {'Title':<25} {'Category':<14} {'Rating':<8} {'Downloads':<10} {'Price'}"
+        f"  {'ID':<22} {'Title':<25} {'Category':<14} {'Rating':<8} {'Downloads':<10} {'Price'}"
     )
-    click.echo(f"  {'─'*25} {'─'*14} {'─'*8} {'─'*10} {'─'*10}")
+    click.echo(f"  {'─'*22} {'─'*25} {'─'*14} {'─'*8} {'─'*10} {'─'*10}")
     for item in results:
         stars = f"{item.rating:.1f}" if item.ratings_count > 0 else "—"
+        lid = (item.id[:19] + "..") if len(item.id) > 21 else item.id
         click.echo(
-            f"  {item.title[:25]:<25} {item.category:<14} {stars:<8} "
+            f"  {lid:<22} {item.title[:25]:<25} {item.category:<14} {stars:<8} "
             f"{item.downloads:<10} {_format_price(item)}"
         )
     click.echo(f"\n  {len(results)} result(s)")
+    click.echo("  Use: prowlr market install <ID>   or   prowlr market detail <ID>")
     store.close()
 
 
@@ -93,21 +111,11 @@ def market_search(query: str, category: str, limit: int):
 @market_group.command(name="install")
 @click.argument("listing_id")
 def market_install(listing_id: str):
-    """Install a marketplace package by ID."""
+    """Install a marketplace package by ID or title."""
     store = _get_store()
-    listing = store.get_listing(listing_id)
-
-    if not listing:
-        # Try searching by title
-        results = store.search_listings(query=listing_id, limit=5)
-        if results:
-            click.echo(f"Package '{listing_id}' not found by ID. Did you mean:")
-            for r in results:
-                click.echo(f"  {r.id[:12]}  {r.title} ({_format_price(r)})")
-        else:
-            click.echo(
-                f"Package '{listing_id}' not found. Try 'prowlr market search <query>'."
-            )
+    listing, err = _resolve_listing(store, listing_id)
+    if err:
+        click.echo(err)
         store.close()
         return
 
@@ -130,14 +138,24 @@ def market_install(listing_id: str):
         user_id="local",
         version=listing.version,
     )
-    store.record_install(record)
+    try:
+        store.record_install(record)
+    except Exception as e:
+        click.echo(f"  Install failed: {e}", err=True)
+        store.close()
+        raise SystemExit(1)
 
-    # Create local install directory
-    install_dir = WORKING_DIR / "marketplace" / listing_id[:12]
+    # Create local install directory (use listing.id, not search query)
+    install_dir = WORKING_DIR / "marketplace" / listing.id[:12]
     install_dir.mkdir(parents=True, exist_ok=True)
-    (install_dir / "manifest.json").write_text(
-        json.dumps(listing.model_dump(), indent=2, default=str)
-    )
+    try:
+        # mode='json' so all values are JSON-serializable (enums, etc.)
+        manifest = listing.model_dump(mode="json")
+        (install_dir / "manifest.json").write_text(
+            json.dumps(manifest, indent=2, default=str)
+        )
+    except Exception as e:
+        click.echo(f"  Warning: could not write manifest.json: {e}", err=True)
 
     click.echo(f"\n  Installed to {install_dir}")
     click.echo(f"  Total downloads: {listing.downloads + 1}")
@@ -262,13 +280,14 @@ def market_popular(limit: int):
         return
 
     click.echo("\n  Most Popular:")
-    click.echo(f"  {'#':<4} {'Title':<25} {'Downloads':<10} {'Price'}")
-    click.echo(f"  {'─'*4} {'─'*25} {'─'*10} {'─'*10}")
+    click.echo(f"  {'#':<4} {'ID':<22} {'Title':<25} {'Downloads':<10} {'Price'}")
+    click.echo(f"  {'─'*4} {'─'*22} {'─'*25} {'─'*10} {'─'*10}")
     for i, item in enumerate(results, 1):
+        lid = (item.id[:19] + "..") if len(item.id) > 21 else item.id
         click.echo(
-            f"  {i:<4} {item.title[:25]:<25} {item.downloads:<10} {_format_price(item)}"
+            f"  {i:<4} {lid:<22} {item.title[:25]:<25} {item.downloads:<10} {_format_price(item)}"
         )
-    click.echo()
+    click.echo("\n  Use: prowlr market install <ID>   or   prowlr market detail <ID>")
     store.close()
 
 
@@ -309,15 +328,15 @@ def market_update(token: "str | None"):
 @click.argument("amount", type=float)
 @click.option("--message", "-m", default="", help="Thank-you message")
 def market_tip(listing_id: str, amount: float, message: str):
-    """Tip a package developer. Shows appreciation and supports development."""
+    """Tip a package developer (by listing ID or title)."""
     if amount <= 0:
         click.echo("Tip amount must be positive.")
         return
 
     store = _get_store()
-    listing = store.get_listing(listing_id)
-    if not listing:
-        click.echo(f"Package '{listing_id}' not found.")
+    listing, err = _resolve_listing(store, listing_id)
+    if err:
+        click.echo(err)
         store.close()
         return
 
@@ -332,7 +351,7 @@ def market_tip(listing_id: str, amount: float, message: str):
 
     # Record tip in marketplace DB
     tip = TipRecord(
-        listing_id=listing_id,
+        listing_id=listing.id,
         author_id=listing.author_id,
         tipper_id="local",
         amount=amount,
@@ -358,16 +377,16 @@ def market_tip(listing_id: str, amount: float, message: str):
 )
 @click.option("--comment", "-c", default="", help="Review comment")
 def market_review(listing_id: str, rating: int, comment: str):
-    """Leave a review for a marketplace package."""
+    """Leave a review for a marketplace package (by ID or title)."""
     store = _get_store()
-    listing = store.get_listing(listing_id)
-    if not listing:
-        click.echo(f"Package '{listing_id}' not found.")
+    listing, err = _resolve_listing(store, listing_id)
+    if err:
+        click.echo(err)
         store.close()
         return
 
     review = ReviewEntry(
-        listing_id=listing_id,
+        listing_id=listing.id,
         reviewer_id="local",
         rating=rating,
         comment=comment,
@@ -441,11 +460,11 @@ def market_install_bundle(bundle_id: str):
 @market_group.command(name="detail")
 @click.argument("listing_id")
 def market_detail(listing_id: str):
-    """Show full details for a marketplace listing."""
+    """Show full details for a marketplace listing (by ID or title)."""
     store = _get_store()
-    listing = store.get_listing(listing_id)
-    if not listing:
-        click.echo(f"Package '{listing_id}' not found.")
+    listing, err = _resolve_listing(store, listing_id)
+    if err:
+        click.echo(err)
         store.close()
         return
 
@@ -466,7 +485,7 @@ def market_detail(listing_id: str):
     if listing.description:
         click.echo(f"\n  {listing.description}")
 
-    reviews = store.get_reviews(listing_id, limit=5)
+    reviews = store.get_reviews(listing.id, limit=5)
     if reviews:
         click.echo(f"\n  Recent Reviews:")
         for r in reviews:

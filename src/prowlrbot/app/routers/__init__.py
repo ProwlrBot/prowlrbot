@@ -43,6 +43,7 @@ from .memory import router as memory_router
 from .monitoring import router as monitoring_router
 from .swarm_api import router as swarm_router
 from .warroom_api import router as warroom_router
+from .console_plugins import router as console_plugins_router
 from .oauth import router as oauth_router
 from .hardware import router as hardware_router
 
@@ -91,6 +92,7 @@ router.include_router(memory_router)
 router.include_router(monitoring_router)
 router.include_router(swarm_router)
 router.include_router(warroom_router)
+router.include_router(console_plugins_router)
 router.include_router(hardware_router)
 
 __all__ = ["router"]

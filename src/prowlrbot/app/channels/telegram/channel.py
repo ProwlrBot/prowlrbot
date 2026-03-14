@@ -520,10 +520,16 @@ class TelegramChannel(BaseChannel):
         if not self.enabled or not self._application or not self._bot_token:
             return
         try:
-            from telegram.error import TelegramError
+            from telegram.error import TelegramError, Conflict
             from telegram import BotCommand
 
             def _on_poll_error(exc: TelegramError) -> None:
+                if isinstance(exc, Conflict):
+                    logger.warning(
+                        "telegram: another bot instance is polling with the same token; "
+                        "only one instance should run. Stop other processes or use a different token."
+                    )
+                    return
                 self._application.create_task(
                     self._application.process_error(error=exc, update=None),
                 )

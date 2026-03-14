@@ -1,3 +1,4 @@
+import { getApiToken } from "./config";
 import { request } from "./request";
 
 export interface Agent {
@@ -66,9 +67,10 @@ export function connectWarRoomWS(
   onEvent: (event: WarRoomEvent | Record<string, unknown>) => void,
   onStatus: (connected: boolean) => void,
 ): () => void {
-  // Connect to same origin — no CORS issues
+  // Connect to same origin — no CORS issues. Use same auth as API (JWT from login or VITE_WARROOM_TOKEN).
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const token = import.meta.env.VITE_WARROOM_TOKEN as string | undefined;
+  const token =
+    (import.meta.env.VITE_WARROOM_TOKEN as string | undefined) || getApiToken();
   const wsUrl = `${protocol}//${window.location.host}/ws/warroom${
     token ? `?token=${encodeURIComponent(token)}` : ""
   }`;

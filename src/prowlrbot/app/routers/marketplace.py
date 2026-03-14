@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from pydantic import BaseModel as PydanticBaseModel
 
 from prowlrbot.auth.middleware import get_current_user
@@ -35,6 +35,7 @@ from ...marketplace.models import (
     MarketplaceCategory,
     MarketplaceListing,
     PREMIUM_CONTENT_PRICES,
+    PricingModel,
     ReviewEntry,
     TipRecord,
 )
@@ -119,12 +120,13 @@ async def get_bundle(bundle_id: str) -> dict:
 
 @router.post("/bundles/{bundle_id}/install")
 async def install_bundle(bundle_id: str, _user=Depends(get_current_user)) -> dict:
-    """Install all listings in a bundle. Continues on failure."""
+    """Install all listings in a bundle. Continues on failure. Paid listings cost credits."""
     store = _get_store()
     bundle = store.get_bundle(bundle_id)
     if bundle is None:
         raise HTTPException(status_code=404, detail="Bundle not found")
 
+    user_id = _user.id
     installed = []
     failed = []
     for lid in bundle.listing_ids:
@@ -133,13 +135,23 @@ async def install_bundle(bundle_id: str, _user=Depends(get_current_user)) -> dic
             failed.append({"slug": lid, "error": "Listing not found"})
             continue
         try:
+            if listing.pricing_model != PricingModel.free and listing.price > 0:
+                store.spend_credits(
+                    user_id,
+                    int(listing.price),
+                    CreditTransactionType.listing_purchase,
+                    reference_id=lid,
+                    description=f"Install: {listing.title}",
+                )
             record = InstallRecord(
                 listing_id=lid,
-                user_id="local",
+                user_id=user_id,
                 version=listing.version,
             )
             store.record_install(record)
             installed.append(lid)
+        except ValueError as e:
+            failed.append({"slug": lid, "error": str(e)})
         except Exception as e:
             failed.append({"slug": lid, "error": str(e)})
 
@@ -291,13 +303,18 @@ async def get_reviews(listing_id: str, limit: int = 50) -> list[ReviewEntry]:
 
 @router.post("/listings/{listing_id}/install", response_model=InstallRecord)
 async def record_install(
-    listing_id: str, record: InstallRecord, _user=Depends(get_current_user)
+    listing_id: str,
+    record: Optional[InstallRecord] = Body(None),
+    _user=Depends(get_current_user),
 ) -> InstallRecord:
     """Record an installation of a listing.
 
+    Body is optional (console sends POST with no body). For paid listings,
+    deducts credits (listing.price) before recording.
     Blocked if the listing's security scan risk level is HIGH or above.
     """
-    listing = _get_store().get_listing(listing_id)
+    store = _get_store()
+    listing = store.get_listing(listing_id)
     if listing is None:
         raise HTTPException(status_code=404, detail="Listing not found")
 
@@ -313,8 +330,41 @@ async def record_install(
             ),
         )
 
-    record.listing_id = listing_id
-    return _get_store().record_install(record)
+    user_id = _user.id
+    if record is None:
+        record = InstallRecord(
+            listing_id=listing_id,
+            user_id=user_id,
+            version=listing.version,
+        )
+    else:
+        record.user_id = user_id
+        record.listing_id = listing_id
+
+    # Paid listing: spend credits before recording install
+    if listing.pricing_model != PricingModel.free and listing.price > 0:
+        amount = int(listing.price)
+        try:
+            store.spend_credits(
+                user_id,
+                amount,
+                CreditTransactionType.listing_purchase,
+                reference_id=listing_id,
+                description=f"Install: {listing.title}",
+            )
+        except ValueError as e:
+            balance = store.get_balance(user_id)
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "code": "insufficient_credits",
+                    "message": str(e),
+                    "balance": balance.balance,
+                    "required": amount,
+                },
+            )
+
+    return store.record_install(record)
 
 
 # ------------------------------------------------------------------
@@ -340,6 +390,10 @@ async def list_categories() -> list[str]:
     return [c.value for c in MarketplaceCategory]
 
 
+# Free trial days for Pro (and Team) when upgrading from Free
+FREE_TRIAL_DAYS = 14
+
+
 @router.get("/tiers")
 async def get_tiers():
     """Return available subscription tiers with pricing and feature lists."""
@@ -350,15 +404,17 @@ async def get_tiers():
             "price_monthly": 0,
             "price_label": "$0/mo",
             "credits_per_month": 1000,
+            "free_trial_days": FREE_TRIAL_DAYS,
             "features": [
                 "1 agent",
                 "1,000 credits/mo",
                 "Basic monitoring",
                 "Community support",
+                f"{FREE_TRIAL_DAYS}-day Pro trial",
             ],
             "color": "default",
-            "cta": "Current Plan",
-            "cta_disabled": True,
+            "cta": "Start free trial",
+            "cta_disabled": False,
         },
         {
             "id": "pro",
@@ -372,6 +428,7 @@ async def get_tiers():
                 "Advanced monitoring",
                 "Priority support",
                 "API access",
+                "Console plugins (add tabs & pages)",
             ],
             "color": "blue",
             "cta": "Upgrade to Pro",
@@ -387,6 +444,7 @@ async def get_tiers():
                 "Unlimited agents",
                 "50,000 credits/mo",
                 "War Room",
+                "Console plugins (add tabs & pages)",
                 "Team collaboration",
                 "SLA support",
             ],
@@ -469,6 +527,9 @@ async def subscribe(
             line_items=[{"price": price_id, "quantity": 1}],
             success_url=success_url,
             cancel_url=cancel_url,
+            subscription_data={
+                "trial_period_days": FREE_TRIAL_DAYS,
+            },
             metadata={
                 "user_id": body.user_id,
                 "tier_id": tier_id,

@@ -11,7 +11,13 @@ from typing import Optional
 
 import httpx
 
-from .models import ListingStatus, MarketplaceCategory, MarketplaceListing, PricingModel
+from .models import (
+    ConsolePluginManifest,
+    ListingStatus,
+    MarketplaceCategory,
+    MarketplaceListing,
+    PricingModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -252,21 +258,41 @@ def sync_registry(
         except ValueError:
             cat = MarketplaceCategory.skills
 
+        # Optional console_plugin: adds a tab/page in the console when installed
+        console_plugin = None
+        cp_raw = raw.get("console_plugin")
+        if (
+            cp_raw
+            and isinstance(cp_raw, dict)
+            and cp_raw.get("path")
+            and cp_raw.get("label")
+            and cp_raw.get("entry")
+        ):
+            try:
+                console_plugin = ConsolePluginManifest(
+                    path=cp_raw["path"],
+                    label=cp_raw["label"],
+                    icon=cp_raw.get("icon", "Plug"),
+                    entry=cp_raw["entry"],
+                )
+            except Exception:
+                console_plugin = None
+
         existing = store.get_listing(listing_id)
         if existing:
-            store.update_listing(
-                listing_id,
-                {
-                    "title": title,
-                    "description": description,
-                    "version": version,
-                    "tags": tags,
-                    "category": cat.value,
-                    "author_name": author_str,
-                    "source_repo": raw.get("source_repo", raw.get("repository", "")),
-                    "license": raw.get("license", "MIT"),
-                },
-            )
+            updates = {
+                "title": title,
+                "description": description,
+                "version": version,
+                "tags": tags,
+                "category": cat.value,
+                "author_name": author_str,
+                "source_repo": raw.get("source_repo", raw.get("repository", "")),
+                "license": raw.get("license", "MIT"),
+            }
+            if console_plugin is not None:
+                updates["console_plugin"] = console_plugin.model_dump()
+            store.update_listing(listing_id, updates)
             updated += 1
         else:
             try:
@@ -294,6 +320,7 @@ def sync_registry(
                 author_name=author_str,
                 source_repo=raw.get("source_repo", raw.get("repository", "")),
                 license=raw.get("license", "MIT"),
+                console_plugin=console_plugin,
             )
             store.publish_listing(listing)
             added += 1

@@ -38,29 +38,47 @@ async def broadcast_ws(event: dict):
     _ws_clients -= dead
 
 
+def _verify_warroom_token(token: str, secret: str, token_hash: str) -> bool:
+    """Return True if token is valid (hub secret, API token hash, or JWT)."""
+    if secret and hmac.compare_digest(token, secret):
+        return True
+    if token_hash:
+        import hashlib
+
+        if hmac.compare_digest(
+            hashlib.sha256(token.encode()).hexdigest(), token_hash
+        ):
+            return True
+        # Console users log in with JWT; accept valid JWT for same-origin War Room WS
+        try:
+            from ..auth.jwt_handler import JWTHandler
+            from ..auth.middleware import _JWT_SECRET
+
+            expiry = int(os.environ.get("PROWLRBOT_JWT_EXPIRY_MINUTES", "60"))
+            handler = JWTHandler(
+                secret_key=_JWT_SECRET, expiry_minutes=expiry
+            )
+            handler.decode_token(token)
+            return True
+        except (ValueError, Exception):
+            pass
+    return False
+
+
 async def warroom_ws(ws: WebSocket):
     """Real-time war room event stream with auth and connection limits."""
     # Verify auth token — required when PROWLR_HUB_SECRET or
-    # PROWLRBOT_TOKEN_HASH is set (i.e. auth is enabled).
+    # PROWLRBOT_API_TOKEN_HASH is set (i.e. auth is enabled).
     secret = os.environ.get("PROWLR_HUB_SECRET", "")
-    token_hash = os.environ.get("PROWLRBOT_TOKEN_HASH", "")
+    token_hash = os.environ.get("PROWLRBOT_API_TOKEN_HASH", "")
     if secret or token_hash:
         token = ws.query_params.get("token", "")
         if not token:
             await ws.close(code=4001, reason="Authentication required")
             return
-        # Check against hub secret first, then token hash
-        if secret and not hmac.compare_digest(token, secret):
+        if not _verify_warroom_token(token, secret, token_hash):
             await ws.close(code=4001, reason="Unauthorized")
             return
-        if not secret and token_hash:
-            import hashlib
-
-            if not hmac.compare_digest(
-                hashlib.sha256(token.encode()).hexdigest(), token_hash
-            ):
-                await ws.close(code=4001, reason="Unauthorized")
-                return
 
     # Rate limit new connections per IP
     import time

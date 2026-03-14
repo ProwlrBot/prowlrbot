@@ -5,6 +5,7 @@ export { request } from "./request";
 export { getApiUrl, getApiToken } from "./config";
 
 import { rootApi } from "./modules/root";
+import { consoleApi } from "./modules/console";
 import { channelApi } from "./modules/channel";
 import { heartbeatApi } from "./modules/heartbeat";
 import { cronJobApi } from "./modules/cronjob";
@@ -32,6 +33,7 @@ export * from "./modules/leaderboard";
 export * from "./modules/externalAgents";
 export * from "./modules/analytics";
 export * from "./modules/credits";
+export { consoleApi, type ConsolePluginManifest } from "./modules/console";
 
 export const api = {
   // Root
@@ -75,6 +77,9 @@ export const api = {
 
   // MCP Clients
   ...mcpApi,
+
+  // Console (push messages, plugins)
+  ...consoleApi,
 };
 
 export default api;
