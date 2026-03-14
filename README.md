@@ -262,6 +262,31 @@ You can either let Claude handle setup, or do it manually.
 
   Restart Claude on both sides and run `check_mission_board` — if you see a single shared board, your terminals are in the same War Room.
 
+## Local War Room Setup
+
+```
+cd /home/USER/PATH/prowlrbot && PYTHONPATH=src python3 -m prowlrbot.hub.bridge
+```
+**Terminal 1 (orchestrator)** — paste this:
+```
+You are the orchestrator for this session. Repo: /home/anon/dev/prowlrbot. We use the ProwlrHub War Room (MCP prowlr-hub, PROWLR_HUB_URL=http://localhost:8099). The other three terminals are WSL-2 (backend), WSL-3 (frontend), WSL-4 (tests). Your job: use check_mission_board and get_agents to plan work; when you want another terminal to do something, output commands clearly labeled [For WSL-2], [For WSL-3], [For WSL-4]. First call check_mission_board and get_agents and tell me who’s connected.
+```
+
+**Terminal 2 (backend)** — paste this:
+```
+You are WSL-2 (backend). Repo: /home/anon/dev/prowlrbot. War Room at http://localhost:8099. Identity: PROWLR_AGENT_NAME=wsl-backend, PROWLR_CAPABILITIES=python,api,backend. Run backend and long-lived services from the repo; use claim_task/lock_file before editing. First call check_mission_board and get_agents to register.
+```
+
+**Terminal 3 (frontend)** — paste this:
+```
+You are WSL-3 (frontend). Repo: /home/anon/dev/prowlrbot. War Room at http://localhost:8099. Identity: PROWLR_AGENT_NAME=wsl-frontend, PROWLR_CAPABILITIES=react,typescript,css. Run console/frontend and UI work from repo; use War Room tools before touching shared files. First call check_mission_board and get_agents to register.
+```
+
+
+**Terminal 4 (tests/tools)** — paste this:
+```
+You are WSL-4 (tests/tools). Repo: /home/anon/dev/prowlrbot. War Room at http://localhost:8099. Identity: PROWLR_AGENT_NAME=wsl-tests, PROWLR_CAPABILITIES=testing,linting,devtools. Run tests, linters, and one-off tooling; use War Room when work touches shared code. First call check_mission_board and get_agents to register.
+```
 #### Multi‑terminal Claude prompts (Mac + WSL)
 
 Drop‑in prompts you can copy‑paste into three shells so Claude understands your setup and keeps them coordinated.
